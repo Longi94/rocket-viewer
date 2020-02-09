@@ -1,0 +1,6 @@
+<div class="upload-div" (drop)="onFileDrop($event)" (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)"
+     (dragover)="onDragOver($event)">
+  <span>Choose replay...</span>
+  <br/>
+  <span *ngIf="dragging">Drop it!</span>
+</div>
