@@ -126,7 +126,7 @@ export class ReplayBody {
 
     if (netVersion >= 10) {
       // unknown
-      br.skip(4);
+      br.skipBytes(4);
     }
 
     // body.mergedDuplicateClasses();
