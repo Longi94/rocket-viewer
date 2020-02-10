@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {ReplayParser} from '../../../parser/replay';
+import { Component, OnInit } from '@angular/core';
+import { ReplayParser } from '../../../parser/replay';
 
 @Component({
   selector: 'app-home',
@@ -31,7 +31,17 @@ export class HomeComponent implements OnInit {
 
     const file = $event.dataTransfer.files[0];
 
-    this.fileReader.readAsArrayBuffer(file);
+    if (typeof Worker !== 'undefined') {
+      // Create a new
+      const worker = new Worker('./home.worker', {type: 'module'});
+      worker.onmessage = ({data}) => {
+        this.loadingFile = false;
+        console.log(data);
+      };
+      worker.postMessage(file);
+    } else {
+      this.fileReader.readAsArrayBuffer(file);
+    }
 
     this.loadingFile = true;
     this.dragging = false;
