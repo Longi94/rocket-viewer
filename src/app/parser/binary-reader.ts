@@ -58,4 +58,18 @@ export class BinaryReader {
     this.pos += 8;
     return n;
   }
+
+  skip(l: number) {
+    this.pos += l;
+  }
+
+  skipString() {
+    const length = this.readInt32();
+
+    if (length > 0) {
+      this.skip(length);
+    } else if (length < 0) {
+      this.skip(length * -2);
+    }
+  }
 }
