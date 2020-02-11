@@ -21,6 +21,17 @@ export class Cache {
   parent: Cache;
   root: boolean;
 
+  getMaxPropertyId() {
+    let maxId = 0;
+
+    for (const prop of Object.values(this.properties)) {
+      if (prop.id > maxId) {
+        maxId = prop.id;
+      }
+    }
+    return maxId;
+  }
+
   static deserialize(br: BinaryReader) {
     const c = new Cache();
 

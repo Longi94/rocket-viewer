@@ -1,0 +1,67 @@
+import { BinaryReader } from '../parser/binary-reader';
+import { Cache } from './cache';
+import { AttributeType } from './attribute/attribute';
+import { RAW_ATTRIBUTE_TYPES } from './attribute/mapping';
+import { ReplayVersion } from './replay-header';
+
+export class ReplicationProperty {
+  id: number;
+  data: any;
+
+  name: string;
+  cache: Cache;
+
+  constructor(copyFrom?: ReplicationProperty) {
+    if (copyFrom != undefined) {
+      this.id = copyFrom.id;
+      this.data = copyFrom.data;
+      this.name = copyFrom.name;
+      this.cache = copyFrom.cache;
+    }
+  }
+
+  static deserialize(cache: Cache, objectIdToName: string[], version: ReplayVersion, br: BinaryReader): ReplicationProperty {
+    const p = new ReplicationProperty();
+
+    p.cache = cache;
+
+    p.id = br.readUInt32Max(cache.getMaxPropertyId() + 1);
+    p.name = objectIdToName[cache.properties[p.id].index];
+
+    const attrType = RAW_ATTRIBUTE_TYPES[p.name];
+
+    if (attrType == undefined) {
+      throw new Error(`Unknown attribute type ${p.name}`);
+    }
+
+    p.data = attrType.deserialize(br, version, objectIdToName);
+
+    return p;
+  }
+}
+
+export class ReplicationListProperty extends ReplicationProperty {
+  constructor(property: ReplicationProperty) {
+    super();
+  }
+}
+
+const AttributeTypeEnum: AttributeType = {
+  deserialize: (br: BinaryReader) => {
+  }
+};
+
+
+const AttributeTypeWeldedInfo: AttributeType = {
+  deserialize: (br: BinaryReader) => {
+  }
+};
+const AttributeTypePickup: AttributeType = {
+  deserialize: (br: BinaryReader) => {
+  }
+};
+const AttributeTypePickupNew: AttributeType = {
+  deserialize: (br: BinaryReader) => {
+  }
+};
+

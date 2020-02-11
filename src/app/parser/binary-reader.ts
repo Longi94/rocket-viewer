@@ -2,17 +2,21 @@ export class BinaryReader {
   private readonly buffer: Uint8Array;
   private readonly view: DataView;
 
-  private bitPos = 0;
+  bitPos = 0;
 
   constructor(buffer: ArrayBuffer) {
     this.buffer = new Uint8Array(buffer);
     this.view = new DataView(buffer);
   }
 
-  private readBit(): number {
+  readBit(): number {
     const a = new Uint8Array(1);
     this.readBits(a, 1);
     return a[0];
+  }
+
+  readBool(): boolean {
+    return this.readBit() !== 0;
   }
 
   private readBits(buffer: ArrayBufferLike, bits: number, offset: number = 0) {
@@ -46,7 +50,7 @@ export class BinaryReader {
     }
   }
 
-  readInt64() {
+  readInt64(): bigint {
     if (this.bitPos % 8 === 0) {
       // @ts-ignore
       const n = this.view.getBigInt64(this.bitPos / 8, true);
@@ -58,6 +62,20 @@ export class BinaryReader {
       this.readBits(a, 32, 1);
       // @ts-ignore
       return new DataView(a).getBigInt64(0, true);
+    }
+  }
+
+  readUInt64(): bigint {
+    if (this.bitPos % 8 === 0) {
+      const n = this.view.getBigUint64(this.bitPos / 8, true);
+      this.bitPos += 64;
+      return n;
+    } else {
+      const a = new Uint32Array(2);
+      this.readBits(a, 32, 0);
+      this.readBits(a, 32, 1);
+      // @ts-ignore
+      return new DataView(a).getBigUint64(0, true);
     }
   }
 
@@ -133,5 +151,38 @@ export class BinaryReader {
     } else if (length < 0) {
       this.skipBytes(length * -2);
     }
+  }
+
+  length(): number {
+    return this.buffer.length;
+  }
+
+  readUInt32Max(maxVal: number) {
+    const maxBits = Math.floor(Math.log10(maxVal) / Math.log10(2)) + 1;
+
+    let a = new Uint32Array(1);
+
+    for (let i = 0; i < maxBits && (a[0] + (1 << i)) < maxVal; i++) {
+      a[0] |= ((this.buffer[Math.floor(this.bitPos / 8)] >> (this.bitPos % 8)) & 1) << i;
+      this.bitPos++;
+    }
+
+    if (a[0] > maxVal) {
+      throw new Error('ReadUInt32Max overflowed!');
+    }
+
+    return a[0];
+  }
+
+  readUInt32FromBits(l: number): number {
+    const a = new Uint32Array(1);
+    this.readBits(a, l);
+    return a[0];
+  }
+
+  readInt32FromBits(l: number): number {
+    const a = new Int32Array(1);
+    this.readBits(a, l);
+    return a[0];
   }
 }

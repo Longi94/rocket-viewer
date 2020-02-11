@@ -10,7 +10,7 @@ export class Replay {
   static deserialize(br: BinaryReader) {
     const replay = new Replay();
     replay.header = ReplayHeader.deserialize(br);
-    replay.body = ReplayBody.deserialize(br, replay.header.netVersion);
+    replay.body = ReplayBody.deserialize(br, replay.header);
     return replay;
   }
 }

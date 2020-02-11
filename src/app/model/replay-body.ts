@@ -4,6 +4,8 @@ import { TickMark } from './tick-mark';
 import { ClassMapping } from './class-mapping';
 import { Cache } from './cache';
 import { groupBy } from '../util/array-util';
+import { Frame } from './frame';
+import { ReplayHeader } from './replay-header';
 
 export class ReplayBody {
 
@@ -18,6 +20,7 @@ export class ReplayBody {
   //names: string[];
   classMappings: ClassMapping[];
   caches: Cache[];
+  frames: Frame[];
 
   mergedDuplicateClasses() {
     // Rarely, a class is defined multiple times.
@@ -46,7 +49,7 @@ export class ReplayBody {
     this.caches = this.caches.filter(value => !deleted.has(value));
   }
 
-  static deserialize(br: BinaryReader, netVersion: number) {
+  static deserialize(br: BinaryReader, header: ReplayHeader) {
     const body = new ReplayBody();
 
     body.length = br.readInt32();
@@ -124,12 +127,23 @@ export class ReplayBody {
       }
     }
 
-    if (netVersion >= 10) {
+    if (header.version.net >= 10) {
       // unknown
       br.skipBytes(4);
     }
 
     // body.mergedDuplicateClasses();
+
+    let maxChannels = 1023;
+    if ('MaxChannels' in header.properties && header.properties['MaxChannels'] != undefined) {
+      maxChannels = header.properties['MaxChannels'].value;
+    }
+
+    body.frames = Frame.extractFrames(maxChannels, body.networkStream, body.objects, body.caches, header.version, br);
+
+    if (br.bitPos != br.length() * 8) {
+      throw Error('Extra data left');
+    }
 
     return body;
   }
