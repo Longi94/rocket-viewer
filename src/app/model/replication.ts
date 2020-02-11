@@ -24,7 +24,7 @@ export class Replication {
   properties: { [key: number]: ReplicationProperty } = {};
 
   static deserialize(maxChannels: number, existingReplications: { [key: number]: Replication }, replications: Replication[],
-                     objectIdToName: string[], caches: { [key: number]: Cache }, version: ReplayVersion,
+                     objectIdToName: string[], caches: { [key: string]: Cache }, version: ReplayVersion,
                      br: BinaryReader): Replication {
     const r = new Replication();
 

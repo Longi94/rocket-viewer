@@ -10,7 +10,7 @@ export class Frame {
   replications: Replication[];
 
   static deserialize(maxChannels: number, existingReplications: { [key: number]: Replication },
-                     objectIdToName: string[], caches: { [key: number]: Cache }, version: ReplayVersion,
+                     objectIdToName: string[], caches: { [key: string]: Cache }, version: ReplayVersion,
                      br: BinaryReader): Frame {
     const f = new Frame();
 
@@ -48,7 +48,7 @@ export class Frame {
     const replications: { [key: number]: Replication } = {};
     const streamReader = new BinaryReader(networkStream);
 
-    const cacheDict: { [key: number]: Cache } = {};
+    const cacheDict: { [key: string]: Cache } = {};
     for (const cache of caches) {
       cacheDict[objectIdToName[cache.objectIndex]] = cache;
     }
