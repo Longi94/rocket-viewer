@@ -61,7 +61,7 @@ export class BinaryReader {
       this.readBits(a, 32, 0);
       this.readBits(a, 32, 1);
       // @ts-ignore
-      return new DataView(a).getBigInt64(0, true);
+      return new DataView(a.buffer).getBigInt64(0, true);
     }
   }
 
@@ -76,7 +76,7 @@ export class BinaryReader {
       this.readBits(a, 32, 0);
       this.readBits(a, 32, 1);
       // @ts-ignore
-      return new DataView(a).getBigUint64(0, true);
+      return new DataView(a.buffer).getBigUint64(0, true);
     }
   }
 
@@ -91,7 +91,7 @@ export class BinaryReader {
         this.readBits(a, 8, i);
       }
       // @ts-ignore
-      return new DataView(a).getFloat32(0, true);
+      return new DataView(a.buffer).getFloat32(0, true);
     }
   }
 
