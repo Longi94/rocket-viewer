@@ -185,4 +185,28 @@ export class BinaryReader {
     this.readBits(a, l);
     return a[0];
   }
+
+  readFixedCompressedFloat(max: number, l: number) {
+    let value = 0.0;
+    // NumBits = 8:
+    const maxBitValue = (1 << (l - 1)) - 1; //   0111 1111 - Max abs value we will serialize
+    const bias = (1 << (l - 1));    //   1000 0000 - Bias to pivot around (in order to support signed values)
+    const serIntMax = (1 << l);   // 1 0000 0000 - What we pass into SerializeInt
+
+    const delta = this.readUInt32Max(serIntMax);
+    const unscaledValue = delta - bias;
+
+    if (max > maxBitValue) {
+      // We have to scale down, scale needs to be a float:
+      const invScale = max / maxBitValue;
+      value = unscaledValue * invScale;
+    } else {
+      const scale = maxBitValue / max;
+      const invScale = 1.0 / scale;
+
+      value = unscaledValue * invScale;
+    }
+
+    return value;
+  }
 }

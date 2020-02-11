@@ -5,6 +5,6 @@ import { ReplayVersion } from '../replay-header';
 
 export const AttributeTypeLocation: AttributeType = {
   deserialize: (br: BinaryReader, version: ReplayVersion): ReplayVector => {
-    return ReplayVector.deserialize(br, version.net);
+    return ReplayVector.deserialize(br, version);
   }
 };

@@ -9,11 +9,11 @@ export class AppliedDamage {
   unknown3: number;
   unknown4: number;
 
-  static deserialize(br: BinaryReader, netVersion: number): AppliedDamage {
+  static deserialize(br: BinaryReader, version: ReplayVersion): AppliedDamage {
     const d = new AppliedDamage();
 
     d.unknown1 = br.readByte();
-    d.position = ReplayVector.deserialize(br, netVersion);
+    d.position = ReplayVector.deserialize(br, version);
     d.unknown3 = br.readInt32();
     d.unknown4 = br.readInt32();
 
@@ -23,6 +23,6 @@ export class AppliedDamage {
 
 export const AttributeTypeAppliedDamage: AttributeType = {
   deserialize: (br: BinaryReader, version: ReplayVersion): AppliedDamage => {
-    return AppliedDamage.deserialize(br, version.net);
+    return AppliedDamage.deserialize(br, version);
   }
 };

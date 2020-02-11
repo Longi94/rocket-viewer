@@ -6,7 +6,7 @@ export class ReplayVersion {
   licensee: number;
   net: number = 0;
 
-  greaterOrEquals(engine: number, licensee: number, net: number) {
+  ge(engine: number, licensee: number, net: number) {
     return this.engine >= engine && this.licensee >= licensee && this.net >= net;
   }
 }

@@ -30,6 +30,11 @@ import { AttributeTypeLoadouts } from './loadouts';
 import { AttributeTypeLoadoutsOnline } from './loadouts-online';
 import { AttributeTypePartyLeader } from './party-leader';
 import { AttributeTypeTitle } from './title';
+import { AttributeTypeEnum } from './enum';
+import { AttributeTypeRigidBodyState } from './rigid-body-state';
+import { AttributeTypeWeldedInfo } from './welded-info';
+import { AttributeTypePickup } from './pickup';
+import { AttributeTypePickupNew } from './pickup-new';
 
 export const RAW_ATTRIBUTE_TYPES: { [name: string]: AttributeType } = {
   'Engine.Actor:bBlockActors': AttributeTypeBoolean,

@@ -1,4 +1,5 @@
 import { BinaryReader } from '../parser/binary-reader';
+import { ReplayVersion } from './replay-header';
 
 export class ReplayVector {
 
@@ -10,18 +11,12 @@ export class ReplayVector {
   y: number;
   z: number;
 
-  static deserialize(br: BinaryReader, netVersion: number): ReplayVector {
-    if (netVersion >= 7) {
-      return ReplayVector.deserializeVector(22, br);
-    } else {
-      return ReplayVector.deserializeVector(20, br);
-    }
-  }
+  static deserialize(br: BinaryReader, version: ReplayVersion): ReplayVector {
+    const size = version.ge(868, 22, 7) ? 22 : 20;
 
-  private static deserializeVector(maxBits: number, br: BinaryReader): ReplayVector {
     const p = new ReplayVector();
 
-    p.numBits = br.readUInt32Max(maxBits);
+    p.numBits = br.readUInt32Max(size);
 
     const bias = 1 << (p.numBits + 1);
     const max = p.numBits + 2;

@@ -1,6 +1,5 @@
 import { AttributeType } from './attribute';
 import { BinaryReader } from '../../parser/binary-reader';
-import { Rotation } from '../rotation';
 import { ReplayVector } from '../replay-vector';
 import { ReplayQuaternion } from '../replay-quaternion';
 import { ReplayVersion } from '../replay-header';
@@ -8,23 +7,28 @@ import { ReplayVersion } from '../replay-header';
 export class RigidBodyState {
   sleeping: boolean;
   position: ReplayVector;
-  rotation: Rotation | ReplayQuaternion;
+  rotation: ReplayQuaternion;
+  linearVelocity: ReplayVector;
+  angularVelocity: ReplayVector;
 
   static deserialize(br: BinaryReader, version: ReplayVersion): RigidBodyState {
     const r = new RigidBodyState();
 
     r.sleeping = br.readBool();
-
+    r.position = ReplayVector.deserialize(br, version);
     if (version.net >= 5) {
-
-    } else {
-      r.position = ReplayVector.deserialize(br, version.net);
+      r.position.x /= 100;
+      r.position.y /= 100;
+      r.position.z /= 100;
     }
-    if (version.net >= 7) {
 
-    } else {
-      r.position = ReplayVector.deserializeFixed(br);
+    r.rotation = ReplayQuaternion.deserialize(br, version);
+
+    if (!r.sleeping) {
+      r.linearVelocity = ReplayVector.deserialize(br, version);
+      r.angularVelocity = ReplayVector.deserialize(br, version);
     }
+
     return r;
   }
 }

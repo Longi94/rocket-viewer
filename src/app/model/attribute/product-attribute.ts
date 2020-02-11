@@ -15,7 +15,7 @@ export class ProductAttribute {
 
     switch (p.objectName) {
       case 'TAGame.ProductAttribute_UserColor_TA':
-        if (version.greaterOrEquals(868, 23, 8)) {
+        if (version.ge(868, 23, 8)) {
           p.value = br.readUInt32();
         } else if (br.readBool()) {
           p.value = br.readUInt32FromBits(31);

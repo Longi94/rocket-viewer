@@ -45,23 +45,3 @@ export class ReplicationListProperty extends ReplicationProperty {
     super();
   }
 }
-
-const AttributeTypeEnum: AttributeType = {
-  deserialize: (br: BinaryReader) => {
-  }
-};
-
-
-const AttributeTypeWeldedInfo: AttributeType = {
-  deserialize: (br: BinaryReader) => {
-  }
-};
-const AttributeTypePickup: AttributeType = {
-  deserialize: (br: BinaryReader) => {
-  }
-};
-const AttributeTypePickupNew: AttributeType = {
-  deserialize: (br: BinaryReader) => {
-  }
-};
-

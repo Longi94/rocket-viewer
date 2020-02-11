@@ -6,7 +6,7 @@ export class Rotation {
   roll: number = 0;
 
   static deserialize(br: BinaryReader): Rotation {
-    const r = new Rotation()
+    const r = new Rotation();
 
     if (br.readBit()) {
       r.pitch = br.readByte();

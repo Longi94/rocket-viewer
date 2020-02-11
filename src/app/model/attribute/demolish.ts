@@ -11,20 +11,20 @@ export class Demolish {
   attackerVelocity: ReplayVector;
   victimVelocity: ReplayVector;
 
-  static deserialize(br: BinaryReader, netVersion: number): Demolish {
+  static deserialize(br: BinaryReader, version: ReplayVersion): Demolish {
     const d = new Demolish();
     d.attackerFlag = br.readBool();
     d.attackerActorId = br.readInt32();
     d.victimFlag = br.readBool();
     d.victimActorId = br.readInt32();
-    d.attackerVelocity = ReplayVector.deserialize(br, netVersion);
-    d.victimVelocity = ReplayVector.deserialize(br, netVersion);
+    d.attackerVelocity = ReplayVector.deserialize(br, version);
+    d.victimVelocity = ReplayVector.deserialize(br, version);
     return d;
   }
 }
 
 export const AttributeTypeDemolish: AttributeType = {
   deserialize: (br: BinaryReader, version: ReplayVersion): Demolish => {
-    return Demolish.deserialize(br, version.net);
+    return Demolish.deserialize(br, version);
   }
 };

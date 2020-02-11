@@ -54,7 +54,7 @@ export class Replication {
           return r;
         }
 
-        r.position = ReplayVector.deserialize(br, version.net);
+        r.position = ReplayVector.deserialize(br, version);
 
         if (RAW_CLASSES_WITH_ROTATION.has(objectIdToName[r.classId])) {
           r.rotation = Rotation.deserialize(br);
