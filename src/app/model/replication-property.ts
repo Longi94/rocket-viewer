@@ -42,7 +42,7 @@ export class ReplicationProperty {
 
 export class ReplicationListProperty extends ReplicationProperty {
   constructor(property: ReplicationProperty) {
-    super();
+    super(property);
     this.data = [property];
   }
 
