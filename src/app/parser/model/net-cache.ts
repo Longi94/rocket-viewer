@@ -1,13 +1,13 @@
 import { BinaryReader } from '../binary-reader';
 
 export class CacheProperty {
-  index: number;
-  id: number;
+  objectIndex: number;
+  streamId: number;
 
   static deserialize(br: BinaryReader) {
     const p = new CacheProperty();
-    p.index = br.readInt32();
-    p.id = br.readInt32();
+    p.objectIndex = br.readInt32();
+    p.streamId = br.readInt32();
     return p;
   }
 }
@@ -28,8 +28,8 @@ export class NetCache {
 
     while (currentCache != undefined) {
       for (const prop of Object.values(this.properties)) {
-        if (prop.id > maxId) {
-          maxId = prop.id;
+        if (prop.streamId > maxId) {
+          maxId = prop.streamId;
         }
       }
       currentCache = currentCache.parent;
@@ -62,9 +62,14 @@ export class NetCache {
 
     for (let i = 0; i < propertiesLength; i++) {
       const prop = CacheProperty.deserialize(br);
-      c.properties[prop.id] = prop;
+      c.properties[prop.streamId] = prop;
     }
 
     return c;
   }
+}
+
+export class CacheInfo {
+  maxPropId: number;
+  attributes: any[];
 }

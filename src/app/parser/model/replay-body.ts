@@ -2,9 +2,12 @@ import { BinaryReader } from '../binary-reader';
 import { KeyFrame } from './key-frame';
 import { TickMark } from './tick-mark';
 import { ClassIndex } from './class-index';
-import { NetCache } from './net-cache';
+import { CacheInfo, NetCache } from './net-cache';
 import { Frame } from './frame';
 import { ReplayHeader } from './replay-header';
+import { normalizeObject } from '../util';
+import { RAW_ATTRIBUTE_TYPES } from './attribute/mapping';
+import { RAW_OBJECT_CLASSES, RAW_PARENT_CLASSES } from '../const';
 
 export class ReplayBody {
 
@@ -70,70 +73,119 @@ export class ReplayBody {
       br.skipBytes(4);
     }
 
+    const normalizedObjects = body.objects.map(normalizeObject);
+    const normalizedNameObjInd: { [name: string]: number[] } = {};
+    for (let i = 0; i < normalizedObjects.length; i++) {
+      const name = normalizedObjects[i];
+      if (name in normalizedNameObjInd) {
+        normalizedNameObjInd[name].push(i);
+      } else {
+        normalizedNameObjInd[name] = [i];
+      }
+    }
+
+    const nameObjInd: { [name: string]: number[] } = {};
+    for (const name of body.objects) {
+      if (name in normalizedNameObjInd) {
+        nameObjInd[name] = normalizedNameObjInd[name].slice();
+      } else {
+        nameObjInd[name] = [];
+      }
+    }
+
+    const objectIndAttrs = {};
+    for (const cache of body.netCaches) {
+      let allProps = {};
+      for (const p of Object.values(cache.properties)) {
+        const attr = RAW_ATTRIBUTE_TYPES[normalizedObjects[p.objectIndex]];
+        allProps[p.streamId] = {attribute: attr, objectId: p.objectIndex};
+      }
+
+      let hadParent = false;
+
+      // We are going to recursively resolve an object's name to find their direct parent.
+      // Parents have parents as well (etc), so we repeatedly walk up the chain picking up
+      // attributes on parent objects until we reach an object with no parent (`Core.Object`)
+      let objectName = body.objects[cache.objectIndex];
+
+      let parentName = RAW_PARENT_CLASSES[objectName];
+      while (parentName != undefined) {
+        hadParent = true;
+        let parentIds = nameObjInd[parentName];
+        if (parentIds != undefined) {
+          for (const parentId of parentIds) {
+            const parentAttrs = objectIndAttrs[parentId];
+            if (parentAttrs != undefined) {
+              allProps = Object.assign({}, allProps, parentAttrs);
+            }
+          }
+        }
+        parentName = RAW_PARENT_CLASSES[parentName];
+      }
+
+      // Sometimes our hierarchy set up in build.rs isn't perfect so if we don't find a
+      // parent and a parent cache id is set, try and find this parent id and carry down
+      // their props.
+      if (!hadParent && cache.parentId !== 0) {
+        const parent = body.netCaches.find(x => x.id == cache.parentId);
+        if (parent != undefined) {
+          const parentAttrs = objectIndAttrs[parent.objectIndex];
+          if (parentAttrs != undefined) {
+            allProps = Object.assign({}, allProps, parentAttrs);
+          }
+        }
+      }
+
+      objectIndAttrs[cache.objectIndex] = allProps;
+    }
+
+    for (const obj in RAW_OBJECT_CLASSES) {
+      const parent = RAW_OBJECT_CLASSES[obj];
+
+      // It's ok if an object class doesn't appear in our replay. For instance, basketball
+      // objects don't appear in a soccer replay.
+      const objectIds = normalizedNameObjInd[obj];
+      if (objectIds != undefined) {
+        const parentIds = nameObjInd[parent];
+
+        for (const i of objectIds) {
+          for (const parentId of parentIds) {
+            const parentAttrs = Object.assign({}, objectIndAttrs[parentId]);
+            if (i in objectIndAttrs) {
+              objectIndAttrs[i] = Object.assign(objectIndAttrs[i], parentAttrs);
+            } else {
+              objectIndAttrs[i] = parentAttrs;
+            }
+          }
+        }
+      }
+    }
+
+    const objectIndAttributes: { [id: number]: CacheInfo } = {};
+    for (const objId in objectIndAttrs) {
+      const attrs = objectIndAttrs[objId];
+      const c = new CacheInfo();
+      const id = objId;
+
+      let max = undefined;
+      for (const i in attrs) {
+        if (max == undefined || parseInt(i) > max) {
+          max = parseInt(i);
+        }
+      }
+      if (max == undefined) {
+        max = 2;
+      }
+      max++;
+      c.maxPropId = max;
+      c.attributes = attrs;
+      objectIndAttributes[id] = c;
+    }
+
     let maxChannels = 1023;
     if ('MaxChannels' in header.properties && header.properties['MaxChannels'] != undefined) {
       maxChannels = header.properties['MaxChannels'].value;
     }
-    // 2016/02/10 patch replays have TAGame.PRI_TA classes with no parent.
-    // Deserialization may have failed somehow, but for now manually fix it up.
-    body.fixClassParent("ProjectX.PRI_X", "Engine.PlayerReplicationInfo");
-    body.fixClassParent("TAGame.PRI_TA", "ProjectX.PRI_X");
-
-    // A lot of replays have messed up class hierarchies, commonly giving
-    // both Engine.TeamInfo, TAGame.CarComponent_TA, and others the same id.
-    // Some ambiguities may have become more common since the 2016-06-20 patch,
-    // but there have always been issues.
-    //
-    // For example, from E8B66F8A4561A2DAACC61FA9FBB710CD:
-    //    Index 26(TAGame.CarComponent_TA) ParentId 21 Id 24
-    //        Index 28(TAGame.CarComponent_Dodge_TA) ParentId 24 Id 25
-    //        Index 188(TAGame.CarComponent_Jump_TA) ParentId 24 Id 24
-    //            Index 190(TAGame.CarComponent_DoubleJump_TA) ParentId 24 Id 24
-    //    Index 30(Engine.Info) ParentId 21 Id 21
-    //        Index 31(Engine.ReplicationInfo) ParentId 21 Id 21
-    //            Index 195(Engine.TeamInfo) ParentId 21 Id 24
-    //                Index 214(TAGame.CarComponent_Boost_TA) ParentId 24 Id 31
-    //                Index 237(TAGame.CarComponent_FlipCar_TA) ParentId 24 Id 26
-    // Problems:
-    //     TAGame.CarComponent_Jump_TA's parent id and id are both 24 (happens to work fine in this case)
-    //     TAGame.CarComponent_DoubleJump_TA's parent id and id are both 24 (incorrectly picks CarComponent_Jump_TA as parent)
-    //     Engine.TeamInfo's ID is 24, even though there are 3 other classes with that id
-    //     TAGame.CarComponent_Boost_TA's parent is 24 (Incorrectly picks Engine.TeamInfo, since it's ambiguous)
-    //     TAGame.CarComponent_FlipCar_TA's parent is 24 (Incorrectly picks Engine.TeamInfo, since it's ambiguous)
-    //     Engine.ReplicationInfo and Engine.Info have the same parent id and id (no ill effects so far)
-    //
-    // Note: The heirarchy problems do not always cause parsing errors! But they can if you're unlucky.
-
-    body.fixClassParent("TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA");
-    body.fixClassParent("TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA");
-    body.fixClassParent("TAGame.CarComponent_Jump_TA", "TAGame.CarComponent_TA");
-    body.fixClassParent("TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA");
-    body.fixClassParent("TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA");
-    body.fixClassParent("TAGame.GameEvent_TA", "Engine.Actor");
-    body.fixClassParent("TAGame.SpecialPickup_TA", "TAGame.CarComponent_TA");
-    body.fixClassParent("TAGame.SpecialPickup_BallVelcro_TA", "TAGame.SpecialPickup_TA");
-    body.fixClassParent("TAGame.SpecialPickup_Targeted_TA", "TAGame.SpecialPickup_TA");
-    body.fixClassParent("TAGame.SpecialPickup_Spring_TA", "TAGame.SpecialPickup_Targeted_TA");
-    body.fixClassParent("TAGame.SpecialPickup_BallLasso_TA", "TAGame.SpecialPickup_Spring_TA");
-    body.fixClassParent("TAGame.SpecialPickup_BoostOverride_TA", "TAGame.SpecialPickup_Targeted_TA");
-    body.fixClassParent("TAGame.SpecialPickup_BallCarSpring_TA", "TAGame.SpecialPickup_Spring_TA");
-    body.fixClassParent("TAGame.SpecialPickup_BallFreeze_TA", "TAGame.SpecialPickup_Targeted_TA");
-    body.fixClassParent("TAGame.SpecialPickup_Swapper_TA", "TAGame.SpecialPickup_Targeted_TA");
-    body.fixClassParent("TAGame.SpecialPickup_GrapplingHook_TA", "TAGame.SpecialPickup_Targeted_TA");
-    body.fixClassParent("TAGame.SpecialPickup_BallGravity_TA", "TAGame.SpecialPickup_TA");
-    body.fixClassParent("TAGame.SpecialPickup_HitForce_TA", "TAGame.SpecialPickup_TA");
-    body.fixClassParent("TAGame.SpecialPickup_Tornado_TA", "TAGame.SpecialPickup_TA");
-    body.fixClassParent("TAGame.SpecialPickup_HauntedBallBeam_TA", "TAGame.SpecialPickup_TA");
-    body.fixClassParent("TAGame.CarComponent_TA", "Engine.Actor");
-    body.fixClassParent("Engine.Info", "Engine.Actor");
-    body.fixClassParent("Engine.Pawn", "Engine.Actor");
-
-    // Havent had problems with these yet. They (among others) can be ambiguous,
-    // but I havent found a replay yet where my parent choosing algorithm
-    // (which picks the matching class that was most recently read) picks the wrong class.
-    // Just a safeguard for now.
-    body.fixClassParent("Engine.TeamInfo", "Engine.ReplicationInfo");
-    body.fixClassParent("TAGame.Team_TA", "Engine.TeamInfo");
 
     body.frames = Frame.extractFrames(maxChannels, body.networkStream.buffer, body.objects, body.netCaches, header.version);
 
