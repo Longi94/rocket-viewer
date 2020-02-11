@@ -1,5 +1,5 @@
 import { BinaryReader } from '../binary-reader';
-import { Cache } from './cache';
+import { NetCache } from './net-cache';
 import { RAW_ATTRIBUTE_TYPES } from './attribute/mapping';
 import { ReplayVersion } from './replay-header';
 
@@ -8,7 +8,7 @@ export class ReplicationProperty {
   data: any;
 
   name: string;
-  cache: Cache;
+  cache: NetCache;
 
   constructor(copyFrom?: ReplicationProperty) {
     if (copyFrom != undefined) {
@@ -19,7 +19,7 @@ export class ReplicationProperty {
     }
   }
 
-  static deserialize(cache: Cache, objectIdToName: string[], version: ReplayVersion, br: BinaryReader): ReplicationProperty {
+  static deserialize(cache: NetCache, objectIdToName: string[], version: ReplayVersion, br: BinaryReader): ReplicationProperty {
     const p = new ReplicationProperty();
 
     p.cache = cache;

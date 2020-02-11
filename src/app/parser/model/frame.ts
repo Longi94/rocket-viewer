@@ -1,4 +1,4 @@
-import { Cache } from './cache';
+import { NetCache } from './net-cache';
 import { ActorState, Replication } from './replication';
 import { BinaryReader } from '../binary-reader';
 import { ReplayVersion } from './replay-header';
@@ -10,7 +10,7 @@ export class Frame {
   replications: Replication[];
 
   static deserialize(maxChannels: number, existingReplications: { [key: number]: Replication },
-                     objectIdToName: string[], caches: { [key: string]: Cache }, version: ReplayVersion,
+                     objectIdToName: string[], caches: { [key: string]: NetCache }, version: ReplayVersion,
                      br: BinaryReader): Frame {
     const f = new Frame();
 
@@ -42,13 +42,13 @@ export class Frame {
   }
 
   static extractFrames(maxChannels: number, networkStream: ArrayBuffer, objectIdToName: string[],
-                       caches: Cache[], version: ReplayVersion): Frame[] {
+                       caches: NetCache[], version: ReplayVersion): Frame[] {
     const frames: Frame[] = [];
 
     const replications: { [key: number]: Replication } = {};
     const streamReader = new BinaryReader(networkStream);
 
-    const cacheDict: { [key: string]: Cache } = {};
+    const cacheDict: { [key: string]: NetCache } = {};
     for (const cache of caches) {
       cacheDict[objectIdToName[cache.objectIndex]] = cache;
     }

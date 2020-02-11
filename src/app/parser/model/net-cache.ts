@@ -12,19 +12,19 @@ export class CacheProperty {
   }
 }
 
-export class Cache {
+export class NetCache {
   objectIndex: number;
   parentId: number;
   id: number;
   properties: { [name: string]: CacheProperty };
-  children: Cache[];
-  parent: Cache;
+  children: NetCache[];
+  parent: NetCache;
   root: boolean;
 
   getMaxPropertyId() {
     let maxId = 0;
 
-    let currentCache: Cache = this;
+    let currentCache: NetCache = this;
 
     while (currentCache != undefined) {
       for (const prop of Object.values(this.properties)) {
@@ -49,7 +49,7 @@ export class Cache {
   }
 
   static deserialize(br: BinaryReader) {
-    const c = new Cache();
+    const c = new NetCache();
 
     c.objectIndex = br.readInt32();
     c.parentId = br.readInt32();

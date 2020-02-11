@@ -1,4 +1,4 @@
-import { Cache } from './cache';
+import { NetCache } from './net-cache';
 import { BinaryReader } from '../binary-reader';
 import { ReplayVector } from './replay-vector';
 import { Rotation } from './rotation';
@@ -16,7 +16,7 @@ export class Replication {
   nameId: number;
   typeId: number;
   classId: number;
-  cache: Cache;
+  cache: NetCache;
 
   position: ReplayVector;
   rotation: Rotation;
@@ -24,7 +24,7 @@ export class Replication {
   properties: { [key: number]: ReplicationProperty } = {};
 
   static deserialize(maxChannels: number, existingReplications: { [key: number]: Replication }, replications: Replication[],
-                     objectIdToName: string[], caches: { [key: string]: Cache }, version: ReplayVersion,
+                     objectIdToName: string[], caches: { [key: string]: NetCache }, version: ReplayVersion,
                      br: BinaryReader): Replication {
     const r = new Replication();
 

@@ -1,9 +1,8 @@
 import { BinaryReader } from '../binary-reader';
 import { KeyFrame } from './key-frame';
 import { TickMark } from './tick-mark';
-import { ClassMapping } from './class-mapping';
-import { Cache } from './cache';
-import { groupBy } from '../../util/array-util';
+import { ClassIndex } from './class-index';
+import { NetCache } from './net-cache';
 import { Frame } from './frame';
 import { ReplayHeader } from './replay-header';
 
@@ -15,43 +14,18 @@ export class ReplayBody {
   levels: string[];
   keyFrames: KeyFrame[];
   networkStream: Uint8Array;
+  debugStrings: string[];
   tickMarks: TickMark[];
   objects: string[];
   names: string[];
-  classMappings: ClassMapping[];
-  caches: Cache[];
+  packages: string[];
+  classIndices: ClassIndex[];
+  netCaches: NetCache[];
   frames: Frame[];
 
-  mergedDuplicateClasses() {
-    // Rarely, a class is defined multiple times.
-    // See replay 5F9D44B6400E284FD15A95AC8D5C5B45 which has 2 entries for TAGame.GameEvent_Soccar_TA
-    // Merge their properties and drop the extras to keep everything from starting on fire
-
-    const deleted = new Set<Cache>();
-
-    const groups = groupBy(this.caches, 'objectIndex');
-
-    for (const group of Object.values<Cache[]>(groups)) {
-      if (group.length === 1) {
-        continue;
-      }
-
-      const goodClass = group[0];
-      for (let i = 1; i < group.length; i++) {
-        const badClass = group[i];
-        for (const p of Object.values(badClass.properties)) {
-          goodClass.properties[p.id] = p;
-        }
-        deleted.add(badClass);
-      }
-    }
-
-    this.caches = this.caches.filter(value => !deleted.has(value));
-  }
-
   fixClassParent(child: string, parent: string) {
-    const parentClass = this.caches.find(c => this.objects[c.objectIndex] == parent);
-    const childClass = this.caches.find(c => this.objects[c.objectIndex] == child);
+    const parentClass = this.netCaches.find(c => this.objects[c.objectIndex] == parent);
+    const childClass = this.netCaches.find(c => this.objects[c.objectIndex] == child);
 
     if (parentClass != undefined && childClass != undefined && (childClass.parent == undefined || childClass.parent != parentClass)) {
       const oldParent = childClass.parent == undefined ? 'NULL' : this.objects[childClass.parent.objectIndex];
@@ -75,83 +49,26 @@ export class ReplayBody {
     body.length = br.readInt32();
     body.crc = br.readUInt32();
 
-    const levelLength = br.readInt32();
-    body.levels = [];
-    for (let i = 0; i < levelLength; i++) {
-      body.levels.push(br.readString());
-    }
+    body.levels = br.readStringList();
 
-    const keyFrameLength = br.readInt32();
-    body.keyFrames = [];
-    for (let i = 0; i < keyFrameLength; i++) {
-      body.keyFrames.push(KeyFrame.deserialize(br));
-    }
+    body.keyFrames = br.readDeserializableList(KeyFrame);
 
     const networkStreamLength = br.readInt32();
     body.networkStream = br.readBytes(networkStreamLength);
 
-    // skip debug strings
-    const debugStringLength = br.readInt32();
-    for (let i = 0; i < debugStringLength; i++) {
-      br.skipString();
-    }
+    body.debugStrings = br.readStringList();
+    body.tickMarks = br.readDeserializableList(TickMark);
+    body.packages = br.readStringList();
+    body.objects = br.readStringList();
+    body.names = br.readStringList();
 
-    const tickMarkLength = br.readInt32();
-    body.tickMarks = [];
-    for (let i = 0; i < tickMarkLength; i++) {
-      body.tickMarks.push(TickMark.deserialize(br));
-    }
-
-    // skip packages
-    const packagesLength = br.readInt32();
-    for (let i = 0; i < packagesLength; i++) {
-      br.skipString();
-    }
-
-    const objectsLength = br.readInt32();
-    body.objects = [];
-    for (let i = 0; i < objectsLength; i++) {
-      body.objects.push(br.readString());
-    }
-
-    // Skip names for now
-    const namesLength = br.readInt32();
-    body.names = [];
-    for (let i = 0; i < namesLength; i++) {
-      body.names.push(br.readString());
-    }
-
-    const classMappingLength = br.readInt32();
-    body.classMappings = [];
-    for (let i = 0; i < classMappingLength; i++) {
-      body.classMappings.push(ClassMapping.deserialize(br));
-    }
-
-    const cacheLength = br.readInt32();
-    body.caches = new Array<Cache>(cacheLength);
-    for (let i = 0; i < cacheLength; i++) {
-      const cache = Cache.deserialize(br);
-      body.caches[i] = cache;
-
-      for (let j = i - 1; j >= 0; --j) {
-        if (cache.parentId === body.caches[j].id) {
-          cache.parent = body.caches[j];
-          body.caches[j].children.push(cache);
-          break;
-        }
-      }
-
-      if (body.caches[i].parent == undefined) {
-        body.caches[i].root = true;
-      }
-    }
+    body.classIndices = br.readDeserializableList(ClassIndex);
+    body.netCaches = br.readDeserializableList(NetCache);
 
     if (header.version.net >= 10) {
       // unknown
       br.skipBytes(4);
     }
-
-    // body.mergedDuplicateClasses();
 
     let maxChannels = 1023;
     if ('MaxChannels' in header.properties && header.properties['MaxChannels'] != undefined) {
@@ -218,7 +135,7 @@ export class ReplayBody {
     body.fixClassParent("Engine.TeamInfo", "Engine.ReplicationInfo");
     body.fixClassParent("TAGame.Team_TA", "Engine.TeamInfo");
 
-    body.frames = Frame.extractFrames(maxChannels, body.networkStream.buffer, body.objects, body.caches, header.version);
+    body.frames = Frame.extractFrames(maxChannels, body.networkStream.buffer, body.objects, body.netCaches, header.version);
 
     if (br.bitPos != br.length() * 8) {
       throw Error('Extra data left');

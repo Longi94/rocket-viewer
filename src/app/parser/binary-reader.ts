@@ -136,6 +136,27 @@ export class BinaryReader {
     return str;
   }
 
+  readStringList(): string[] {
+    const l = this.readInt32();
+    const strs: string[] = [];
+
+    for (let i = 0; i < l; i++) {
+      strs.push(this.readString());
+    }
+    return strs;
+  }
+
+  readDeserializableList<T>(clazz): T[] {
+    const l = this.readInt32();
+    const objects = [];
+
+    for (let i = 0; i < l; i++) {
+      objects.push(clazz.deserialize(this));
+    }
+    return objects;
+  }
+
+
   skipBits(l: number) {
     this.bitPos += l;
   }
