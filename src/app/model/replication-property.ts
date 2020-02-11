@@ -26,7 +26,7 @@ export class ReplicationProperty {
     p.cache = cache;
 
     p.id = br.readUInt32Max(cache.getMaxPropertyId() + 1);
-    p.name = objectIdToName[cache.properties[p.id].index];
+    p.name = objectIdToName[cache.getProperty(p.id).index];
 
     const attrType = RAW_ATTRIBUTE_TYPES[p.name];
 
@@ -43,5 +43,13 @@ export class ReplicationProperty {
 export class ReplicationListProperty extends ReplicationProperty {
   constructor(property: ReplicationProperty) {
     super();
+    this.data = [property];
+  }
+
+  add(property: ReplicationProperty) {
+    if (this.id !== property.id) {
+      throw new Error('Property id mismatch, can not add to list');
+    }
+    this.data.push(property);
   }
 }

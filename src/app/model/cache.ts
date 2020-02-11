@@ -24,12 +24,28 @@ export class Cache {
   getMaxPropertyId() {
     let maxId = 0;
 
-    for (const prop of Object.values(this.properties)) {
-      if (prop.id > maxId) {
-        maxId = prop.id;
+    let currentCache: Cache = this;
+
+    while (currentCache != undefined) {
+      for (const prop of Object.values(this.properties)) {
+        if (prop.id > maxId) {
+          maxId = prop.id;
+        }
       }
+      currentCache = currentCache.parent;
     }
     return maxId;
+  }
+
+  getProperty(id: number) {
+    const prop = this.properties[id];
+    if (prop != undefined) {
+      return prop;
+    }
+    if (this.parent != undefined) {
+      return this.parent.getProperty(id);
+    }
+    return undefined;
   }
 
   static deserialize(br: BinaryReader) {

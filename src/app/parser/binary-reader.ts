@@ -67,6 +67,7 @@ export class BinaryReader {
 
   readUInt64(): bigint {
     if (this.bitPos % 8 === 0) {
+      // @ts-ignore
       const n = this.view.getBigUint64(this.bitPos / 8, true);
       this.bitPos += 64;
       return n;

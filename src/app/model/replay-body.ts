@@ -14,10 +14,10 @@ export class ReplayBody {
 
   levels: string[];
   keyFrames: KeyFrame[];
-  networkStream: ArrayBuffer;
+  networkStream: Uint8Array;
   tickMarks: TickMark[];
   objects: string[];
-  //names: string[];
+  names: string[];
   classMappings: ClassMapping[];
   caches: Cache[];
   frames: Frame[];
@@ -96,10 +96,9 @@ export class ReplayBody {
 
     // Skip names for now
     const namesLength = br.readInt32();
-    // body.names = [];
+    body.names = [];
     for (let i = 0; i < namesLength; i++) {
-      br.skipString();
-      // body.names.push(br.readString());
+      body.names.push(br.readString());
     }
 
     const classMappingLength = br.readInt32();
@@ -132,14 +131,14 @@ export class ReplayBody {
       br.skipBytes(4);
     }
 
-    // body.mergedDuplicateClasses();
+    body.mergedDuplicateClasses();
 
     let maxChannels = 1023;
     if ('MaxChannels' in header.properties && header.properties['MaxChannels'] != undefined) {
       maxChannels = header.properties['MaxChannels'].value;
     }
 
-    body.frames = Frame.extractFrames(maxChannels, body.networkStream, body.objects, body.caches, header.version, br);
+    body.frames = Frame.extractFrames(maxChannels, body.networkStream.buffer, body.objects, body.caches, header.version);
 
     if (br.bitPos != br.length() * 8) {
       throw Error('Extra data left');

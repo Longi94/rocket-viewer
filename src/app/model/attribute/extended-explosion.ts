@@ -7,8 +7,8 @@ export class ExtendedExplosion extends Explosion {
   unknown3: boolean;
   unknown4: number;
 
-  static deserialize(br: BinaryReader, netVersion: number): ExtendedExplosion {
-    const e = Explosion.deserialize(br, netVersion) as ExtendedExplosion;
+  static deserialize(br: BinaryReader, version: ReplayVersion): ExtendedExplosion {
+    const e = Explosion.deserialize(br, version) as ExtendedExplosion;
 
     e.unknown3 = br.readBool();
     e.unknown4 = br.readUInt32();
@@ -19,6 +19,6 @@ export class ExtendedExplosion extends Explosion {
 
 export const AttributeTypeExtendedExplosion: AttributeType = {
   deserialize: (br: BinaryReader, version: ReplayVersion): ExtendedExplosion => {
-    return ExtendedExplosion.deserialize(br, version.net);
+    return ExtendedExplosion.deserialize(br, version);
   }
 };

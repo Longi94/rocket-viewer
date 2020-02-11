@@ -26,7 +26,6 @@ export class Replication {
   static deserialize(maxChannels: number, existingReplications: { [key: number]: Replication }, replications: Replication[],
                      objectIdToName: string[], caches: { [key: number]: Cache }, version: ReplayVersion,
                      br: BinaryReader): Replication {
-    const startPos = br.bitPos;
     const r = new Replication();
 
     r.actorId = br.readUInt32Max(maxChannels);
@@ -46,7 +45,7 @@ export class Replication {
 
         const typeName = objectIdToName[r.typeId];
 
-        const cache = caches[RAW_OBJECT_CLASSES[typeName]];
+        const cache = caches[getRawObjectClass(typeName)];
         r.cache = cache;
         r.classId = cache.objectIndex;
 
@@ -68,8 +67,6 @@ export class Replication {
 
         while (br.readBit()) {
           lastProp = ReplicationProperty.deserialize(oldState.cache, objectIdToName, version, br);
-
-          let existingProperty: ReplicationProperty;
 
           if (!(lastProp.id in r.properties)) {
             r.properties[lastProp.id] = lastProp;
@@ -149,7 +146,7 @@ const RAW_OBJECT_CLASSES = {
   'GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype': 'TAGame.GRI_TA',
   'GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype': 'TAGame.GRI_TA',
   'GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype': 'TAGame.GRI_TA',
-  'ProjectX.Default__NetModeReplicator_X': 'ProjectX.NetModeReplicator',
+  'ProjectX.Default__NetModeReplicator_X': 'ProjectX.NetModeReplicator_X',
   'TAGame.Default__CameraSettingsActor_TA': 'TAGame.CameraSettingsActor_TA',
   'TAGame.Default__PRI_TA': 'TAGame.PRI_TA',
   'TheWorld:PersistentLevel.BreakOutActor_Platform_TA': 'TAGame.BreakOutActor_Platform_TA',
@@ -160,6 +157,27 @@ const RAW_OBJECT_CLASSES = {
   'Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1': 'TAGame.HauntedBallTrapTrigger_TA',
   'Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0': 'TAGame.HauntedBallTrapTrigger_TA'
 };
+
+function getRawObjectClass(type: string) {
+  let _class = RAW_OBJECT_CLASSES[type];
+
+  if (_class !== undefined) {
+    return _class;
+  }
+
+  if (type.indexOf('CrowdActor_TA') >= -1) {
+    return 'TAGame.CrowdActor_TA';
+  }
+  if (type.indexOf('VehiclePickup_Boost_TA') >= -1) {
+    return 'TAGame.VehiclePickup_Boost_TA';
+  }
+  if (type.indexOf('CrowdManager_TA') >= -1) {
+    return 'TAGame.CrowdManager_TA';
+  }
+  if (type.indexOf('BreakOutActor_Platform_TA') >= -1) {
+    return 'TAGame.BreakOutActor_Platform_TA';
+  }
+}
 
 const RAW_CLASSES_WITH_LOCATION = new Set<string>([
   'TAGame.Ball_Breakout_TA',
@@ -211,7 +229,7 @@ const RAW_CLASSES_WITH_LOCATION = new Set<string>([
   'TheWorld:PersistentLevel.InMapScoreboard_TA',
   'TheWorld:PersistentLevel.VehiclePickup_Boost_TA',
   'TAGame.HauntedBallTrapTrigger_TA',
-  'ProjectX.NetModeReplicator'
+  'ProjectX.NetModeReplicator_X'
 ]);
 
 const RAW_CLASSES_WITH_ROTATION = new Set<string>([

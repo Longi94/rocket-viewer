@@ -1,8 +1,6 @@
 import { Cache } from './cache';
-import { Replication } from './replication';
+import { ActorState, Replication } from './replication';
 import { BinaryReader } from '../parser/binary-reader';
-import { max } from 'rxjs/operators';
-import { CacheEntry } from '@angular-devkit/build-angular/src/utils/action-cache';
 import { ReplayVersion } from './replay-header';
 
 export class Frame {
@@ -23,17 +21,28 @@ export class Frame {
       throw new Error(`Frame time values are negative`);
     }
 
-    let lastReplication: Replication;
+    f.replications = [];
+
     while (br.readBit()) {
       const r = Replication.deserialize(maxChannels, existingReplications, f.replications, objectIdToName, caches,
         version, br);
+
+      if (r.actorState !== ActorState.DELETED) {
+        if (!(r.actorId in existingReplications)) {
+          existingReplications[r.actorId] = r;
+        }
+      } else {
+        delete existingReplications[r.actorId];
+      }
+
+      f.replications.push(r);
     }
 
     return f;
   }
 
   static extractFrames(maxChannels: number, networkStream: ArrayBuffer, objectIdToName: string[],
-                       caches: Cache[], version: ReplayVersion, br: BinaryReader): Frame[] {
+                       caches: Cache[], version: ReplayVersion): Frame[] {
     const frames: Frame[] = [];
 
     const replications: { [key: number]: Replication } = {};
@@ -41,10 +50,10 @@ export class Frame {
 
     const cacheDict: { [key: number]: Cache } = {};
     for (const cache of caches) {
-      cacheDict[cache.objectIndex] = cache;
+      cacheDict[objectIdToName[cache.objectIndex]] = cache;
     }
 
-    while (br.bitPos < br.length() * 8) {
+    while (streamReader.bitPos < streamReader.length() * 8) {
       const f = Frame.deserialize(maxChannels, replications, objectIdToName, cacheDict, version, streamReader);
 
       if (frames.length > 0 && f.time != 0 && frames[frames.length - 1].time > f.time) {
