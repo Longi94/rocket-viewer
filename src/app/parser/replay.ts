@@ -1,5 +1,5 @@
 import { BinaryReader } from './binary-reader';
-import { Replay } from '../model/replay';
+import { Replay } from './model/replay';
 
 export class ReplayParser {
   private br: BinaryReader;
