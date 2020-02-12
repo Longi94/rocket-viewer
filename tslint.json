@@ -82,6 +82,10 @@
     "no-outputs-metadata-property": true,
     "template-banana-in-box": true,
     "template-no-negated-async": true,
+    "triple-equals": [
+      true,
+      "allow-undefined-check"
+    ],
     "use-lifecycle-interface": true,
     "use-pipe-transform-interface": true
   },
