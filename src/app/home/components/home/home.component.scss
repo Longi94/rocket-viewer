@@ -1,4 +1,11 @@
+.main-container {
+  height: 100%;
+  width: 100%;
+}
+
 .upload-div {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.51);
   height: 100%;
   width: 100%;
   display: flex;
@@ -6,6 +13,7 @@
   justify-content: center;
   flex-flow: column;
   font-size: 16px;
+  z-index: 1000;
 }
 
 .upload-div span {

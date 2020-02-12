@@ -8,6 +8,7 @@ import { BoxcarsService } from '../../../service/boxcars.service';
 })
 export class HomeComponent implements OnInit {
 
+  replayLoaded = false;
   dragging = false;
   errorMessage: string;
 
@@ -16,7 +17,7 @@ export class HomeComponent implements OnInit {
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
-        console.log(result);
+        this.replayLoaded = true;
       }
     });
   }

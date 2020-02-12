@@ -19,6 +19,7 @@ export class BoxcarsService {
     fileReader.onload = (event) => {
       const replay = parse_replay(new Uint8Array(event.target.result as ArrayBuffer));
       this.resultSubject.next(replay);
+      console.log(replay);
     };
     fileReader.readAsArrayBuffer(file);
   }
