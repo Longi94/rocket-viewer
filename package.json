@@ -9,8 +9,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "wasm-pack": "npm run wasm-pack:boxcars && npm run wasm-pack:copy",
-    "wasm-pack:copy": "cpx boxcars-wasm/pkg/boxcars_wasm.js src/assets/boxcars/ && cpx boxcars-wasm/pkg/boxcars_wasm_bg.wasm src/assets/boxcars/",
-    "wasm-pack:boxcars": "cd boxcars-wasm && wasm-pack build --target web"
+    "wasm-pack:copy": "cpx boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/",
+    "wasm-pack:boxcars": "cd boxcars-wasm && wasm-pack build"
   },
   "private": true,
   "dependencies": {
