@@ -1,0 +1,6 @@
+<div class="playback-control-div">
+  <button class="play-button" mat-icon-button (click)="playClick()">
+    <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
+  </button>
+  <mat-slider [min]="minTime" [max]="maxTime" step="0.01" [(value)]="currentTime"></mat-slider>
+</div>

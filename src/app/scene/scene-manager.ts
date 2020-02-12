@@ -3,7 +3,6 @@ import {
   AmbientLight,
   Color,
   DefaultLoadingManager,
-  Object3D,
   PerspectiveCamera,
   Scene, Texture,
   TextureLoader,
@@ -45,6 +44,14 @@ export class SceneManager {
   private actorHandlers: { [actorId: number]: ActorHandler } = {};
 
   private mapModel: Scene;
+
+  private currentAnimationTime: number;
+  private currentTime: number;
+  private currentFrame: number;
+  minTime: number;
+  maxTime: number;
+
+  private isPlaying = false;
 
   constructor() {
   }
@@ -136,12 +143,33 @@ export class SceneManager {
       }
     }
 
+    this.minTime = replay.network_frames.frames[0].time;
+    this.maxTime = replay.network_frames.frames[replay.network_frames.frames.length - 1].time;
+
     const map = replay.properties['MapName'];
     this.mapModel = (await loadMap(map, this.modelLoader)).scene;
     this.scene.add(this.mapModel);
   }
 
   render(time: number) {
+    if (this.currentAnimationTime == undefined) {
+      this.currentAnimationTime = time;
+      this.renderer.render(this.scene, this.camera);
+      return;
+    }
+
+    if (this.isPlaying) {
+      const d = time - this.currentAnimationTime;
+    }
     this.renderer.render(this.scene, this.camera);
+    this.currentAnimationTime = time;
+  }
+
+  play() {
+    this.isPlaying = true;
+  }
+
+  pause() {
+    this.isPlaying = false;
   }
 }

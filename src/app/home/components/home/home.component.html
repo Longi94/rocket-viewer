@@ -8,5 +8,8 @@
       <span>{{errorMessage}}</span>
     </div>
   </div>
+  <div class="playback-control-div" *ngIf="replayLoaded">
+    <app-playback-control></app-playback-control>
+  </div>
   <app-canvas></app-canvas>
 </div>

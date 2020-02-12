@@ -24,3 +24,10 @@
   margin-top: 16px;
   color: lightcoral;
 }
+
+.playback-control-div {
+  z-index: 1500;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}

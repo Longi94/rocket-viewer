@@ -1,0 +1,16 @@
+.playback-control-div {
+  width: 100%;
+  display: flex;
+  flex-flow: row;
+  padding: 16px;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.playback-control-div mat-slider {
+    flex-grow: 1;
+}
+
+.playback-control-div .play-button {
+    margin-right: 16px;
+}

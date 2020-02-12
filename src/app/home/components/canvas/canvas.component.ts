@@ -3,6 +3,7 @@ import { DefaultLoadingManager } from 'three';
 import { BoxcarsService } from '../../../service/boxcars.service';
 import { Replay } from '../../../model/replay/replay';
 import { SceneManager } from '../../../scene/scene-manager';
+import { PlaybackService } from '../../../service/playback.service';
 
 @Component({
   selector: 'app-canvas',
@@ -32,8 +33,11 @@ export class CanvasComponent implements OnInit {
 
   sceneManager = new SceneManager();
 
-  constructor(private readonly boxcarsService: BoxcarsService) {
+  constructor(private readonly boxcarsService: BoxcarsService,
+              private readonly playbackService: PlaybackService) {
     this.boxcarsService.onResult.subscribe(replay => this.onReplayLoaded(replay));
+    this.playbackService.onPlay.subscribe(() => this.sceneManager.play());
+    this.playbackService.onPause.subscribe(() => this.sceneManager.pause());
   }
 
   onReplayLoaded(replay: Replay | string) {
@@ -56,6 +60,7 @@ export class CanvasComponent implements OnInit {
     this.sceneManager.init(this.canvas.nativeElement, this.canvasContainer.nativeElement).then(() => {
       this.isLoading = false;
       requestAnimationFrame(t => this.animate(t));
+      this.playbackService.setLimits(this.sceneManager.minTime, this.sceneManager.maxTime);
     }).catch(console.log);
   }
 
