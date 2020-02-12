@@ -22,7 +22,7 @@ export class CanvasComponent implements OnInit {
 
   // Loading stuff
   mathRound = Math.round;
-  initializing = true;
+  isLoading = true;
   progress = {
     percent: 0,
     start: 0,
@@ -38,7 +38,9 @@ export class CanvasComponent implements OnInit {
 
   onReplayLoaded(replay: Replay | string) {
     if (typeof replay !== 'string') {
-      this.sceneManager.prepareReplay(replay).then();
+      this.resetProgress();
+      this.isLoading = true;
+      this.sceneManager.prepareReplay(replay).then(() => this.isLoading = false);
     }
   }
 
@@ -52,7 +54,7 @@ export class CanvasComponent implements OnInit {
     };
 
     this.sceneManager.init(this.canvas.nativeElement, this.canvasContainer.nativeElement).then(() => {
-      this.initializing = false;
+      this.isLoading = false;
       requestAnimationFrame(t => this.animate(t));
     }).catch(console.log);
   }
@@ -62,5 +64,10 @@ export class CanvasComponent implements OnInit {
 
     this.sceneManager.resizeCanvas(this.canvas.nativeElement, this.canvasContainer.nativeElement);
     this.sceneManager.render(time);
+  }
+
+  private resetProgress() {
+    this.progress.start = this.progress.current;
+    this.progress.percent = 0;
   }
 }

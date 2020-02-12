@@ -15,6 +15,9 @@ import { PromiseLoader, RocketConfig, TextureFormat } from 'rl-loadout-lib';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PMREMGenerator } from 'three/examples/jsm/pmrem/PMREMGenerator';
 import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
+import { ActorHandler } from './actor/actor-handler';
+import { loadMap } from './loader/map';
+import { HANDLER_MAPPING } from './actor/mapping';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -38,6 +41,10 @@ export class SceneManager {
   private controls: OrbitControls;
   private cubeRenderTarget: WebGLRenderTarget;
   private envMap: Texture;
+
+  private actorHandlers: { [actorId: number]: ActorHandler } = {};
+
+  private mapModel: Scene;
 
   constructor() {
   }
@@ -111,7 +118,27 @@ export class SceneManager {
   }
 
   async prepareReplay(replay: Replay) {
+    const objects = replay.objects;
+    const names = replay.name;
 
+    for (const frame of replay.network_frames.frames) {
+      for (const newActor of frame.new_actors) {
+        const objectName = objects[newActor.object_id];
+        const handler = HANDLER_MAPPING[objectName];
+
+        if (handler == undefined) {
+          continue;
+        }
+
+        if (!(newActor.actor_id in this.actorHandlers)) {
+          this.actorHandlers[newActor.actor_id] = handler.create(newActor);
+        }
+      }
+    }
+
+    const map = replay.properties['MapName'];
+    this.mapModel = (await loadMap(map, this.modelLoader)).scene;
+    this.scene.add(this.mapModel);
   }
 
   render(time: number) {

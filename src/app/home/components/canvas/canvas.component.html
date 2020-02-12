@@ -2,7 +2,7 @@
   <canvas #canvas></canvas>
 </div>
 
-<div class="full-overlay" [style.display]="initializing ? null : 'none'">
+<div class="full-overlay" [style.display]="isLoading ? null : 'none'">
   <span>Loading {{mathRound(progress.percent * 100) / 100}}%</span>
   <mat-progress-bar mode="determinate" [value]="progress.percent" color="primary"></mat-progress-bar>
 </div>

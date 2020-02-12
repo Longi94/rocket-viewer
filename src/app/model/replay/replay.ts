@@ -1,4 +1,4 @@
-import { Frame } from './frame';
+import { Frame, NetworkFrames } from './frame';
 import { Keyframe } from './keyframe';
 import { TickMark } from './tick-mark';
 import { ClassIndex } from './class-index';
@@ -14,7 +14,7 @@ export interface Replay {
   properties: { [name: string]: any };
   content_size: number;
   content_crc: number;
-  network_frames: Frame[];
+  network_frames: NetworkFrames;
   levels: string[];
   keyframes: Keyframe[];
   debug_info: string[];
