@@ -231,4 +231,8 @@ export class BinaryReader {
 
     return value;
   }
+
+  hasBits() {
+    return this.bitPos < this.buffer.length * 8;
+  }
 }

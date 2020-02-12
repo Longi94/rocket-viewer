@@ -1,4 +1,4 @@
-import { NetCache } from './net-cache';
+import { CacheInfo, NetCache } from './net-cache';
 import { BinaryReader } from '../binary-reader';
 import { ReplayVector } from './replay-vector';
 import { Rotation } from './rotation';
@@ -15,7 +15,7 @@ export class Replication {
   actorId: number;
   actorState: ActorState;
   nameId: number;
-  typeId: number;
+  objectId: number;
   classId: number;
   cache: NetCache;
 
@@ -24,9 +24,9 @@ export class Replication {
 
   properties: { [key: number]: ReplicationProperty } = {};
 
-  static deserialize(maxChannels: number, existingReplications: { [key: number]: Replication }, replications: Replication[],
-                     objectIdToName: string[], caches: { [key: string]: NetCache }, version: ReplayVersion,
-                     br: BinaryReader): Replication {
+  static deserialize(maxChannels: number, existingReplications: { [p: number]: Replication },
+                     br: BinaryReader, objectIndAttrs: { [p: string]: CacheInfo }, version: ReplayVersion,
+                     isLan: boolean, objectIdToName: string[]): Replication {
     const r = new Replication();
 
     r.actorId = br.readUInt32Max(maxChannels);
@@ -35,55 +35,38 @@ export class Replication {
       if (br.readBit()) {
         r.actorState = ActorState.CREATED;
 
-        if (version.engine > 868 || (version.engine == 868 && version.licensee >= 14)) {
+        if (version.ge(868, 14, 0) && !isLan) {
           r.nameId = br.readUInt32();
         }
 
         // unknown
         br.skipBits(1);
 
-        r.typeId = br.readUInt32();
+        r.objectId = br.readUInt32();
 
-        const typeName = objectIdToName[r.typeId];
+        const objectName = objectIdToName[r.objectId];
 
-        const cache = caches[getRawObjectClass(typeName)];
-        r.cache = cache;
-        r.classId = cache.objectIndex;
-
-        if (!RAW_CLASSES_WITH_LOCATION.has(objectIdToName[r.classId])) {
+        if (!RAW_CLASSES_WITH_LOCATION.has(objectName)) {
           return r;
         }
 
         r.position = ReplayVector.deserialize(br, version);
 
-        if (RAW_CLASSES_WITH_ROTATION.has(objectIdToName[r.classId])) {
+        if (RAW_CLASSES_WITH_ROTATION.has(objectName)) {
           r.rotation = Rotation.deserialize(br);
         }
 
+        existingReplications[r.actorId] = r;
+
       } else {
         r.actorState = ActorState.UPDATED;
-        const oldState = existingReplications[r.actorId];
 
-        let lastProp: ReplicationProperty;
+        const objectId = existingReplications[r.actorId].objectId;
+        const cacheInfo = objectIndAttrs[objectId];
 
         while (br.readBit()) {
-          lastProp = ReplicationProperty.deserialize(oldState.cache, objectIdToName, version, br);
-
-          if (!(lastProp.id in r.properties)) {
-            r.properties[lastProp.id] = lastProp;
-          } else {
-            const existingProperty = r.properties[lastProp.id];
-
-            let listProperty: ReplicationListProperty;
-            if (existingProperty instanceof ReplicationListProperty) {
-              listProperty = existingProperty as ReplicationListProperty;
-            } else {
-              listProperty = new ReplicationListProperty(existingProperty);
-              r.properties[listProperty.id] = listProperty;
-            }
-
-            listProperty.add(lastProp);
-          }
+          const property = ReplicationProperty.deserialize(cacheInfo, objectIdToName, version, br);
+          r.properties[property.id] = property;
         }
       }
     } else {
@@ -119,14 +102,17 @@ function getRawObjectClass(type: string) {
 const RAW_CLASSES_WITH_LOCATION = new Set<string>([
   'TAGame.Ball_Breakout_TA',
   'Archetypes.Ball.Ball_Breakout',
+  'Archetypes.Ball.Ball_Trajectory',
   'TAGame.Ball_TA',
   'Archetypes.Ball.Ball_BasketBall_Mutator',
   'Archetypes.Ball.Ball_BasketBall',
   'Archetypes.Ball.Ball_Basketball',
   'Archetypes.Ball.Ball_Default',
   'Archetypes.Ball.Ball_Puck',
+  'Archetypes.Ball.Ball_Anniversary',
   'Archetypes.Ball.CubeBall',
   'Archetypes.Ball.Ball_Haunted',
+  'Archetypes.Ball.Ball_Training',
   'TAGame.Ball_Haunted_TA',
   'TAGame.Car_Season_TA',
   'TAGame.Car_TA',
@@ -158,6 +144,45 @@ const RAW_CLASSES_WITH_LOCATION = new Set<string>([
   'TAGame.SpecialPickup_Swapper_TA',
   'TAGame.SpecialPickup_Tornado_TA',
   'TAGame.Team_Soccar_TA',
+  'Archetypes.CarComponents.CarComponent_Boost',
+  'Archetypes.CarComponents.CarComponent_Dodge',
+  'Archetypes.CarComponents.CarComponent_DoubleJump',
+  'Archetypes.CarComponents.CarComponent_FlipCar',
+  'Archetypes.CarComponents.CarComponent_Jump',
+  'Archetypes.GameEvent.GameEvent_Basketball',
+  'Archetypes.GameEvent.GameEvent_BasketballPrivate',
+  'Archetypes.GameEvent.GameEvent_BasketballSplitscreen',
+  'Archetypes.GameEvent.GameEvent_Breakout',
+  'Archetypes.GameEvent.GameEvent_Hockey',
+  'Archetypes.GameEvent.GameEvent_HockeyPrivate',
+  'Archetypes.GameEvent.GameEvent_HockeySplitscreen',
+  'Archetypes.GameEvent.GameEvent_Items',
+  'Archetypes.GameEvent.GameEvent_Season',
+  'Archetypes.GameEvent.GameEvent_Soccar',
+  'Archetypes.GameEvent.GameEvent_SoccarLan',
+  'Archetypes.GameEvent.GameEvent_SoccarPrivate',
+  'Archetypes.GameEvent.GameEvent_SoccarSplitscreen',
+  'Archetypes.SpecialPickups.SpecialPickup_BallFreeze',
+  'Archetypes.SpecialPickups.SpecialPickup_BallGrapplingHook',
+  'Archetypes.SpecialPickups.SpecialPickup_BallLasso',
+  'Archetypes.SpecialPickups.SpecialPickup_BallSpring',
+  'Archetypes.SpecialPickups.SpecialPickup_BallVelcro',
+  'Archetypes.SpecialPickups.SpecialPickup_Batarang',
+  'Archetypes.SpecialPickups.SpecialPickup_BoostOverride',
+  'Archetypes.SpecialPickups.SpecialPickup_CarSpring',
+  'Archetypes.SpecialPickups.SpecialPickup_GravityWell',
+  'Archetypes.SpecialPickups.SpecialPickup_StrongHit',
+  'Archetypes.SpecialPickups.SpecialPickup_Swapper',
+  'Archetypes.SpecialPickups.SpecialPickup_Tornado',
+  'Archetypes.Teams.Team0',
+  'Archetypes.Teams.Team1',
+  'GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype',
+  'GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype',
+  'Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype',
+  'GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype',
+  'GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype',
+  'GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype',
+  'GameInfo_Tutorial.GameInfo.GameInfo_Tutorial:GameReplicationInfoArchetype',
   'TAGame.Default__CameraSettingsActor_TA',
   'TAGame.Default__PRI_TA',
   'TheWorld:PersistentLevel.BreakOutActor_Platform_TA',
@@ -166,25 +191,28 @@ const RAW_CLASSES_WITH_LOCATION = new Set<string>([
   'TheWorld:PersistentLevel.InMapScoreboard_TA',
   'TheWorld:PersistentLevel.VehiclePickup_Boost_TA',
   'TAGame.HauntedBallTrapTrigger_TA',
-  'ProjectX.NetModeReplicator_X'
+  'ProjectX.Default__NetModeReplicator_X',
+  'GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial',
+  'Archetypes.Tutorial.Cannon'
 ]);
 
 const RAW_CLASSES_WITH_ROTATION = new Set<string>([
   'TAGame.Ball_Breakout_TA',
   'Archetypes.Ball.Ball_Breakout',
+  'Archetypes.Ball.Ball_Trajectory',
   'TAGame.Ball_TA',
   'Archetypes.Ball.Ball_BasketBall_Mutator',
   'Archetypes.Ball.Ball_BasketBall',
   'Archetypes.Ball.Ball_Basketball',
   'Archetypes.Ball.Ball_Default',
   'Archetypes.Ball.Ball_Puck',
+  'Archetypes.Ball.Ball_Anniversary',
   'Archetypes.Ball.CubeBall',
   'Archetypes.Ball.Ball_Haunted',
+  'Archetypes.Ball.Ball_Training',
   'TAGame.Ball_Haunted_TA',
   'TAGame.Car_Season_TA',
   'TAGame.Car_TA',
   'Archetypes.Car.Car_Default',
-  'Archetypes.GameEvent.GameEvent_Season:CarArchetype',
-  'Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam',
-  'Archetypes.SpecialPickups.SpecialPickup_Rugby'
+  'Archetypes.GameEvent.GameEvent_Season:CarArchetype'
 ]);

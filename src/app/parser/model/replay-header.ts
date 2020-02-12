@@ -18,6 +18,14 @@ export class ReplayHeader {
   game: string;
   properties: Properties;
 
+  getProperty(name: string, _default?: any) {
+    if (name in this.properties && this.properties[name] != undefined) {
+      return this.properties[name].value != undefined ? this.properties[name].value : _default;
+    } else {
+      return _default;
+    }
+  }
+
   static deserialize(br: BinaryReader): ReplayHeader {
     const header = new ReplayHeader();
     header.length = br.readInt32();

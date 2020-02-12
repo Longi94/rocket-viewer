@@ -4,10 +4,11 @@ import { TickMark } from './tick-mark';
 import { ClassIndex } from './class-index';
 import { CacheInfo, NetCache } from './net-cache';
 import { Frame } from './frame';
-import { ReplayHeader } from './replay-header';
+import { ReplayHeader, ReplayVersion } from './replay-header';
 import { normalizeObject } from '../util';
 import { RAW_ATTRIBUTE_TYPES } from './attribute/mapping';
 import { RAW_OBJECT_CLASSES, RAW_PARENT_CLASSES } from '../const';
+import { Replication } from './replication';
 
 export class ReplayBody {
 
@@ -182,12 +183,15 @@ export class ReplayBody {
       objectIndAttributes[id] = c;
     }
 
-    let maxChannels = 1023;
-    if ('MaxChannels' in header.properties && header.properties['MaxChannels'] != undefined) {
-      maxChannels = header.properties['MaxChannels'].value;
+    const maxChannels = header.getProperty('MaxChannels', 1023);
+    const frameCount = header.getProperty('NumFrames');
+    const isLan = header.getProperty('MatchType') === 'Lan';
+
+    if (frameCount > body.networkStream.length) {
+      throw new Error('too many frames');
     }
 
-    body.frames = Frame.extractFrames(maxChannels, body.networkStream.buffer, body.objects, body.netCaches, header.version);
+    body.frames = decodeFrames(frameCount, maxChannels, body, objectIndAttributes, header.version, isLan, body.objects);
 
     if (br.bitPos != br.length() * 8) {
       throw Error('Extra data left');
@@ -195,4 +199,25 @@ export class ReplayBody {
 
     return body;
   }
+}
+
+function decodeFrames(frameCount: any, maxChannels: any, body: ReplayBody, objectIndAttrs: { [id: number]: CacheInfo },
+                      version: ReplayVersion, isLan: boolean, objectIdToName: string[]) {
+  const frames: Frame[] = [];
+
+  const replications: { [key: number]: Replication } = {};
+  const streamReader = new BinaryReader(body.networkStream.buffer);
+
+  while (streamReader.hasBits() && frames.length < frameCount) {
+    const f = Frame.deserialize(maxChannels, replications, streamReader, objectIndAttrs, version, isLan,
+      objectIdToName);
+
+    if (frames.length > 0 && f.time != 0 && frames[frames.length - 1].time > f.time) {
+      throw new Error('Frame time is less than the previous frame\'s time.');
+    }
+
+    frames.push(f);
+  }
+
+  return frames;
 }
