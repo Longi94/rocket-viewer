@@ -1,6 +1,9 @@
 <div class="upload-div" (drop)="onFileDrop($event)" (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)"
      (dragover)="onDragOver($event)">
-  <span>Choose replay...</span>
-  <br/>
-  <span *ngIf="dragging">Drop it!</span>
+  <span>Drop a replay file into the page...</span>
+  <span>or</span>
+  <button mat-raised-button color="accent">Choose one from your computer</button>
+  <div class="error-div" *ngIf="errorMessage != undefined">
+    <span>{{errorMessage}}</span>
+  </div>
 </div>

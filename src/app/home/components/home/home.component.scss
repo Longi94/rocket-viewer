@@ -4,4 +4,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-flow: column;
+  font-size: 16px;
+}
+
+.upload-div span {
+  margin-bottom: 8px;
+}
+
+.error-div {
+  margin-top: 16px;
+  color: lightcoral;
 }

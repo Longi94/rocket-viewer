@@ -22,6 +22,9 @@ export class BoxcarsService {
   private wasmReadySubject: Subject<boolean> = new Subject<boolean>();
   wasmReady$: Observable<boolean> = this.wasmReadySubject.asObservable();
 
+  private resultSubject: Subject<object | string> = new Subject<object | string>();
+  onResult = this.resultSubject.asObservable();
+
   constructor() {
     window.wasmInit('/assets/boxcars/boxcars_wasm_bg.wasm').then(() => {
       this.wasmReadySubject.next();
@@ -29,11 +32,11 @@ export class BoxcarsService {
     this.wasmModuleRef = window.wasmModule;
   }
 
-  async parse(file) {
+  parse(file) {
     const fileReader = new FileReader();
     fileReader.onload = (event) => {
       const replay = this.wasmModuleRef.parse_replay(new Uint8Array(event.target.result as ArrayBuffer));
-      console.log(replay);
+      this.resultSubject.next(replay);
     };
     fileReader.readAsArrayBuffer(file);
   }

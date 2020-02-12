@@ -9,9 +9,16 @@ import { BoxcarsService } from '../../../service/boxcars.service';
 export class HomeComponent implements OnInit {
 
   dragging = false;
-  loadingFile = false;
+  errorMessage: string;
 
   constructor(private readonly boxcarsService: BoxcarsService) {
+    this.boxcarsService.onResult.subscribe(result => {
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        console.log(result);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -19,13 +26,11 @@ export class HomeComponent implements OnInit {
 
   onFileDrop($event: DragEvent) {
     $event.preventDefault();
+    this.dragging = false;
 
     const file = $event.dataTransfer.files[0];
-
     this.boxcarsService.parse(file);
 
-    this.loadingFile = true;
-    this.dragging = false;
   }
 
   onDragEnter($event: DragEvent) {
