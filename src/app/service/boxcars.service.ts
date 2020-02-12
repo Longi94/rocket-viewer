@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import { Replay } from '../model/replay/replay';
 
 declare global {
   interface Window {
@@ -8,7 +9,7 @@ declare global {
   }
 
   interface BoxcarsWasm {
-    parse_replay(data: Uint8Array): any;
+    parse_replay(data: Uint8Array): Replay | string;
   }
 }
 
@@ -22,7 +23,7 @@ export class BoxcarsService {
   private wasmReadySubject: Subject<boolean> = new Subject<boolean>();
   wasmReady$: Observable<boolean> = this.wasmReadySubject.asObservable();
 
-  private resultSubject: Subject<object | string> = new Subject<object | string>();
+  private resultSubject: Subject<Replay | string> = new Subject<Replay | string>();
   onResult = this.resultSubject.asObservable();
 
   constructor() {
