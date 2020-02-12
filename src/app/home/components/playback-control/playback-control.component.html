@@ -2,5 +2,11 @@
   <button class="play-button" mat-icon-button (click)="playClick()">
     <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
   </button>
-  <mat-slider [min]="minTime" [max]="maxTime" step="0.01" [(value)]="currentTime"></mat-slider>
+  <ng5-slider
+    class="time-slider"
+    [options]="sliderOptions"
+    [(value)]="sliderValue"
+    (userChangeStart)="slideStart($event)"
+    (userChangeEnd)="slideEnd($event)"
+  ></ng5-slider>
 </div>

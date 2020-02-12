@@ -15,6 +15,12 @@ export class PlaybackService {
   private timeLimitSubject = new Subject<any>();
   onTimeLimit = this.timeLimitSubject.asObservable();
 
+  private timeUpdateSubject = new Subject<number>();
+  onTimeUpdate = this.timeUpdateSubject.asObservable();
+
+  private timeScrollSubject = new Subject<number>();
+  onTimeScroll = this.timeScrollSubject.asObservable();
+
   constructor() {
   }
 
@@ -28,5 +34,13 @@ export class PlaybackService {
 
   setLimits(min: number, max: number) {
     this.timeLimitSubject.next({min, max});
+  }
+
+  updateTime(time: number) {
+    this.timeUpdateSubject.next(time);
+  }
+
+  scrollToTime(time: number) {
+    this.timeScrollSubject.next(time);
   }
 }

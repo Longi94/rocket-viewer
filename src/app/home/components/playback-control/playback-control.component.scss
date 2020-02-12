@@ -5,12 +5,13 @@
   padding: 16px;
   box-sizing: border-box;
   align-items: center;
-}
 
-.playback-control-div mat-slider {
+  .time-slider {
     flex-grow: 1;
-}
+    margin-top: 15px;
+  }
 
-.playback-control-div .play-button {
+  .play-button {
     margin-right: 16px;
+  }
 }

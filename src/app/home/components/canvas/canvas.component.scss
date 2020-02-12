@@ -53,3 +53,11 @@ canvas {
   position: absolute;
   right: 1em;
 }
+
+.debug-overlay {
+  top: 0;
+  left: 0;
+  position: absolute;
+  display: flex;
+  flex-flow: column;
+}

@@ -11,6 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { PlaybackControlComponent } from './home/components/playback-control/playback-control.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
+import { FormsModule } from '@angular/forms';
+import { Ng5SliderModule } from 'ng5-slider';
 
 @NgModule({
   declarations: [
@@ -23,10 +25,12 @@ import { MatSliderModule } from '@angular/material/slider';
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
-    MatSliderModule
+    MatSliderModule,
+    Ng5SliderModule
   ],
   providers: [],
   bootstrap: [AppComponent]
