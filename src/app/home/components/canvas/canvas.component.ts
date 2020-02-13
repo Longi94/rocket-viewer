@@ -52,7 +52,7 @@ export class CanvasComponent implements OnInit {
       this.isLoading = true;
       this.sceneManager.prepareReplay(replay).then(() => {
         this.isLoading = false;
-        this.playbackService.setLimits(this.sceneManager.minTime, this.sceneManager.maxTime);
+        this.playbackService.setLimits(this.sceneManager.maxTime);
       });
     }
   }

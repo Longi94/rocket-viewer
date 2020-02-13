@@ -45,11 +45,13 @@ export class SceneManager {
 
   private mapModel: Scene;
 
+  replay: Replay;
+
   currentAnimationTime: number;
   currentTime: number;
   currentFrame: number;
-  minTime: number;
   maxTime: number;
+  realFrameTimes: number[];
 
   private isPlaying = false;
 
@@ -129,6 +131,8 @@ export class SceneManager {
   }
 
   async prepareReplay(replay: Replay) {
+    this.replay = replay;
+
     const objects = replay.objects;
     const names = replay.name;
 
@@ -147,9 +151,14 @@ export class SceneManager {
       }
     }
 
-    this.minTime = replay.network_frames.frames[0].time;
-    this.maxTime = replay.network_frames.frames[replay.network_frames.frames.length - 1].time;
-    this.currentTime = this.minTime;
+    this.realFrameTimes = [];
+    let total = 0;
+    for (const f of replay.network_frames.frames) {
+      total += f.delta;
+      this.realFrameTimes.push(total);
+    }
+    this.maxTime = total;
+    this.currentTime = 0;
     this.currentFrame = 0;
 
     const map = replay.properties['MapName'];
@@ -167,6 +176,10 @@ export class SceneManager {
     if (this.isPlaying) {
       const d = time - this.currentAnimationTime;
       this.currentTime += d / 1000.0;
+
+      while (this.currentTime > this.realFrameTimes[this.currentFrame]) {
+        this.currentFrame++;
+      }
 
       this.onTimeUpdate(this.currentTime);
     }
