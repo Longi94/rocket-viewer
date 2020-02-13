@@ -206,23 +206,23 @@ export class SceneManager {
     if (handler == undefined) {
       return;
     }
-
+    if (newActor.actor_id in this.actorHandlers) {
+      this.deleteActor(newActor.actor_id);
+    }
     this.actorHandlers[newActor.actor_id] = handler.create(this.rs);
     this.actorHandlers[newActor.actor_id].create(newActor);
   }
 
   private deleteActor(actorId) {
     const handler = this.actorHandlers[actorId];
-    if (handler != undefined) {
-      handler.delete();
-    }
+    handler?.delete();
     delete this.actorHandlers[actorId];
   }
 
   private updateActors() {
     if (this.currentFrame < this.rs.replay.network_frames.frames.length) {
       for (const handler of Object.values(this.actorHandlers)) {
-        handler.update(this.currentTime, this.currentFrame, this.rs.replay.network_frames.frames, this.realFrameTimes);
+        handler?.update(this.currentTime, this.currentFrame, this.rs.replay.network_frames.frames, this.realFrameTimes);
       }
     }
   }
@@ -293,6 +293,9 @@ export class SceneManager {
     const newActors: { [id: number]: NewActor } = {};
     for (let i = 0; i <= this.currentFrame; i++) {
       const frame = this.rs.replay.network_frames.frames[i];
+      for (const deleted of frame.deleted_actors) {
+        delete newActors[deleted];
+      }
       for (const newActor of frame.new_actors) {
         newActors[newActor.actor_id] = newActor;
       }
