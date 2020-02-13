@@ -17,7 +17,6 @@ export class BasketBallHandler extends BallHandler {
 
 export const BasketBallHandlerCreator: HandlerCreator = {
   create: (newActor: NewActor): BasketBallHandler => {
-    const handler = new BasketBallHandler(newActor);
-    return handler;
+    return new BasketBallHandler(newActor);
   }
 };

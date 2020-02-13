@@ -137,7 +137,14 @@ export class SceneManager {
     const objects = replay.objects;
     const names = replay.name;
 
-    for (const frame of replay.network_frames.frames) {
+    this.realFrameTimes = [];
+    let total = 0;
+
+    for (let i = 0; i < replay.network_frames.frames.length; i++) {
+      const frame = replay.network_frames.frames[i];
+      total += frame.delta;
+      this.realFrameTimes.push(total);
+
       for (const newActor of frame.new_actors) {
         const objectName = objects[newActor.object_id];
         const handler = HANDLER_MAPPING[objectName];
@@ -152,12 +159,6 @@ export class SceneManager {
       }
     }
 
-    this.realFrameTimes = [];
-    let total = 0;
-    for (const f of replay.network_frames.frames) {
-      total += f.delta;
-      this.realFrameTimes.push(total);
-    }
     this.maxTime = total;
     this.currentTime = 0;
     this.currentFrame = 0;
