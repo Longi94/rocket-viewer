@@ -42,7 +42,7 @@ export class ThreeSceneHandler extends ActorHandler {
       }
     }
 
-    const prevPos: Location = rigidBody == undefined ? this.initial.location : rigidBody.location;
+    const prevPos: Location = rigidBody?.location ?? this.initial.location;
 
     let nextRigidBody = this.findUpdatedAttribute('RigidBody', frames[currentFrame + 1]);
 
@@ -65,9 +65,6 @@ export class ThreeSceneHandler extends ActorHandler {
       return updated.actor_id === this.actorId && name in updated.attribute;
     });
 
-    if (actor != undefined) {
-      return actor.attribute[name];
-    }
-    return undefined;
+    return actor?.attribute[name];
   }
 }

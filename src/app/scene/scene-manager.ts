@@ -193,9 +193,7 @@ export class SceneManager {
     // Actors that are created in the first frame are immediately added the scene
     for (const newActor of replay.network_frames.frames[0].new_actors) {
       const actorHandler = this.actorHandlers[newActor.actor_id];
-      if (actorHandler != undefined) {
-        actorHandler.create(newActor);
-      }
+      actorHandler?.create(newActor);
     }
   }
 
