@@ -68,7 +68,7 @@ export class SceneManager {
 
     const width = canvasContainerElement.offsetWidth;
     const height = canvasContainerElement.offsetHeight;
-    this.rs.camera = new PerspectiveCamera(70, width / height, 0.01, 10000);
+    this.rs.camera = new PerspectiveCamera(70, width / height, 0.01, 100000);
     this.rs.camera.position.x = 1679.7478335547376;
     this.rs.camera.position.y = 580.2658014964849;
     this.rs.camera.position.z = -917.4632500987678;
@@ -93,7 +93,7 @@ export class SceneManager {
 
     const textureLoader = new PromiseLoader(new TextureLoader(DefaultLoadingManager));
 
-    const backgroundTexture = await textureLoader.load('assets/background_space.jpg');
+    const backgroundTexture = await textureLoader.load('assets/Nebula_02.jpg');
     this.processBackground(backgroundTexture);
   }
 
