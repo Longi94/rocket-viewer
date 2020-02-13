@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, Texture, WebGLRenderer, WebGLRenderTarget } from 'three';
+import { Object3D, PerspectiveCamera, Scene, Texture } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Replay } from '../model/replay/replay';
 
@@ -16,4 +16,6 @@ export class ReplayScene {
   scene: Scene;
   camera: PerspectiveCamera;
   controls: OrbitControls;
+
+  envMap: Texture;
 }

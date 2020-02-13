@@ -24,6 +24,7 @@ import { LOADER_MAPPING } from './loader/mapping';
 import { ActorLoader } from './loader/actor';
 import { ReplayScene } from './replay-scene';
 import { NewActor } from '../model/replay/actor';
+import { applyEnvMap } from '../util/three';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -45,7 +46,6 @@ export class SceneManager {
 
   private renderer: WebGLRenderer;
   private cubeRenderTarget: WebGLRenderTarget;
-  private envMap: Texture;
 
   private actorHandlers: { [actorId: number]: ActorHandler } = {};
 
@@ -114,7 +114,7 @@ export class SceneManager {
     const pmremCubeUVPacker = new PMREMCubeUVPacker(pmremGenerator.cubeLods);
     pmremCubeUVPacker.update(this.renderer);
     this.cubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
-    this.envMap = this.cubeRenderTarget.texture;
+    this.rs.envMap = this.cubeRenderTarget.texture;
 
     backgroundTexture.dispose();
     pmremGenerator.dispose();
@@ -173,7 +173,7 @@ export class SceneManager {
     this.currentFrame = 0;
 
     // Load necessary models
-    const promises = loaders.map(h => h.load(this.modelLoader, this.rs.models));
+    const promises = loaders.map(h => h.load(this.modelLoader, this.rs.models, this.rs.envMap));
     const actorPromises = Promise.all(promises);
 
     const map = replay.properties['MapName'];
@@ -182,11 +182,7 @@ export class SceneManager {
     this.rs.models.map = (await mapPromise).scene;
     await actorPromises;
 
-    traverseMaterials(this.rs.models.map, mat => {
-      if (mat.isMeshStandardMaterial) {
-        mat.envMap = this.envMap;
-      }
-    });
+    applyEnvMap(this.rs.models.map, this.rs.envMap);
 
     this.rs.scene.add(this.rs.models.map);
 
