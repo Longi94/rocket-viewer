@@ -23,6 +23,7 @@ import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 import { LOADER_MAPPING } from './loader/mapping';
 import { ActorLoader } from './loader/actor';
 import { ReplayScene } from './replay-scene';
+import { NewActor } from '../model/replay/actor';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -198,6 +199,34 @@ export class SceneManager {
     }
   }
 
+  private creatNewActor(newActor: NewActor) {
+    const objectName = this.rs.replay.objects[newActor.object_id];
+    const handler = HANDLER_MAPPING[objectName];
+
+    if (handler == undefined) {
+      return;
+    }
+
+    this.actorHandlers[newActor.actor_id] = handler.create(this.rs);
+    this.actorHandlers[newActor.actor_id].create(newActor);
+  }
+
+  private deleteActor(actorId) {
+    const handler = this.actorHandlers[actorId];
+    if (handler != undefined) {
+      handler.delete();
+    }
+    delete this.actorHandlers[actorId];
+  }
+
+  private updateActors() {
+    if (this.currentFrame < this.rs.replay.network_frames.frames.length) {
+      for (const handler of Object.values(this.actorHandlers)) {
+        handler.update(this.currentTime, this.currentFrame, this.rs.replay.network_frames.frames, this.realFrameTimes);
+      }
+    }
+  }
+
   render(time: number) {
     if (this.currentAnimationTime == undefined) {
       this.currentAnimationTime = time;
@@ -219,31 +248,15 @@ export class SceneManager {
         const frame = this.rs.replay.network_frames.frames[this.currentFrame];
 
         for (const deleted of frame.deleted_actors) {
-          const handler = this.actorHandlers[deleted];
-          if (handler != undefined) {
-            handler.delete();
-          }
-          delete this.actorHandlers[deleted];
+          this.deleteActor(deleted);
         }
 
         for (const newActor of frame.new_actors) {
-          const objectName = this.rs.replay.objects[newActor.object_id];
-          const handler = HANDLER_MAPPING[objectName];
-
-          if (handler == undefined) {
-            continue;
-          }
-
-          this.actorHandlers[newActor.actor_id] = handler.create(this.rs);
-          this.actorHandlers[newActor.actor_id].create(newActor);
+          this.creatNewActor(newActor);
         }
       }
 
-      if (this.currentFrame < this.rs.replay.network_frames.frames.length) {
-        for (const handler of Object.values(this.actorHandlers)) {
-          handler.update(this.currentTime, this.currentFrame, this.rs.replay.network_frames.frames, this.realFrameTimes);
-        }
-      }
+      this.updateActors();
 
       this.onTimeUpdate(this.currentTime);
     }
@@ -260,6 +273,36 @@ export class SceneManager {
   }
 
   scrollToTime(time: number) {
+
+    if (time > this.currentTime) {
+      while (time > this.realFrameTimes[this.currentFrame + 1]) {
+        this.currentFrame++;
+      }
+    } else if (time < this.currentTime) {
+      while (time < this.realFrameTimes[this.currentFrame - 1]) {
+        this.currentFrame--;
+      }
+    }
+
+    for (const i of Object.keys(this.actorHandlers)) {
+      this.deleteActor(i);
+    }
+
+    // recreate necessary actors
+    // TODO could optimize this with forward/backward stepping from current frame, but it got real hacky and broke down
+    const newActors: { [id: number]: NewActor } = {};
+    for (let i = 0; i <= this.currentFrame; i++) {
+      const frame = this.rs.replay.network_frames.frames[i];
+      for (const newActor of frame.new_actors) {
+        newActors[newActor.actor_id] = newActor;
+      }
+    }
+
+    for (const newActor of Object.values(newActors)) {
+      this.creatNewActor(newActor);
+    }
+
     this.currentTime = time;
+    this.updateActors();
   }
 }

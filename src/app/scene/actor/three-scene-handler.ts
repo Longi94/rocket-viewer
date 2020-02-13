@@ -58,6 +58,9 @@ export class ThreeSceneHandler extends ActorHandler {
   }
 
   private findUpdatedAttribute(name: string, frame: Frame) {
+    if (frame == undefined) {
+      return undefined;
+    }
     const actor = frame.updated_actors.find(updated => {
       return updated.actor_id === this.actorId && name in updated.attribute;
     });
