@@ -10,8 +10,8 @@ export class BasketBallHandler extends BallHandler {
   async load(modelLoader: PromiseLoader) {
     const gltf = await modelLoader.load('/assets/models/basketball.draco.glb');
     this.scene = gltf.scene;
-    this.scene.position = this.position;
-    this.scene.rotation = this.rotation;
+    this.scene.position.copy(this.position);
+    this.scene.rotation.copy(this.rotation);
   }
 }
 

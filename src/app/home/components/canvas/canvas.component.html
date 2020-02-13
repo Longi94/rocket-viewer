@@ -3,7 +3,7 @@
 </div>
 
 <div class="full-overlay" [style.display]="isLoading ? null : 'none'">
-  <span>Loading {{mathRound(progress.percent * 100) / 100}}%</span>
+  <span>Loading {{progress.current - progress.start}}/{{progress.total - progress.start}}</span>
   <mat-progress-bar mode="determinate" [value]="progress.percent" color="primary"></mat-progress-bar>
 </div>
 

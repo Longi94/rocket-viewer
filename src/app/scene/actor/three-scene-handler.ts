@@ -1,7 +1,6 @@
 import { ActorHandler } from './actor-handler';
 import { Euler, Scene, Vector3 } from 'three';
 import { NewActor } from '../../model/replay/actor';
-import { PromiseLoader } from 'rl-loadout-lib';
 import { locationToVector3, rotationToEuler } from '../../util/replay';
 
 export abstract class ThreeSceneHandler extends ActorHandler {
@@ -16,5 +15,11 @@ export abstract class ThreeSceneHandler extends ActorHandler {
     this.rotation = rotationToEuler(newActor.initial_trajectory.rotation);
   }
 
-  abstract async load(modelLoader: PromiseLoader);
+  addToScene(scene: Scene) {
+    scene.add(this.scene);
+  }
+
+  removeFromScene(scene: Scene) {
+    scene.remove(this.scene);
+  }
 }

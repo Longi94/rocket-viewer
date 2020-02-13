@@ -28,11 +28,11 @@ export function locationToVector3(l: Location): Vector3 {
   if (l.dx != undefined) {
     v.x = l.dx - bias;
   }
-  if (l.dy != undefined) {
-    v.y = l.dy - bias;
-  }
   if (l.dz != undefined) {
-    v.z = l.dz - bias;
+    v.y = l.dz - bias;
+  }
+  if (l.dy != undefined) {
+    v.z = l.dy - bias;
   }
   return v;
 }

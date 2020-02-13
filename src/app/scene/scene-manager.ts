@@ -172,6 +172,18 @@ export class SceneManager {
     });
 
     this.scene.add(this.mapModel);
+
+    // Load necessary models
+    const promises = Object.values(this.actorHandlers).map(h => h.load(this.modelLoader));
+    await Promise.all(promises);
+
+    // Actors that are created in the first frame are immediately added the scene
+    for (const newActor of replay.network_frames.frames[0].new_actors) {
+      const actorHandler = this.actorHandlers[newActor.actor_id];
+      if (actorHandler != undefined) {
+        actorHandler.addToScene(this.scene);
+      }
+    }
   }
 
   render(time: number) {
