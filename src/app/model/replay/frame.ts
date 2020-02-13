@@ -8,6 +8,6 @@ export interface Frame {
   time: number;
   delta: number;
   new_actors: NewActor[];
-  deleted_actors: UpdatedActor[];
-  updated_actors: number[];
+  updated_actors: UpdatedActor[];
+  deleted_actors: number[];
 }
