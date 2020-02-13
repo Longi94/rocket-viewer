@@ -1,14 +1,18 @@
 import { NewActor } from '../../model/replay/actor';
 import { ReplayScene } from '../replay-scene';
+import { Frame } from '../../model/replay/frame';
 
 export abstract class ActorHandler {
+  protected actorId: number;
 
   protected constructor(protected replayScene: ReplayScene) {
   }
 
-  abstract create(newActor: NewActor);
+  create(newActor: NewActor) {
+    this.actorId = newActor.actor_id;
+  }
 
-  abstract update();
+  abstract update(time: number, currentFrame: number, frames: Frame[], realFrameTimes: number[]);
 
   abstract delete()
 }

@@ -1,5 +1,6 @@
 import { Object3D, PerspectiveCamera, Scene, Texture, WebGLRenderer, WebGLRenderTarget } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Replay } from '../model/replay/replay';
 
 export class ModelStore {
   map: Object3D;
@@ -9,6 +10,8 @@ export class ModelStore {
 
 export class ReplayScene {
   models: ModelStore = new ModelStore();
+
+  replay: Replay;
 
   scene: Scene;
   camera: PerspectiveCamera;

@@ -40,15 +40,13 @@ export class SceneManager {
 
   private readonly modelLoader = new PromiseLoader(gltfLoader);
 
-  private rs: ReplayScene = new ReplayScene();
+  rs: ReplayScene = new ReplayScene();
 
   private renderer: WebGLRenderer;
   private cubeRenderTarget: WebGLRenderTarget;
   private envMap: Texture;
 
   private actorHandlers: { [actorId: number]: ActorHandler } = {};
-
-  replay: Replay;
 
   currentAnimationTime: number;
   currentTime: number;
@@ -134,7 +132,7 @@ export class SceneManager {
   }
 
   async prepareReplay(replay: Replay) {
-    this.replay = replay;
+    this.rs.replay = replay;
 
     const objects = replay.objects;
     const names = replay.name;
@@ -211,8 +209,40 @@ export class SceneManager {
       const d = time - this.currentAnimationTime;
       this.currentTime += d / 1000.0;
 
-      while (this.currentTime > this.realFrameTimes[this.currentFrame]) {
+      const previousFrame = this.currentFrame;
+
+      while (this.currentTime > this.realFrameTimes[this.currentFrame + 1]) {
         this.currentFrame++;
+      }
+
+      if (previousFrame !== this.currentFrame) {
+        const frame = this.rs.replay.network_frames.frames[this.currentFrame];
+
+        for (const deleted of frame.deleted_actors) {
+          const handler = this.actorHandlers[deleted];
+          if (handler != undefined) {
+            handler.delete();
+          }
+          delete this.actorHandlers[deleted];
+        }
+
+        for (const newActor of frame.new_actors) {
+          const objectName = this.rs.replay.objects[newActor.object_id];
+          const handler = HANDLER_MAPPING[objectName];
+
+          if (handler == undefined) {
+            continue;
+          }
+
+          this.actorHandlers[newActor.actor_id] = handler.create(this.rs);
+          this.actorHandlers[newActor.actor_id].create(newActor);
+        }
+      }
+
+      if (this.currentFrame < this.rs.replay.network_frames.frames.length) {
+        for (const handler of Object.values(this.actorHandlers)) {
+          handler.update(this.currentTime, this.currentFrame, this.rs.replay.network_frames.frames, this.realFrameTimes);
+        }
       }
 
       this.onTimeUpdate(this.currentTime);
