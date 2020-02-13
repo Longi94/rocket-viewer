@@ -17,6 +17,7 @@ import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
 import { ActorHandler } from './actor/actor-handler';
 import { loadMap } from './loader/map';
 import { HANDLER_MAPPING } from './actor/mapping';
+import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -67,9 +68,9 @@ export class SceneManager {
     const width = canvasContainerElement.offsetWidth;
     const height = canvasContainerElement.offsetHeight;
     this.camera = new PerspectiveCamera(70, width / height, 0.01, 10000);
-    this.camera.position.x = 167.97478335547376;
-    this.camera.position.y = 58.02658014964849;
-    this.camera.position.z = -91.74632500987678;
+    this.camera.position.x = 1679.7478335547376;
+    this.camera.position.y = 580.2658014964849;
+    this.camera.position.z = -917.4632500987678;
 
     this.scene = new Scene();
     this.scene.background = new Color('#AAAAAA');
@@ -163,6 +164,13 @@ export class SceneManager {
 
     const map = replay.properties['MapName'];
     this.mapModel = (await loadMap(map, this.modelLoader)).scene;
+
+    traverseMaterials(this.mapModel, mat => {
+      if (mat.isMeshStandardMaterial) {
+        mat.envMap = this.envMap;
+      }
+    });
+
     this.scene.add(this.mapModel);
   }
 
