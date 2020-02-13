@@ -1,21 +1,18 @@
 import { NewActor } from '../../model/replay/actor';
-import { PromiseLoader } from 'rl-loadout-lib';
-import { Scene } from 'three';
+import { ReplayScene } from '../replay-scene';
 
 export abstract class ActorHandler {
-  actorId: number;
 
-  protected constructor(newActor: NewActor) {
-    this.actorId = newActor.actor_id;
+  protected constructor(protected replayScene: ReplayScene) {
   }
 
-  abstract async load(modelLoader: PromiseLoader);
+  abstract create(newActor: NewActor);
 
-  abstract addToScene(scene: Scene);
+  abstract update();
 
-  abstract removeFromScene(scene: Scene);
+  abstract delete()
 }
 
 export interface HandlerCreator {
-  create: (newActor: NewActor) => ActorHandler;
+  create: (replayScene: ReplayScene) => ActorHandler;
 }
