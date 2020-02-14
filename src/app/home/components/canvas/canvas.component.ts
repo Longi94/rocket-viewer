@@ -5,6 +5,7 @@ import { Replay } from '../../../model/replay/replay';
 import { SceneManager } from '../../../scene/scene-manager';
 import { PlaybackService } from '../../../service/playback.service';
 import { environment } from '../../../../environments/environment';
+import * as Stats from 'stats.js';
 
 @Component({
   selector: 'app-canvas',
@@ -14,16 +15,15 @@ import { environment } from '../../../../environments/environment';
 export class CanvasComponent implements OnInit {
 
   @ViewChild('canvas', {static: true})
-  canvas: ElementRef;
+  canvas: ElementRef<HTMLCanvasElement>;
 
   @ViewChild('canvasContainer', {static: true})
-  canvasContainer: ElementRef;
+  canvasContainer: ElementRef<HTMLDivElement>;
 
-  @ViewChild('dgContainer', {static: true})
-  dgContainer: ElementRef;
+  @ViewChild('statsDiv', {static: true})
+  statsDiv: ElementRef<HTMLDivElement>;
 
   // Loading stuff
-  mathRound = Math.round;
   isLoading = true;
   progress = {
     percent: 0,
@@ -33,6 +33,8 @@ export class CanvasComponent implements OnInit {
   };
 
   sceneManager = new SceneManager();
+
+  stats: Stats;
 
   isDebug = !environment.production;
 
@@ -66,6 +68,13 @@ export class CanvasComponent implements OnInit {
         (this.progress.total - this.progress.start);
     };
 
+    if (this.isDebug) {
+      this.stats = new Stats();
+      this.stats.dom.style.removeProperty('left');
+      this.stats.dom.style.right = 0;
+      this.statsDiv.nativeElement.appendChild(this.stats.dom);
+    }
+
     this.sceneManager.init(this.canvas.nativeElement, this.canvasContainer.nativeElement).then(() => {
       this.isLoading = false;
       requestAnimationFrame(t => this.animate(t));
@@ -75,8 +84,10 @@ export class CanvasComponent implements OnInit {
   private animate(time: number) {
     requestAnimationFrame(t => this.animate(t));
 
+    this.stats?.begin();
     this.sceneManager.resizeCanvas(this.canvas.nativeElement, this.canvasContainer.nativeElement);
     this.sceneManager.render(time);
+    this.stats?.end();
   }
 
   private resetProgress() {
