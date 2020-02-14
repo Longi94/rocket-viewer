@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Replay } from '../model/replay/replay';
-import { parse_replay } from '../boxcars/boxcars_wasm';
+import { parse_and_clean_replay } from '../boxcars/boxcars_wasm';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class BoxcarsService {
   parse(file) {
     const fileReader = new FileReader();
     fileReader.onload = (event) => {
-      const replay = parse_replay(new Uint8Array(event.target.result as ArrayBuffer));
+      const replay = parse_and_clean_replay(new Uint8Array(event.target.result as ArrayBuffer));
       this.resultSubject.next(replay);
       console.log(replay);
     };

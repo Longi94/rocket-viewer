@@ -2,7 +2,7 @@ use boxcars::Replay;
 use crate::models::{ReplayVersion, FrameData};
 use crate::actor::BallType::*;
 
-pub trait ActorHandler: Sized {
+pub trait ActorHandler {
     fn update(&self, replay: &Replay, version: &ReplayVersion, frame_data: &FrameData);
 }
 
