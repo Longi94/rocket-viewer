@@ -1,12 +1,12 @@
-import { ActorLoader } from './actor';
 import { PromiseLoader } from 'rl-loadout-lib';
-import { ModelStore } from '../replay-scene';
+import { ReplayScene } from '../replay-scene';
 import { applyEnvMap } from '../../util/three';
-import { Texture } from 'three';
 
-export const BasketBallLoader: ActorLoader = {
-  async load(modelLoader: PromiseLoader, modelStore: ModelStore, envMap: Texture) {
-    modelStore.ball = (await modelLoader.load('/assets/models/basketball.draco.glb')).scene;
-    applyEnvMap(modelStore.ball, envMap);
-  }
+const BALL_MAPPING = {
+  'Basketball': '/assets/models/basketball.draco.glb'
 };
+
+export async function loadBall(type: string, modelLoader: PromiseLoader, rs: ReplayScene) {
+  rs.models.ball = (await modelLoader.load(BALL_MAPPING[type])).scene;
+  applyEnvMap(rs.models.ball, rs.envMap);
+}

@@ -16,15 +16,9 @@ import { PromiseLoader, RocketConfig, TextureFormat } from 'rl-loadout-lib';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PMREMGenerator } from 'three/examples/jsm/pmrem/PMREMGenerator';
 import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
-import { ActorHandler } from './actor/actor-handler';
 import { loadMap } from './loader/map';
-import { HANDLER_MAPPING } from './actor/mapping';
-import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
-import { LOADER_MAPPING } from './loader/mapping';
-import { ActorLoader } from './loader/actor';
 import { ReplayScene } from './replay-scene';
-import { NewActor } from '../model/replay/actor';
-import { applyEnvMap } from '../util/three';
+import { loadBall } from './loader/ball';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -46,8 +40,6 @@ export class SceneManager {
 
   private renderer: WebGLRenderer;
   private cubeRenderTarget: WebGLRenderTarget;
-
-  private actorHandlers: { [actorId: number]: ActorHandler } = {};
 
   currentAnimationTime: number;
   currentTime: number;
@@ -135,37 +127,13 @@ export class SceneManager {
   async prepareReplay(replay: Replay) {
     this.rs.replay = replay;
 
-    const objects = replay.objects;
-    const names = replay.name;
-
     this.realFrameTimes = [];
     let total = 0;
 
-    for (let i = 0; i < replay.network_frames.frames.length; i++) {
-      const frame = replay.network_frames.frames[i];
-      total += frame.delta;
+    for (let i = 0; i < replay.frame_data.deltas.length; i++) {
+      const delta = replay.frame_data.deltas[i];
+      total += delta;
       this.realFrameTimes.push(total);
-    }
-
-    const frame = replay.network_frames.frames[0];
-    const loaders: ActorLoader[] = [];
-
-    for (const newActor of frame.new_actors) {
-      const objectName = objects[newActor.object_id];
-      const handler = HANDLER_MAPPING[objectName];
-      const loader = LOADER_MAPPING[objectName];
-
-      if (loader != undefined) {
-        loaders.push(loader);
-      }
-
-      if (handler == undefined) {
-        continue;
-      }
-
-      if (!(newActor.actor_id in this.actorHandlers)) {
-        this.actorHandlers[newActor.actor_id] = handler.create(this.rs);
-      }
     }
 
     this.maxTime = total;
@@ -173,52 +141,20 @@ export class SceneManager {
     this.currentFrame = 0;
 
     // Load necessary models
-    const promises = loaders.map(h => h.load(this.modelLoader, this.rs.models, this.rs.envMap));
-    const actorPromises = Promise.all(promises);
 
     const map = replay.properties['MapName'];
-    const mapPromise = loadMap(map, this.modelLoader);
+    const mapPromise = loadMap(map, this.modelLoader, this.rs);
+    const ballPromise = loadBall(replay.frame_data.ball_data.ball_type, this.modelLoader, this.rs);
 
-    this.rs.models.map = (await mapPromise).scene;
-    await actorPromises;
-
-    applyEnvMap(this.rs.models.map, this.rs.envMap);
+    await mapPromise;
+    await ballPromise;
 
     this.rs.scene.add(this.rs.models.map);
+    this.rs.scene.add(this.rs.models.ball);
 
-    // Actors that are created in the first frame are immediately added the scene
-    for (const newActor of replay.network_frames.frames[0].new_actors) {
-      const actorHandler = this.actorHandlers[newActor.actor_id];
-      actorHandler?.create(newActor);
-    }
-  }
-
-  private creatNewActor(newActor: NewActor) {
-    const objectName = this.rs.replay.objects[newActor.object_id];
-    const handler = HANDLER_MAPPING[objectName];
-
-    if (handler == undefined) {
-      return;
-    }
-    if (newActor.actor_id in this.actorHandlers) {
-      this.deleteActor(newActor.actor_id);
-    }
-    this.actorHandlers[newActor.actor_id] = handler.create(this.rs);
-    this.actorHandlers[newActor.actor_id].create(newActor);
-  }
-
-  private deleteActor(actorId) {
-    const handler = this.actorHandlers[actorId];
-    handler?.delete();
-    delete this.actorHandlers[actorId];
-  }
-
-  private updateActors() {
-    if (this.currentFrame < this.rs.replay.network_frames.frames.length) {
-      for (const handler of Object.values(this.actorHandlers)) {
-        handler?.update(this.currentTime, this.currentFrame, this.rs.replay.network_frames.frames, this.realFrameTimes);
-      }
-    }
+    this.rs.models.ball.position.x = replay.frame_data.ball_data.positions[0].x;
+    this.rs.models.ball.position.y = replay.frame_data.ball_data.positions[0].z;
+    this.rs.models.ball.position.z = replay.frame_data.ball_data.positions[0].y;
   }
 
   render(time: number) {
@@ -237,20 +173,6 @@ export class SceneManager {
       while (this.currentTime > this.realFrameTimes[this.currentFrame + 1]) {
         this.currentFrame++;
       }
-
-      if (previousFrame !== this.currentFrame) {
-        const frame = this.rs.replay.network_frames.frames[this.currentFrame];
-
-        for (const deleted of frame.deleted_actors) {
-          this.deleteActor(deleted);
-        }
-
-        for (const newActor of frame.new_actors) {
-          this.creatNewActor(newActor);
-        }
-      }
-
-      this.updateActors();
 
       this.onTimeUpdate(this.currentTime);
     }
@@ -278,28 +200,6 @@ export class SceneManager {
       }
     }
 
-    for (const i of Object.keys(this.actorHandlers)) {
-      this.deleteActor(i);
-    }
-
-    // recreate necessary actors
-    // TODO could optimize this with forward/backward stepping from current frame, but it got real hacky and broke down
-    const newActors: { [id: number]: NewActor } = {};
-    for (let i = 0; i <= this.currentFrame; i++) {
-      const frame = this.rs.replay.network_frames.frames[i];
-      for (const deleted of frame.deleted_actors) {
-        delete newActors[deleted];
-      }
-      for (const newActor of frame.new_actors) {
-        newActors[newActor.actor_id] = newActor;
-      }
-    }
-
-    for (const newActor of Object.values(newActors)) {
-      this.creatNewActor(newActor);
-    }
-
     this.currentTime = time;
-    this.updateActors();
   }
 }
