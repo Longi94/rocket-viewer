@@ -1,9 +1,10 @@
 use boxcars::{Replay, UpdatedAttribute, Attribute};
 use crate::models::{ReplayVersion, FrameData, BallType};
+use wasm_bindgen::__rt::std::collections::HashMap;
 
 pub trait ActorHandler {
     fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize,
-              frame_data: &mut FrameData, attribute: &UpdatedAttribute);
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>);
 }
 
 pub struct BallHandler {
@@ -12,34 +13,36 @@ pub struct BallHandler {
 
 impl ActorHandler for BallHandler {
     fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize,
-              frame_data: &mut FrameData, attribute: &UpdatedAttribute) {
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>) {
         if frame_data.ball_data.ball_type == BallType::Unknown {
             frame_data.ball_data.ball_type = self.ball_type;
         }
 
-        let object_name = match replay.objects.get(attribute.object_id.0 as usize) {
-            None => return,
-            Some(object_name) => object_name
-        };
-
-        match object_name.as_str() {
-            "TAGame.RBActor_TA:ReplicatedRBState" => {
-                match &attribute.attribute {
-                    Attribute::RigidBody(rigid_body) => {
-                        frame_data.ball_data.positions[frame * 3] = rigid_body.location.x;
-                        // Y is up in three.js
-                        frame_data.ball_data.positions[frame * 3 + 1] = rigid_body.location.z;
-                        frame_data.ball_data.positions[frame * 3 + 2] = rigid_body.location.y;
-                        frame_data.ball_data.rotations[frame * 4] = rigid_body.rotation.x;
-                        frame_data.ball_data.rotations[frame * 4 + 1] = rigid_body.rotation.y;
-                        frame_data.ball_data.rotations[frame * 4 + 2] = rigid_body.rotation.z;
-                        frame_data.ball_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
-                    }
-                    _ => return
+        match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
+            Some(rigid_body) => match rigid_body {
+                Attribute::RigidBody(rigid_body) => {
+                    frame_data.ball_data.positions[frame * 3] = rigid_body.location.x;
+                    // Y is up in three.js
+                    frame_data.ball_data.positions[frame * 3 + 1] = rigid_body.location.z;
+                    frame_data.ball_data.positions[frame * 3 + 2] = rigid_body.location.y;
+                    frame_data.ball_data.rotations[frame * 4] = rigid_body.rotation.x;
+                    frame_data.ball_data.rotations[frame * 4 + 1] = rigid_body.rotation.y;
+                    frame_data.ball_data.rotations[frame * 4 + 2] = rigid_body.rotation.z;
+                    frame_data.ball_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
                 }
+                _ => return
             }
             _ => return
         }
+    }
+}
+
+pub struct CarHandler {
+}
+
+impl ActorHandler for CarHandler {
+    fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize,
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>) {
     }
 }
 

@@ -1,6 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 use boxcars::{HeaderProp, KeyFrame, TickMark};
+use wasm_bindgen::__rt::std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
 pub struct CleanedReplay {
@@ -21,6 +22,7 @@ pub struct FrameData {
     pub ball_data: BallData,
     pub times: Vec<f32>,
     pub deltas: Vec<f32>,
+    pub players: HashMap<i32, PlayerData>,
 }
 
 impl FrameData {
@@ -29,6 +31,7 @@ impl FrameData {
             ball_data: BallData::with_capacity(c),
             times: Vec::with_capacity(c),
             deltas: Vec::with_capacity(c),
+            players: HashMap::new(),
         }
     }
 
@@ -72,6 +75,45 @@ impl BallData {
             }
             self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
         } else {
+            for _i in 0..3 {
+                self.positions.push(0.0);
+                self.rotations.push(0.0);
+            }
+            self.rotations.push(0.0);
+        }
+    }
+}
+
+#[derive(Serialize, Debug)]
+pub struct PlayerData {
+    pub name: String,
+    pub team: i8,
+    pub positions: Vec<f32>,
+    pub rotations: Vec<f32>,
+    pub visible: Vec<bool>,
+}
+
+impl PlayerData {
+    pub fn with_capacity(c: usize) -> Self {
+        PlayerData {
+            name: String::new(),
+            team: 0,
+            positions: Vec::with_capacity(c * 3),
+            rotations: Vec::with_capacity(c * 4),
+            visible: Vec::with_capacity(c),
+        }
+    }
+
+    pub fn create_frame(&mut self, frame: usize) {
+        if frame > 0 {
+            self.visible.push(self.visible[frame - 1]);
+            for i in 0..3 {
+                self.positions.push(self.positions[(frame - 1) * 3 + i]);
+                self.rotations.push(self.rotations[(frame - 1) * 4 + i]);
+            }
+            self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
+        } else {
+            self.visible.push(false);
             for _i in 0..3 {
                 self.positions.push(0.0);
                 self.rotations.push(0.0);
