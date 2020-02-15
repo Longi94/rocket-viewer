@@ -10,33 +10,18 @@ import {
   WebGLRenderTarget,
   WebGLRenderTargetCube
 } from 'three';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { PromiseLoader, RocketConfig, TextureFormat } from 'rl-loadout-lib';
+import { PromiseLoader } from 'rl-loadout-lib';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PMREMGenerator } from 'three/examples/jsm/pmrem/PMREMGenerator';
 import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
 import { loadMap } from './loader/map';
 import { ReplayScene } from './replay-scene';
 import { loadBall } from './loader/ball';
-import { setFromQuaternion, setFromReplayPosition } from '../util/three';
+import { setFromQuaternion } from '../util/three';
 import { AnimationManager } from './anim/animation-manager';
-
-const dracoLoader = new DRACOLoader(DefaultLoadingManager);
-dracoLoader.setDecoderPath('/assets/draco/');
-const gltfLoader = new GLTFLoader(DefaultLoadingManager);
-gltfLoader.setDRACOLoader(dracoLoader);
-
-const ROCKET_CONFIG = new RocketConfig({
-  loadingManager: DefaultLoadingManager,
-  textureFormat: TextureFormat.PNG,
-  useCompressedModels: true,
-  gltfLoader
-});
+import { loadCar } from './loader/car';
 
 export class SceneManager {
-
-  private readonly modelLoader = new PromiseLoader(gltfLoader);
 
   rs: ReplayScene = new ReplayScene();
 
@@ -147,11 +132,13 @@ export class SceneManager {
     // Load necessary models
 
     const map = replay.properties['MapName'];
-    const mapPromise = loadMap(map, this.modelLoader, this.rs);
-    const ballPromise = loadBall(replay.frame_data.ball_data.ball_type, this.modelLoader, this.rs);
+    const mapPromise = loadMap(map, this.rs);
+    const ballPromise = loadBall(replay.frame_data.ball_data.ball_type, this.rs);
+    const playerPromises = Object.values(replay.frame_data.players).map(player => loadCar(player, this.rs));
 
     await mapPromise;
     await ballPromise;
+    await Promise.all(playerPromises);
 
     this.rs.scene.add(this.rs.models.map);
     this.rs.scene.add(this.rs.models.ball);
@@ -160,6 +147,10 @@ export class SceneManager {
     this.rs.models.ball.position.y = replay.frame_data.ball_data.positions[1];
     this.rs.models.ball.position.z = replay.frame_data.ball_data.positions[2];
     setFromQuaternion(this.rs.models.ball.rotation, replay.frame_data.ball_data.rotations);
+
+    for (const body of Object.values(this.rs.models.players)) {
+      body.addToScene(this.rs.scene);
+    }
 
     this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs);
   }

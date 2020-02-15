@@ -1,20 +1,25 @@
 import { FrameData } from '../../model/replay/frame-data';
 import { ReplayScene } from '../replay-scene';
-import { AnimationClip, AnimationMixer, QuaternionKeyframeTrack, VectorKeyframeTrack } from 'three';
+import { AnimationMixer } from 'three';
+import { createBallAnimationMixer } from './ball';
+import { createCarAnimationMixer } from './car';
 
 export class AnimationManager {
   ballMixer: AnimationMixer;
+  playerMixers: AnimationMixer[] = [];
 
   constructor(realFrameTimes: number[], frameData: FrameData, replayScene: ReplayScene) {
-    this.ballMixer = new AnimationMixer(replayScene.models.ball);
+    this.ballMixer = createBallAnimationMixer(realFrameTimes, frameData, replayScene);
 
-    const ballPositionTrack = new VectorKeyframeTrack('.position', realFrameTimes, frameData.ball_data.positions);
-    const ballRotationTrack = new QuaternionKeyframeTrack('.quaternion', realFrameTimes, frameData.ball_data.rotations);
-    const ballAnimationClip = new AnimationClip('ball_clip', realFrameTimes[realFrameTimes.length - 1], [ballPositionTrack, ballRotationTrack]);
-    this.ballMixer.clipAction(ballAnimationClip).play();
+    for (const playerData of Object.values(frameData.players)) {
+      this.playerMixers.push(createCarAnimationMixer(realFrameTimes, playerData, replayScene));
+    }
   }
 
   update(time: number) {
     this.ballMixer.setTime(time);
+    for (const mixer of this.playerMixers) {
+      mixer.setTime(time);
+    }
   }
 }

@@ -97,6 +97,7 @@ impl BallData {
 
 #[derive(Serialize, Debug)]
 pub struct PlayerData {
+    pub id: i32,
     pub name: Option<String>,
     pub team: Option<u32>,
     pub positions: Vec<f32>,
@@ -107,6 +108,7 @@ pub struct PlayerData {
 impl PlayerData {
     pub fn with_capacity(c: usize) -> Self {
         PlayerData {
+            id: -1,
             name: None,
             team: None,
             positions: Vec::with_capacity(c * 3),
