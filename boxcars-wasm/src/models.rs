@@ -68,9 +68,9 @@ impl BallData {
         if frame > 0 {
             for i in 0..3 {
                 self.positions.push(self.positions[(frame - 1) * 3 + i]);
-                self.rotations.push(self.rotations[(frame - 1) * 3 + i]);
+                self.rotations.push(self.rotations[(frame - 1) * 4 + i]);
             }
-            self.rotations.push(self.rotations[(frame - 1) * 3 + 3]);
+            self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
         } else {
             for _i in 0..3 {
                 self.positions.push(0.0);
