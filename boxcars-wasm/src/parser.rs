@@ -29,7 +29,7 @@ impl<'a> FrameParser<'a> {
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
 
         for (i, frame) in frames.frames.iter().enumerate() {
-            frame_data.create_frame();
+            frame_data.create_frame(i);
 
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);
@@ -53,7 +53,7 @@ impl<'a> FrameParser<'a> {
                 match actors_handlers.get(&updated_actor.actor_id.0) {
                     None => continue,
                     Some(handler) => {
-                        handler.update(&self.replay, &replay_version, i as i32, &mut frame_data);
+                        handler.update(&self.replay, &replay_version, i, &mut frame_data, &updated_actor);
                     }
                 }
             }
