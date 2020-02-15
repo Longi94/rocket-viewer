@@ -19,6 +19,7 @@ import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
 import { loadMap } from './loader/map';
 import { ReplayScene } from './replay-scene';
 import { loadBall } from './loader/ball';
+import { setFromQuaternion, setFromReplayPosition } from '../util/three';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -152,9 +153,8 @@ export class SceneManager {
     this.rs.scene.add(this.rs.models.map);
     this.rs.scene.add(this.rs.models.ball);
 
-    this.rs.models.ball.position.x = replay.frame_data.ball_data.positions[0].x;
-    this.rs.models.ball.position.y = replay.frame_data.ball_data.positions[0].z;
-    this.rs.models.ball.position.z = replay.frame_data.ball_data.positions[0].y;
+    setFromReplayPosition(this.rs.models.ball.position,  replay.frame_data.ball_data.positions[0]);
+    setFromQuaternion(this.rs.models.ball.rotation,  replay.frame_data.ball_data.rotations[0]);
   }
 
   render(time: number) {

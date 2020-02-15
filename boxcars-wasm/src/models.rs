@@ -52,7 +52,7 @@ pub enum BallType {
 pub struct BallData {
     pub ball_type: BallType,
     pub positions: Vec<Vector3f>,
-    pub rotation: Vec<Quaternion>,
+    pub rotations: Vec<Quaternion>,
 }
 
 impl BallData {
@@ -60,17 +60,17 @@ impl BallData {
         BallData {
             ball_type: BallType::Unknown,
             positions: Vec::with_capacity(c),
-            rotation: Vec::with_capacity(c),
+            rotations: Vec::with_capacity(c),
         }
     }
 
     pub fn create_frame(&mut self, frame: usize) {
         if frame > 0 {
             self.positions.push(self.positions[frame - 1].clone());
-            self.rotation.push(self.rotation[frame - 1].clone());
+            self.rotations.push(self.rotations[frame - 1].clone());
         } else {
             self.positions.push(Vector3f { x: 0.0, y: 0.0, z: 0.0 });
-            self.rotation.push(Quaternion { x: 0.0, y: 0.0, z: 0.0, w: 0.0 });
+            self.rotations.push(Quaternion { x: 0.0, y: 0.0, z: 0.0, w: 0.0 });
         }
     }
 }
