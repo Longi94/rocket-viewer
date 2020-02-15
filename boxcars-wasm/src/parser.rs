@@ -30,6 +30,8 @@ impl<'a> FrameParser<'a> {
 
         for (i, frame) in frames.frames.iter().enumerate() {
             frame_data.create_frame(i);
+            frame_data.times.push(frame.time);
+            frame_data.deltas.push(frame.delta);
 
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);

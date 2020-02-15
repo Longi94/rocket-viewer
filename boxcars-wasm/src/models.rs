@@ -18,13 +18,17 @@ pub struct CleanedReplay {
 
 #[derive(Serialize, Debug)]
 pub struct FrameData {
-    pub ball_data: BallData
+    pub ball_data: BallData,
+    pub times: Vec<f32>,
+    pub deltas: Vec<f32>,
 }
 
 impl FrameData {
     pub fn with_capacity(c: usize) -> Self {
         FrameData {
-            ball_data: BallData::with_capacity(c)
+            ball_data: BallData::with_capacity(c),
+            times: Vec::with_capacity(c),
+            deltas: Vec::with_capacity(c),
         }
     }
 
@@ -61,7 +65,7 @@ impl BallData {
     }
 
     pub fn create_frame(&mut self, frame: usize) {
-        if frame >   0 {
+        if frame > 0 {
             self.positions.push(self.positions[frame - 1].clone());
             self.rotation.push(self.rotation[frame - 1].clone());
         } else {
