@@ -20,6 +20,7 @@ import { loadMap } from './loader/map';
 import { ReplayScene } from './replay-scene';
 import { loadBall } from './loader/ball';
 import { setFromQuaternion, setFromReplayPosition } from '../util/three';
+import { AnimationManager } from './anim/animation-manager';
 
 const dracoLoader = new DRACOLoader(DefaultLoadingManager);
 dracoLoader.setDecoderPath('/assets/draco/');
@@ -41,6 +42,8 @@ export class SceneManager {
 
   private renderer: WebGLRenderer;
   private cubeRenderTarget: WebGLRenderTarget;
+
+  animationManager: AnimationManager;
 
   currentAnimationTime: number;
   currentTime: number;
@@ -153,8 +156,12 @@ export class SceneManager {
     this.rs.scene.add(this.rs.models.map);
     this.rs.scene.add(this.rs.models.ball);
 
-    setFromReplayPosition(this.rs.models.ball.position,  replay.frame_data.ball_data.positions[0]);
-    setFromQuaternion(this.rs.models.ball.rotation,  replay.frame_data.ball_data.rotations[0]);
+    this.rs.models.ball.position.x = replay.frame_data.ball_data.positions[0];
+    this.rs.models.ball.position.y = replay.frame_data.ball_data.positions[1];
+    this.rs.models.ball.position.z = replay.frame_data.ball_data.positions[2];
+    setFromQuaternion(this.rs.models.ball.rotation, replay.frame_data.ball_data.rotations);
+
+    this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs);
   }
 
   render(time: number) {
@@ -168,13 +175,12 @@ export class SceneManager {
       const d = time - this.currentAnimationTime;
       this.currentTime += d / 1000.0;
 
-      const previousFrame = this.currentFrame;
-
       while (this.currentTime > this.realFrameTimes[this.currentFrame + 1]) {
         this.currentFrame++;
       }
-
       this.onTimeUpdate(this.currentTime);
+
+      this.animationManager?.update(this.currentTime);
     }
     this.renderer.render(this.rs.scene, this.rs.camera);
     this.currentAnimationTime = time;
@@ -201,5 +207,6 @@ export class SceneManager {
     }
 
     this.currentTime = time;
+    this.animationManager?.update(this.currentTime);
   }
 }

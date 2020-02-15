@@ -1,6 +1,6 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f, Quaternion};
+use boxcars::{HeaderProp, KeyFrame, TickMark};
 
 #[derive(Serialize, Debug)]
 pub struct CleanedReplay {
@@ -51,26 +51,32 @@ pub enum BallType {
 #[derive(Serialize, Debug)]
 pub struct BallData {
     pub ball_type: BallType,
-    pub positions: Vec<Vector3f>,
-    pub rotations: Vec<Quaternion>,
+    pub positions: Vec<f32>,
+    pub rotations: Vec<f32>,
 }
 
 impl BallData {
     pub fn with_capacity(c: usize) -> Self {
         BallData {
             ball_type: BallType::Unknown,
-            positions: Vec::with_capacity(c),
-            rotations: Vec::with_capacity(c),
+            positions: Vec::with_capacity(c * 3),
+            rotations: Vec::with_capacity(c * 4),
         }
     }
 
     pub fn create_frame(&mut self, frame: usize) {
         if frame > 0 {
-            self.positions.push(self.positions[frame - 1].clone());
-            self.rotations.push(self.rotations[frame - 1].clone());
+            for i in 0..3 {
+                self.positions.push(self.positions[(frame - 1) * 3 + i]);
+                self.rotations.push(self.rotations[(frame - 1) * 3 + i]);
+            }
+            self.rotations.push(self.rotations[(frame - 1) * 3 + 3]);
         } else {
-            self.positions.push(Vector3f { x: 0.0, y: 0.0, z: 0.0 });
-            self.rotations.push(Quaternion { x: 0.0, y: 0.0, z: 0.0, w: 0.0 });
+            for _i in 0..3 {
+                self.positions.push(0.0);
+                self.rotations.push(0.0);
+            }
+            self.rotations.push(0.0);
         }
     }
 }

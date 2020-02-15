@@ -26,13 +26,14 @@ impl ActorHandler for BallHandler {
             "TAGame.RBActor_TA:ReplicatedRBState" => {
                 match &attribute.attribute {
                     Attribute::RigidBody(rigid_body) => {
-                        frame_data.ball_data.positions[frame].x = rigid_body.location.x;
-                        frame_data.ball_data.positions[frame].y = rigid_body.location.y;
-                        frame_data.ball_data.positions[frame].z = rigid_body.location.z;
-                        frame_data.ball_data.rotations[frame].x = rigid_body.rotation.x;
-                        frame_data.ball_data.rotations[frame].y = rigid_body.rotation.y;
-                        frame_data.ball_data.rotations[frame].z = rigid_body.rotation.z;
-                        frame_data.ball_data.rotations[frame].w = rigid_body.rotation.w;
+                        frame_data.ball_data.positions[frame * 3] = rigid_body.location.x;
+                        // Y is up in three.js
+                        frame_data.ball_data.positions[frame * 3 + 1] = rigid_body.location.z;
+                        frame_data.ball_data.positions[frame * 3 + 2] = rigid_body.location.y;
+                        frame_data.ball_data.rotations[frame * 4] = rigid_body.rotation.x;
+                        frame_data.ball_data.rotations[frame * 4 + 1] = rigid_body.rotation.y;
+                        frame_data.ball_data.rotations[frame * 4 + 2] = rigid_body.rotation.z;
+                        frame_data.ball_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
                     }
                     _ => return
                 }

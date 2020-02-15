@@ -22,7 +22,7 @@ export function setFromReplayPosition(v: Vector3, p: Position) {
   v.z = p.y;
 }
 
-export function setFromQuaternion(e: Euler, q: ReplayQuaternion) {
-  const quat = new Quaternion(q.x, q.y, q.z, q.w);
+export function setFromQuaternion(e: Euler, q: number[]) {
+  const quat = new Quaternion(q[0], q[1], q[2], q[3]);
   e.setFromQuaternion(quat);
 }
