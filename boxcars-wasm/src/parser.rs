@@ -1,7 +1,7 @@
-use crate::models::{BallFrame, ReplayVersion, FrameData};
+use crate::models::{ReplayVersion, FrameData};
 use boxcars::{Replay};
 use std::collections::HashMap;
-use crate::actor::{ActorHandler, get_handler};
+use crate::actor::{get_handler, ActorHandler};
 
 pub struct FrameParser<'a> {
     pub replay: &'a Replay
@@ -26,14 +26,36 @@ impl<'a> FrameParser<'a> {
         );
 
         let mut frame_data = FrameData::with_capacity(count);
-        let mut actors: HashMap<i32, &dyn ActorHandler> = HashMap::new();
+        let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
 
         for (i, frame) in frames.frames.iter().enumerate() {
-            let ball_frame = BallFrame::new();
-            frame_data.ball_frames.push(ball_frame);
+            frame_data.create_frame();
 
             for deleted in &frame.deleted_actors {
-                actors.remove(&deleted.0);
+                actors_handlers.remove(&deleted.0);
+            }
+
+            for new_actor in &frame.new_actors {
+                let object_name = match self.replay.objects.get(new_actor.object_id.0 as usize) {
+                    None => continue,
+                    Some(object_name) => object_name
+                };
+
+                let handler = match get_handler(object_name) {
+                    None => continue,
+                    Some(handler) => handler
+                };
+
+                actors_handlers.insert(new_actor.actor_id.0, handler);
+            }
+
+            for updated_actor in &frame.updated_actors {
+                match actors_handlers.get(&updated_actor.actor_id.0) {
+                    None => continue,
+                    Some(handler) => {
+                        handler.update(&self.replay, &replay_version, i as i32, &mut frame_data);
+                    }
+                }
             }
         }
 
