@@ -1,5 +1,6 @@
-export interface Rotation {
-  yaw?: number;
-  pitch?: number;
-  roll?: number;
+export interface Quaternion {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
 }
