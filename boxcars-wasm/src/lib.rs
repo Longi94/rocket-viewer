@@ -30,7 +30,7 @@ pub fn parse_replay(data: &[u8]) -> JsValue {
 
 #[wasm_bindgen]
 pub fn parse_and_clean_replay(data: &[u8]) -> JsValue {
-    set_panic_hook();
+    //set_panic_hook();
 
     let parse_result = boxcars::ParserBuilder::new(data)
         .on_error_check_crc()

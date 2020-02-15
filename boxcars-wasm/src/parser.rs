@@ -28,6 +28,7 @@ impl<'a> FrameParser<'a> {
         let mut frame_data = FrameData::with_capacity(count);
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
         let mut actors: HashMap<i32, HashMap<String, Attribute>> = HashMap::new();
+        let mut actor_objects: HashMap<i32, String> = HashMap::new();
 
         for (i, frame) in frames.frames.iter().enumerate() {
             frame_data.create_frame(i);
@@ -37,6 +38,7 @@ impl<'a> FrameParser<'a> {
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);
                 actors.remove(&deleted.0);
+                actor_objects.remove(&deleted.0);
             }
 
             for new_actor in &frame.new_actors {
@@ -45,6 +47,7 @@ impl<'a> FrameParser<'a> {
                     None => continue,
                     Some(object_name) => object_name
                 };
+                actor_objects.insert(new_actor.actor_id.0, object_name.clone());
 
                 let handler = match get_handler(object_name) {
                     None => continue,
@@ -72,7 +75,8 @@ impl<'a> FrameParser<'a> {
                 match actors.get(actor_id) {
                     None => continue,
                     Some(attributes) => {
-                        handler.update(&self.replay, &replay_version, i, &mut frame_data, &attributes);
+                        handler.update(&self.replay, &replay_version, i, count,
+                                       &mut frame_data, &attributes, &actors, &actor_objects);
                     }
                 }
             }

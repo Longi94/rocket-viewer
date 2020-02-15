@@ -37,6 +37,9 @@ impl FrameData {
 
     pub fn create_frame(&mut self, frame: usize) {
         self.ball_data.create_frame(frame);
+        for (_, player_data) in &mut self.players {
+            player_data.create_frame(frame);
+        }
     }
 }
 
@@ -67,7 +70,19 @@ impl BallData {
         }
     }
 
+    fn push_default(&mut self) {
+        for _i in 0..3 {
+            self.positions.push(0.0);
+            self.rotations.push(0.0);
+        }
+        self.rotations.push(0.0);
+    }
+
     pub fn create_frame(&mut self, frame: usize) {
+        while frame > self.positions.len() * 3 {
+            self.push_default();
+        }
+
         if frame > 0 {
             for i in 0..3 {
                 self.positions.push(self.positions[(frame - 1) * 3 + i]);
@@ -75,19 +90,15 @@ impl BallData {
             }
             self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
         } else {
-            for _i in 0..3 {
-                self.positions.push(0.0);
-                self.rotations.push(0.0);
-            }
-            self.rotations.push(0.0);
+            self.push_default();
         }
     }
 }
 
 #[derive(Serialize, Debug)]
 pub struct PlayerData {
-    pub name: String,
-    pub team: i8,
+    pub name: Option<String>,
+    pub team: Option<u32>,
     pub positions: Vec<f32>,
     pub rotations: Vec<f32>,
     pub visible: Vec<bool>,
@@ -96,15 +107,28 @@ pub struct PlayerData {
 impl PlayerData {
     pub fn with_capacity(c: usize) -> Self {
         PlayerData {
-            name: String::new(),
-            team: 0,
+            name: None,
+            team: None,
             positions: Vec::with_capacity(c * 3),
             rotations: Vec::with_capacity(c * 4),
             visible: Vec::with_capacity(c),
         }
     }
 
+    fn push_default(&mut self) {
+        self.visible.push(false);
+        for _i in 0..3 {
+            self.positions.push(0.0);
+            self.rotations.push(0.0);
+        }
+        self.rotations.push(0.0);
+    }
+
     pub fn create_frame(&mut self, frame: usize) {
+        while frame > self.visible.len() {
+            self.push_default();
+        }
+
         if frame > 0 {
             self.visible.push(self.visible[frame - 1]);
             for i in 0..3 {
@@ -113,12 +137,7 @@ impl PlayerData {
             }
             self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
         } else {
-            self.visible.push(false);
-            for _i in 0..3 {
-                self.positions.push(0.0);
-                self.rotations.push(0.0);
-            }
-            self.rotations.push(0.0);
+            self.push_default();
         }
     }
 }
