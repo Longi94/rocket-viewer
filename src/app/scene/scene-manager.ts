@@ -151,8 +151,17 @@ export class SceneManager {
     this.rs.models.ball.position.z = replay.frame_data.ball_data.positions[2];
     setFromQuaternion(this.rs.models.ball.rotation, replay.frame_data.ball_data.rotations);
 
-    for (const body of Object.values(this.rs.models.players)) {
+    for (const playerId in this.rs.models.players) {
+      const body = this.rs.models.players[playerId];
       body.addToScene(this.rs.scene);
+      body.scene.position.x = replay.frame_data.players[playerId].positions[0];
+      body.scene.position.y = replay.frame_data.players[playerId].positions[1];
+      body.scene.position.z = replay.frame_data.players[playerId].positions[2];
+
+      body.scene.quaternion.x = replay.frame_data.players[playerId].rotations[0];
+      body.scene.quaternion.y = replay.frame_data.players[playerId].rotations[1];
+      body.scene.quaternion.z = replay.frame_data.players[playerId].rotations[2];
+      body.scene.quaternion.w = replay.frame_data.players[playerId].rotations[3];
     }
 
     this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs);

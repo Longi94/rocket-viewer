@@ -1,6 +1,6 @@
 import { PlayerData } from '../../model/replay/player-data';
 import { ReplayScene } from '../replay-scene';
-import { DEFAULT_PAINT_CONFIG, modelLoader, RocketManager } from './loader-config';
+import { DEFAULT_PAINT_CONFIG_BLUE, DEFAULT_PAINT_CONFIG_ORANGE, modelLoader, RocketManager } from './loader-config';
 import {
   Body,
   createBodyModel,
@@ -48,8 +48,10 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   wheelAssets.tireD = await tireDTask;
   wheelAssets.tireN = await tireNTask;
 
-  const body = createBodyModel(Body.DEFAULT, Decal.NONE, bodyAssets, new DecalAssets(), DEFAULT_PAINT_CONFIG);
-  const wheels = createWheelsModel(Wheel.DEFAULT, wheelAssets, DEFAULT_PAINT_CONFIG);
+  const paintConfig = playerData.team === 0 ? DEFAULT_PAINT_CONFIG_BLUE : DEFAULT_PAINT_CONFIG_ORANGE;
+
+  const body = createBodyModel(Body.DEFAULT, Decal.NONE, bodyAssets, new DecalAssets(), paintConfig);
+  const wheels = createWheelsModel(Wheel.DEFAULT, wheelAssets, paintConfig);
 
   //const bodyTask = RocketManager.loadBody(Body.DEFAULT.id, DEFAULT_PAINT_CONFIG);
   //const wheelsTask = RocketManager.loadWheel(Wheel.DEFAULT.id, DEFAULT_PAINT_CONFIG);

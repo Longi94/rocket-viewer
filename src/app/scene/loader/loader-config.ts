@@ -19,4 +19,5 @@ const ROCKET_CONFIG = new RocketConfig({
 });
 
 export const RocketManager: RocketAssetManager = new RocketAssetManager(ROCKET_CONFIG);
-export const DEFAULT_PAINT_CONFIG = createPaintConfig();
+export const DEFAULT_PAINT_CONFIG_BLUE = createPaintConfig();
+export const DEFAULT_PAINT_CONFIG_ORANGE = createPaintConfig(true);
