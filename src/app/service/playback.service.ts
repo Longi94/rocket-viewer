@@ -21,6 +21,9 @@ export class PlaybackService {
   private timeScrollSubject = new Subject<number>();
   onTimeScroll = this.timeScrollSubject.asObservable();
 
+  private speedSubject = new Subject<number>();
+  onSpeed = this.speedSubject.asObservable();
+
   constructor() {
   }
 
@@ -42,5 +45,9 @@ export class PlaybackService {
 
   scrollToTime(time: number) {
     this.timeScrollSubject.next(time);
+  }
+
+  setSpeed(speed: number) {
+    this.speedSubject.next(speed);
   }
 }

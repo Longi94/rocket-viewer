@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
 import { FormsModule } from '@angular/forms';
 import { Ng5SliderModule } from 'ng5-slider';
+import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { Ng5SliderModule } from 'ng5-slider';
     FormsModule,
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
     MatProgressBarModule,
     MatSliderModule,
     Ng5SliderModule

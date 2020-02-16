@@ -44,6 +44,7 @@ export class CanvasComponent implements OnInit {
     this.playbackService.onPlay.subscribe(() => this.sceneManager.play());
     this.playbackService.onPause.subscribe(() => this.sceneManager.pause());
     this.playbackService.onTimeScroll.subscribe(t => this.sceneManager.scrollToTime(t));
+    this.playbackService.onSpeed.subscribe(t => this.sceneManager.setSpeed(t));
 
     this.sceneManager.onTimeUpdate = time => this.playbackService.updateTime(time);
 

@@ -16,6 +16,9 @@ export class PlaybackControlComponent implements OnInit {
   sliderOptions: Options = this.createSliderOption(100);
   isSliding = false;
 
+  playbackSpeeds = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  selectedSpeed = 1;
+
   constructor(private readonly playbackService: PlaybackService) {
     this.playbackService.onTimeLimit.subscribe(max => {
       this.sliderOptions = this.createSliderOption(max);
@@ -60,5 +63,10 @@ export class PlaybackControlComponent implements OnInit {
   slideEnd($event: ChangeContext) {
     this.isSliding = false;
     this.playbackService.scrollToTime($event.value);
+  }
+
+  setSpeed(speed: number) {
+    this.selectedSpeed = speed;
+    this.playbackService.setSpeed(speed);
   }
 }

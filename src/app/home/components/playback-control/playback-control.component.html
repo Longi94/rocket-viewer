@@ -9,4 +9,19 @@
     (userChangeStart)="slideStart($event)"
     (userChangeEnd)="slideEnd($event)"
   ></ng5-slider>
+  <button class="more-button" mat-icon-button [matMenuTriggerFor]="moreMenu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
 </div>
+
+<mat-menu #moreMenu="matMenu">
+  <button mat-menu-item [matMenuTriggerFor]="playbackSpeedMenu">Playback speed</button>
+</mat-menu>
+
+<mat-menu #playbackSpeedMenu="matMenu">
+  <button *ngFor="let speed of playbackSpeeds" mat-menu-item (click)="setSpeed(speed)">
+    <mat-icon *ngIf="speed === selectedSpeed">radio_button_checked</mat-icon>
+    <mat-icon *ngIf="speed !== selectedSpeed">radio_button_unchecked</mat-icon>
+    <span>{{speed}}</span>
+  </button>
+</mat-menu>

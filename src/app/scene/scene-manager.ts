@@ -37,6 +37,7 @@ export class SceneManager {
   realFrameTimes: number[];
 
   private isPlaying = false;
+  private playbackSpeed = 1;
 
   // callbacks
   onTimeUpdate = (time: number) => {
@@ -166,7 +167,7 @@ export class SceneManager {
 
     if (this.isPlaying) {
       const d = time - this.currentAnimationTime;
-      this.currentTime += d / 1000.0;
+      this.currentTime += d * this.playbackSpeed / 1000.0;
 
       while (this.currentTime > this.realFrameTimes[this.currentFrame + 1]) {
         this.currentFrame++;
@@ -201,5 +202,9 @@ export class SceneManager {
 
     this.currentTime = time;
     this.animationManager?.update(this.currentTime);
+  }
+
+  setSpeed(speed: number) {
+    this.playbackSpeed = speed;
   }
 }
