@@ -1,7 +1,16 @@
 import { PlayerData } from '../../model/replay/player-data';
 import { ReplayScene } from '../replay-scene';
 import { DEFAULT_PAINT_CONFIG, modelLoader, RocketManager } from './loader-config';
-import { Body, createBodyModel, Decal, MultiImageLoader, PromiseLoader, TextureFormat, Wheel } from 'rl-loadout-lib';
+import {
+  Body,
+  createBodyModel,
+  createWheelsModel,
+  Decal,
+  MultiImageLoader,
+  PromiseLoader,
+  TextureFormat,
+  Wheel
+} from 'rl-loadout-lib';
 import { DefaultLoadingManager } from 'three';
 import { BodyAssets } from 'rl-loadout-lib/dist/loader/body/body-assets';
 import { WheelAssets } from 'rl-loadout-lib/dist/loader/wheel/wheel-assets';
@@ -40,6 +49,7 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   wheelAssets.tireN = await tireNTask;
 
   const body = createBodyModel(Body.DEFAULT, Decal.NONE, bodyAssets, new DecalAssets(), DEFAULT_PAINT_CONFIG);
+  const wheels = createWheelsModel(Wheel.DEFAULT, wheelAssets, DEFAULT_PAINT_CONFIG);
 
   //const bodyTask = RocketManager.loadBody(Body.DEFAULT.id, DEFAULT_PAINT_CONFIG);
   //const wheelsTask = RocketManager.loadWheel(Wheel.DEFAULT.id, DEFAULT_PAINT_CONFIG);
@@ -47,8 +57,8 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   // const body = await bodyTask;
   //const wheels = await wheelsTask;
   body.setEnvMap(rs.envMap);
-  //wheels.setEnvMap(rs.envMap);
-  //body.addWheelsModel(wheels);
+  wheels.setEnvMap(rs.envMap);
+  body.addWheelsModel(wheels);
 
   rs.models.players[playerData.id] = body;
 }

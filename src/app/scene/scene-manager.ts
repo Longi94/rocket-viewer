@@ -10,7 +10,7 @@ import {
   WebGLRenderTarget,
   WebGLRenderTargetCube
 } from 'three';
-import { PromiseLoader } from 'rl-loadout-lib';
+import { PromiseLoader, GlobalWebGLContext } from 'rl-loadout-lib';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PMREMGenerator } from 'three/examples/jsm/pmrem/PMREMGenerator';
 import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
@@ -139,6 +139,8 @@ export class SceneManager {
     await mapPromise;
     await ballPromise;
     await Promise.all(playerPromises);
+
+    GlobalWebGLContext.dispose();
 
     this.rs.scene.add(this.rs.models.map);
     this.rs.scene.add(this.rs.models.ball);
