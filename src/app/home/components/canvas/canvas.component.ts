@@ -32,11 +32,11 @@ export class CanvasComponent implements OnInit {
     current: 0
   };
 
-  sceneManager = new SceneManager();
+  isDebug = !environment.production;
+
+  sceneManager = new SceneManager(this.isDebug);
 
   stats: Stats;
-
-  isDebug = !environment.production;
 
   constructor(private readonly boxcarsService: BoxcarsService,
               private readonly playbackService: PlaybackService) {

@@ -2,7 +2,7 @@ import { Replay } from '../model/replay/replay';
 import {
   AmbientLight,
   Color,
-  DefaultLoadingManager,
+  DefaultLoadingManager, DirectionalLight, DirectionalLightHelper,
   PerspectiveCamera,
   Scene, Texture,
   TextureLoader,
@@ -43,7 +43,7 @@ export class SceneManager {
   onTimeUpdate = (time: number) => {
   };
 
-  constructor() {
+  constructor(private readonly debug = false) {
   }
 
   async init(canvasElement: HTMLCanvasElement, canvasContainerElement: HTMLDivElement) {
@@ -80,10 +80,30 @@ export class SceneManager {
   }
 
   private addLights() {
-    const INTENSITY = 0.6;
-
-    const ambient = new AmbientLight(0xFFFFFF, INTENSITY);
+    const ambient = new AmbientLight(0xFFFFFF, 0.6);
     this.rs.scene.add(ambient);
+
+    const dirLight1 = new DirectionalLight(0xffffff, 1);
+    const dirLight2 = new DirectionalLight(0xffffff, 1);
+
+    dirLight1.position.z = 5000;
+    dirLight1.position.y = 2000;
+    dirLight1.position.x = 1000;
+
+    dirLight2.position.z = -5000;
+    dirLight2.position.y = 1000;
+    dirLight2.position.x = -1500;
+
+    this.rs.scene.add(dirLight1);
+    this.rs.scene.add(dirLight2);
+
+    if (this.debug) {
+      const helper1 = new DirectionalLightHelper(dirLight1, 1000, 0xff0000);
+      const helper2 = new DirectionalLightHelper(dirLight2, 1000, 0x00ff00);
+
+      this.rs.scene.add(helper1);
+      this.rs.scene.add(helper2);
+    }
   }
 
   private processBackground(backgroundTexture: Texture) {
