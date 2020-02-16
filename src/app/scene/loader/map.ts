@@ -3,12 +3,15 @@ import { applyEnvMap } from '../../util/three';
 import { modelLoader } from './loader-config';
 
 const MAPPING = {
-  'HoopsStadium_P': '/assets/models/HoopsStadium_P.draco.glb'
+  'HoopsStadium_P': '/assets/models/maps/HoopsStadium_P.draco.glb'
 };
 
 
 export async function loadMap(name: string, rs: ReplayScene) {
-  const mapUrl = MAPPING[name];
+  let mapUrl = MAPPING[name];
+  if (mapUrl == undefined) {
+    mapUrl = '/assets/models/maps/TrainStation_P.draco.glb'
+  }
   rs.models.map = (await modelLoader.load(mapUrl)).scene;
   applyEnvMap(rs.models.map, rs.envMap);
 }
