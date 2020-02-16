@@ -93,6 +93,39 @@ impl<'a> FrameParser<'a> {
                                &actor_objects);
             }
         }
+
+        // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
+        // the interpolation to slowly drift the models. Add artificial frames to prevent that.
+        fix_position_frames(
+            &mut frame_data.ball_data.positions,
+            &mut frame_data.ball_data.rotations,
+            &mut frame_data.ball_data.position_times
+        );
+
+        for (_, player_data) in &mut frame_data.players {
+            fix_position_frames(
+                &mut player_data.positions,
+                &mut player_data.rotations,
+                &mut player_data.position_times
+            );
+        }
+
         Ok(frame_data)
+    }
+}
+
+fn fix_position_frames(p: &mut Vec<f32>, q: &mut Vec<f32>, times: &mut Vec<f32>) {
+    for i in (0..(times.len() - 2)).rev() {
+        if times[i + 1] - times[i] > 1.0 {
+            times.insert(i + 1, times[i + 1] - 1.0 / 30.0);
+            p.insert((i + 1) * 3, p[i * 3 + 2]);
+            p.insert((i + 1) * 3, p[i * 3 + 1]);
+            p.insert((i + 1) * 3, p[i * 3]);
+
+            q.insert((i + 1) * 4, q[i * 4 + 3]);
+            q.insert((i + 1) * 4, q[i * 4 + 2]);
+            q.insert((i + 1) * 4, q[i * 4 + 1]);
+            q.insert((i + 1) * 4, q[i * 4]);
+        }
     }
 }
