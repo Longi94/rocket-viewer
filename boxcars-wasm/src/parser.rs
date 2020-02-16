@@ -19,7 +19,7 @@ impl<'a> FrameParser<'a> {
             return Ok(FrameData::with_capacity(0));
         }
 
-        let replay_version = ReplayVersion(
+        let _replay_version = ReplayVersion(
             self.replay.major_version,
             self.replay.minor_version,
             self.replay.net_version.unwrap_or(0),
@@ -63,7 +63,7 @@ impl<'a> FrameParser<'a> {
                 match actors.get_mut(&updated_actor.actor_id.0) {
                     None => continue,
                     Some(attributes) => {
-                        let object_name = match self.replay.objects.get(updated_actor.object_id.0 as usize) {
+                        match self.replay.objects.get(updated_actor.object_id.0 as usize) {
                             None => continue,
                             Some(object_name) => {
                                 attributes.insert(object_name.clone(), updated_actor.attribute.clone());
@@ -89,8 +89,8 @@ impl<'a> FrameParser<'a> {
                     Some(object_name) => object_name
                 };
 
-                handler.update(real_time, i, count,
-                               &mut frame_data, &attributes, &object_name, &actors, &actor_objects)
+                handler.update(real_time, i, &mut frame_data, &attributes, &object_name, &actors,
+                               &actor_objects);
             }
         }
         Ok(frame_data)

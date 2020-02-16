@@ -1,6 +1,6 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f};
+use boxcars::{HeaderProp, KeyFrame, TickMark};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
@@ -28,7 +28,7 @@ pub struct FrameData {
 impl FrameData {
     pub fn with_capacity(c: usize) -> Self {
         FrameData {
-            ball_data: BallData::with_capacity(c),
+            ball_data: BallData::new(),
             times: Vec::with_capacity(c),
             deltas: Vec::with_capacity(c),
             players: HashMap::new(),
@@ -56,7 +56,7 @@ pub struct BallData {
 }
 
 impl BallData {
-    pub fn with_capacity(c: usize) -> Self {
+    pub fn new() -> Self {
         BallData {
             ball_type: BallType::Unknown,
             positions: Vec::new(),
@@ -78,7 +78,7 @@ pub struct PlayerData {
 }
 
 impl PlayerData {
-    pub fn with_capacity(c: usize) -> Self {
+    pub fn new() -> Self {
         PlayerData {
             id: -1,
             name: None,
