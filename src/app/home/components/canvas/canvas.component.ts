@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { DefaultLoadingManager } from 'three';
+import { Cache, DefaultLoadingManager } from 'three';
 import { BoxcarsService } from '../../../service/boxcars.service';
 import { Replay } from '../../../model/replay/replay';
 import { SceneManager } from '../../../scene/scene-manager';
@@ -46,6 +46,8 @@ export class CanvasComponent implements OnInit {
     this.playbackService.onTimeScroll.subscribe(t => this.sceneManager.scrollToTime(t));
 
     this.sceneManager.onTimeUpdate = time => this.playbackService.updateTime(time);
+
+    Cache.enabled = true;
   }
 
   onReplayLoaded(replay: Replay | string) {
