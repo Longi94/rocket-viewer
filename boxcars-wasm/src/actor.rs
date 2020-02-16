@@ -37,13 +37,15 @@ impl ActorHandler for BallHandler {
         match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
             Some(rigid_body) => match rigid_body {
                 Attribute::RigidBody(rigid_body) => {
+                    // convert vectors from Z-up to Y-up coordinate system
                     frame_data.ball_data.positions[frame * 3] = rigid_body.location.x;
-                    // Y is up in three.js
                     frame_data.ball_data.positions[frame * 3 + 1] = rigid_body.location.z;
                     frame_data.ball_data.positions[frame * 3 + 2] = rigid_body.location.y;
+
+                    // convert quaternions from Z-up to Y-up coordinate system
                     frame_data.ball_data.rotations[frame * 4] = rigid_body.rotation.x;
-                    frame_data.ball_data.rotations[frame * 4 + 1] = rigid_body.rotation.y;
-                    frame_data.ball_data.rotations[frame * 4 + 2] = rigid_body.rotation.z;
+                    frame_data.ball_data.rotations[frame * 4 + 1] = -rigid_body.rotation.z;
+                    frame_data.ball_data.rotations[frame * 4 + 2] = -rigid_body.rotation.y;
                     frame_data.ball_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
                 }
                 _ => return
@@ -80,14 +82,15 @@ impl ActorHandler for CarHandler {
         match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
             Some(rigid_body) => match rigid_body {
                 Attribute::RigidBody(rigid_body) => {
+                    // convert vectors from Z-up to Y-up coordinate system
                     player_data.positions[frame * 3] = rigid_body.location.x;
-                    // Y is up in three.js
                     player_data.positions[frame * 3 + 1] = rigid_body.location.z;
                     player_data.positions[frame * 3 + 2] = rigid_body.location.y;
 
+                    // convert quaternions from Z-up to Y-up coordinate system
                     player_data.rotations[frame * 4] = rigid_body.rotation.x;
-                    player_data.rotations[frame * 4 + 1] = rigid_body.rotation.z;
-                    player_data.rotations[frame * 4 + 2] = rigid_body.rotation.y;
+                    player_data.rotations[frame * 4 + 1] = -rigid_body.rotation.z;
+                    player_data.rotations[frame * 4 + 2] = -rigid_body.rotation.y;
                     player_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
                 }
                 _ => return
