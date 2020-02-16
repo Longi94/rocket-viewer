@@ -29,11 +29,13 @@ impl<'a> FrameParser<'a> {
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
         let mut actors: HashMap<i32, HashMap<String, Attribute>> = HashMap::new();
         let mut actor_objects: HashMap<i32, String> = HashMap::new();
+        let mut real_time: f32 = 0.0;
 
         for (i, frame) in frames.frames.iter().enumerate() {
-            frame_data.create_frame(i);
             frame_data.times.push(frame.time);
             frame_data.deltas.push(frame.delta);
+
+            real_time += frame.delta;
 
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);
@@ -71,18 +73,26 @@ impl<'a> FrameParser<'a> {
                 }
             }
 
-            for (actor_id, handler) in &actors_handlers {
-                match actors.get(actor_id) {
+            for updated_actor in &frame.updated_actors {
+                let handler = match actors_handlers.get(&updated_actor.actor_id.0) {
                     None => continue,
-                    Some(attributes) => {
-                        handler.update(&self.replay, &replay_version, i, count,
-                                       &mut frame_data, &attributes, &actors, &actor_objects);
-                    }
-                }
+                    Some(handler) => handler
+                };
+
+                let attributes = match actors.get(&updated_actor.actor_id.0) {
+                    None => continue,
+                    Some(attributes) => attributes
+                };
+
+                let object_name = match self.replay.objects.get(updated_actor.object_id.0 as usize) {
+                    None => continue,
+                    Some(object_name) => object_name
+                };
+
+                handler.update(real_time, i, count,
+                               &mut frame_data, &attributes, &object_name, &actors, &actor_objects)
             }
         }
-
         Ok(frame_data)
     }
 }
-

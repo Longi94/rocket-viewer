@@ -1,7 +1,6 @@
-use boxcars::{Replay, UpdatedAttribute, Attribute};
+use boxcars::{Replay, UpdatedAttribute, Attribute, Vector3f};
 use crate::models::{ReplayVersion, FrameData, BallType, PlayerData};
 use wasm_bindgen::__rt::std::collections::HashMap;
-use wasm_bindgen::__rt::std::collections::hash_map::RandomState;
 
 fn get_actor_attribute(actor_id: i32, attr_name: &str,
                        all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<Attribute> {
@@ -15,8 +14,8 @@ fn get_actor_attribute(actor_id: i32, attr_name: &str,
 }
 
 pub trait ActorHandler {
-    fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize, frame_count: usize,
-              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>,
+    fn update(&self, time: f32, frame: usize, frame_count: usize,
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               actor_objects: &HashMap<i32, String>);
 }
@@ -26,31 +25,35 @@ pub struct BallHandler {
 }
 
 impl ActorHandler for BallHandler {
-    fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize, frame_count: usize,
-              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>,
+    fn update(&self, time: f32, frame: usize, frame_count: usize,
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               actor_objects: &HashMap<i32, String>) {
         if frame_data.ball_data.ball_type == BallType::Unknown {
             frame_data.ball_data.ball_type = self.ball_type;
         }
 
-        match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
-            Some(rigid_body) => match rigid_body {
-                Attribute::RigidBody(rigid_body) => {
-                    // convert vectors from Z-up to Y-up coordinate system
-                    frame_data.ball_data.positions[frame * 3] = rigid_body.location.x;
-                    frame_data.ball_data.positions[frame * 3 + 1] = rigid_body.location.z;
-                    frame_data.ball_data.positions[frame * 3 + 2] = rigid_body.location.y;
+        if updated_attr == "TAGame.RBActor_TA:ReplicatedRBState" {
+            match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
+                Some(rigid_body) => match rigid_body {
+                    Attribute::RigidBody(rigid_body) => {
+                        // convert vectors from Z-up to Y-up coordinate system
+                        frame_data.ball_data.positions.push(rigid_body.location.x);
+                        frame_data.ball_data.positions.push(rigid_body.location.z);
+                        frame_data.ball_data.positions.push(rigid_body.location.y);
 
-                    // convert quaternions from Z-up to Y-up coordinate system
-                    frame_data.ball_data.rotations[frame * 4] = rigid_body.rotation.x;
-                    frame_data.ball_data.rotations[frame * 4 + 1] = -rigid_body.rotation.z;
-                    frame_data.ball_data.rotations[frame * 4 + 2] = -rigid_body.rotation.y;
-                    frame_data.ball_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
+                        // convert quaternions from Z-up to Y-up coordinate system
+                        frame_data.ball_data.rotations.push(rigid_body.rotation.x);
+                        frame_data.ball_data.rotations.push(-rigid_body.rotation.z);
+                        frame_data.ball_data.rotations.push(-rigid_body.rotation.y);
+                        frame_data.ball_data.rotations.push(rigid_body.rotation.w);
+
+                        frame_data.ball_data.position_times.push(time);
+                    }
+                    _ => return
                 }
                 _ => return
             }
-            _ => return
         }
     }
 }
@@ -58,8 +61,8 @@ impl ActorHandler for BallHandler {
 pub struct CarHandler {}
 
 impl ActorHandler for CarHandler {
-    fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize, frame_count: usize,
-              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>,
+    fn update(&self, time: f32, frame: usize, frame_count: usize,
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               actor_objects: &HashMap<i32, String>) {
         let player_actor_id = match attributes.get("Engine.Pawn:PlayerReplicationInfo") {
@@ -79,23 +82,27 @@ impl ActorHandler for CarHandler {
             Some(player_data) => player_data
         };
 
-        match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
-            Some(rigid_body) => match rigid_body {
-                Attribute::RigidBody(rigid_body) => {
-                    // convert vectors from Z-up to Y-up coordinate system
-                    player_data.positions[frame * 3] = rigid_body.location.x;
-                    player_data.positions[frame * 3 + 1] = rigid_body.location.z;
-                    player_data.positions[frame * 3 + 2] = rigid_body.location.y;
+        if updated_attr == "TAGame.RBActor_TA:ReplicatedRBState" {
+            match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
+                Some(rigid_body) => match rigid_body {
+                    Attribute::RigidBody(rigid_body) => {
+                        // convert vectors from Z-up to Y-up coordinate system
+                        player_data.positions.push(rigid_body.location.x);
+                        player_data.positions.push(rigid_body.location.z);
+                        player_data.positions.push(rigid_body.location.y);
 
-                    // convert quaternions from Z-up to Y-up coordinate system
-                    player_data.rotations[frame * 4] = rigid_body.rotation.x;
-                    player_data.rotations[frame * 4 + 1] = -rigid_body.rotation.z;
-                    player_data.rotations[frame * 4 + 2] = -rigid_body.rotation.y;
-                    player_data.rotations[frame * 4 + 3] = rigid_body.rotation.w;
+                        // convert quaternions from Z-up to Y-up coordinate system
+                        player_data.rotations.push(rigid_body.rotation.x);
+                        player_data.rotations.push(-rigid_body.rotation.z);
+                        player_data.rotations.push(-rigid_body.rotation.y);
+                        player_data.rotations.push(rigid_body.rotation.w);
+
+                        player_data.position_times.push(time);
+                    }
+                    _ => return
                 }
                 _ => return
             }
-            _ => return
         }
     }
 }
@@ -103,8 +110,8 @@ impl ActorHandler for CarHandler {
 pub struct PlayerHandler {}
 
 impl ActorHandler for PlayerHandler {
-    fn update(&self, replay: &Replay, version: &ReplayVersion, frame: usize, frame_count: usize,
-              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>,
+    fn update(&self, time: f32, frame: usize, frame_count: usize,
+              frame_data: &mut FrameData, attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               actor_objects: &HashMap<i32, String>) {
         let player_id = match attributes.get("Engine.PlayerReplicationInfo:PlayerID") {
@@ -140,7 +147,6 @@ impl ActorHandler for PlayerHandler {
                 Some(_) => None,
                 None => None,
             };
-            player_data.create_frame(frame);
             frame_data.players.insert(player_id.clone(), player_data);
         }
     }

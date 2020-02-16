@@ -1,6 +1,6 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use boxcars::{HeaderProp, KeyFrame, TickMark};
+use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
@@ -34,13 +34,6 @@ impl FrameData {
             players: HashMap::new(),
         }
     }
-
-    pub fn create_frame(&mut self, frame: usize) {
-        self.ball_data.create_frame(frame);
-        for (_, player_data) in &mut self.players {
-            player_data.create_frame(frame);
-        }
-    }
 }
 
 // BALL
@@ -58,6 +51,7 @@ pub enum BallType {
 pub struct BallData {
     pub ball_type: BallType,
     pub positions: Vec<f32>,
+    pub position_times: Vec<f32>,
     pub rotations: Vec<f32>,
 }
 
@@ -65,32 +59,9 @@ impl BallData {
     pub fn with_capacity(c: usize) -> Self {
         BallData {
             ball_type: BallType::Unknown,
-            positions: Vec::with_capacity(c * 3),
-            rotations: Vec::with_capacity(c * 4),
-        }
-    }
-
-    fn push_default(&mut self) {
-        for _i in 0..3 {
-            self.positions.push(0.0);
-            self.rotations.push(0.0);
-        }
-        self.rotations.push(0.0);
-    }
-
-    pub fn create_frame(&mut self, frame: usize) {
-        while frame > self.positions.len() * 3 {
-            self.push_default();
-        }
-
-        if frame > 0 {
-            for i in 0..3 {
-                self.positions.push(self.positions[(frame - 1) * 3 + i]);
-                self.rotations.push(self.rotations[(frame - 1) * 4 + i]);
-            }
-            self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
-        } else {
-            self.push_default();
+            positions: Vec::new(),
+            position_times: Vec::new(),
+            rotations: Vec::new(),
         }
     }
 }
@@ -101,6 +72,7 @@ pub struct PlayerData {
     pub name: Option<String>,
     pub team: Option<u32>,
     pub positions: Vec<f32>,
+    pub position_times: Vec<f32>,
     pub rotations: Vec<f32>,
     pub visible: Vec<bool>,
 }
@@ -111,35 +83,10 @@ impl PlayerData {
             id: -1,
             name: None,
             team: None,
-            positions: Vec::with_capacity(c * 3),
-            rotations: Vec::with_capacity(c * 4),
-            visible: Vec::with_capacity(c),
-        }
-    }
-
-    fn push_default(&mut self) {
-        self.visible.push(false);
-        for _i in 0..3 {
-            self.positions.push(0.0);
-            self.rotations.push(0.0);
-        }
-        self.rotations.push(0.0);
-    }
-
-    pub fn create_frame(&mut self, frame: usize) {
-        while frame > self.visible.len() {
-            self.push_default();
-        }
-
-        if frame > 0 {
-            self.visible.push(self.visible[frame - 1]);
-            for i in 0..3 {
-                self.positions.push(self.positions[(frame - 1) * 3 + i]);
-                self.rotations.push(self.rotations[(frame - 1) * 4 + i]);
-            }
-            self.rotations.push(self.rotations[(frame - 1) * 4 + 3]);
-        } else {
-            self.push_default();
+            positions: Vec::new(),
+            position_times: Vec::new(),
+            rotations: Vec::new(),
+            visible: Vec::new(),
         }
     }
 }

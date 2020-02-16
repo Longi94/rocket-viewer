@@ -4,4 +4,5 @@ export interface PlayerData {
   team: number;
   positions: number[];
   rotations: number[];
+  position_times: number[];
 }
