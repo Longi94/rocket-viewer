@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationMixer, QuaternionKeyframeTrack, VectorKeyframeTrack } from 'three';
+import { AnimationClip, AnimationMixer, LoopOnce, QuaternionKeyframeTrack, VectorKeyframeTrack } from 'three';
 import { FrameData } from '../../model/replay/frame-data';
 import { ReplayScene } from '../replay-scene';
 import { addAnimPathHelper } from '../../util/debug';
@@ -16,7 +16,7 @@ export function createBallAnimationMixer(realFrameTimes: number[], frameData: Fr
     frameData.ball_data.position_times[frameData.ball_data.position_times.length - 1],
     [ballPositionTrack, ballRotationTrack]
   );
-  mixer.clipAction(ballAnimationClip).play();
+  mixer.clipAction(ballAnimationClip).setLoop(LoopOnce, 0).play();
 
   if (debug) {
     addAnimPathHelper(frameData.ball_data.positions, '#ffffff', rs.scene);

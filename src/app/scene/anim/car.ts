@@ -2,7 +2,7 @@ import { PlayerData } from '../../model/replay/player-data';
 import {
   AnimationClip,
   AnimationMixer,
-  BufferGeometry, Line, LineBasicMaterial,
+  BufferGeometry, Line, LineBasicMaterial, LoopOnce,
   QuaternionKeyframeTrack,
   Vector3,
   VectorKeyframeTrack
@@ -19,7 +19,7 @@ export function createCarAnimationMixer(realFrameTimes: number[], playerData: Pl
   const carAnimationClip = new AnimationClip(`car_${playerData.id}_clip`,
     playerData.position_times[playerData.position_times.length - 1],
     [carPositionTrack, carRotationTrack]);
-  mixer.clipAction(carAnimationClip).play();
+  mixer.clipAction(carAnimationClip).setLoop(LoopOnce, 0).play();
 
   if (debug) {
     addAnimPathHelper(playerData.positions, ColorHasher.hex(playerData.name), rs.scene);
