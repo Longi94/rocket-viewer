@@ -8,7 +8,7 @@ import {
   PerspectiveCamera,
   Scene,
   Texture,
-  TextureLoader,
+  TextureLoader, Vector3,
   WebGLRenderer,
   WebGLRenderTarget,
   WebGLRenderTargetCube
@@ -203,6 +203,13 @@ export class SceneManager {
       while (this.currentTime > this.realFrameTimes[this.currentFrame + 1]) {
         this.currentFrame++;
       }
+
+      if (this.debug) {
+        while (this.currentTime > this.rs.replay.frame_data.ball_data.position_times[this.ballFrame + 1]) {
+          this.ballFrame++;
+        }
+      }
+
       this.onTimeUpdate(this.currentTime);
 
       this.animationManager?.update(this.currentTime);
@@ -225,9 +232,22 @@ export class SceneManager {
       while (time > this.realFrameTimes[this.currentFrame + 1]) {
         this.currentFrame++;
       }
+
+      if (this.debug) {
+        while (time > this.rs.replay.frame_data.ball_data.position_times[this.ballFrame + 1]) {
+          this.ballFrame++;
+        }
+      }
+
     } else if (time < this.currentTime) {
       while (time < this.realFrameTimes[this.currentFrame - 1]) {
         this.currentFrame--;
+      }
+
+      if (this.debug) {
+        while (time < this.rs.replay.frame_data.ball_data.position_times[this.ballFrame - 1]) {
+          this.ballFrame--;
+        }
       }
     }
 
@@ -237,5 +257,23 @@ export class SceneManager {
 
   setSpeed(speed: number) {
     this.playbackSpeed = speed;
+  }
+
+  // anything down here is for debug purposes only
+  ballFrame = 0;
+  v1 = new Vector3();
+  v2 = new Vector3();
+
+  getBallSpeed(): number {
+    const ballData = this.rs.replay.frame_data.ball_data;
+    const dt = ballData.position_times[this.ballFrame + 1] - ballData.position_times[this.ballFrame];
+    this.v1.x = ballData.positions[this.ballFrame * 3];
+    this.v1.y = ballData.positions[this.ballFrame * 3 + 1];
+    this.v1.z = ballData.positions[this.ballFrame * 3 + 2];
+    this.v2.x = ballData.positions[(this.ballFrame + 1) * 3];
+    this.v2.y = ballData.positions[(this.ballFrame + 1) * 3 + 1];
+    this.v2.z = ballData.positions[(this.ballFrame + 1) * 3 + 2];
+    const ds = this.v1.distanceTo(this.v2);
+    return ds / dt;
   }
 }

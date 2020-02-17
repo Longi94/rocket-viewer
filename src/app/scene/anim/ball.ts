@@ -18,8 +18,8 @@ export function createBallAnimationMixer(realFrameTimes: number[], frameData: Fr
   );
   mixer.clipAction(ballAnimationClip).setLoop(LoopOnce, 0).play();
 
-  if (debug) {
-    addAnimPathHelper(frameData.ball_data.positions, '#ffffff', rs.scene);
-  }
+  // if (debug) {
+  //   addAnimPathHelper(frameData.ball_data.positions, '#ffffff', rs.scene);
+  // }
   return mixer;
 }

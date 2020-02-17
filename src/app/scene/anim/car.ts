@@ -21,9 +21,9 @@ export function createCarAnimationMixer(realFrameTimes: number[], playerData: Pl
     [carPositionTrack, carRotationTrack]);
   mixer.clipAction(carAnimationClip).setLoop(LoopOnce, 0).play();
 
-  if (debug) {
-    addAnimPathHelper(playerData.positions, ColorHasher.hex(playerData.name), rs.scene);
-  }
+  // if (debug) {
+  //   addAnimPathHelper(playerData.positions, ColorHasher.hex(playerData.name), rs.scene);
+  // }
 
   return mixer;
 }

@@ -1,5 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, Texture } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Object3D, Scene, Texture } from 'three';
 import { Replay } from '../model/replay/replay';
 import { BodyModel } from 'rl-loadout-lib';
 

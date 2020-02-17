@@ -12,8 +12,14 @@
   <span>animtime: {{sceneManager.currentAnimationTime}}</span>
   <span>frame: {{sceneManager.currentFrame}}</span>
   <span>time: {{sceneManager.currentTime}}</span>
-  <span *ngIf="sceneManager.rs.models.ball">ballpos: {{sceneManager.rs.models.ball.position.x}} {{sceneManager.rs.models.ball.position.y}} {{sceneManager.rs.models.ball.position.z}}</span>
-  <span *ngIf="sceneManager.rs.models.ball">ballrot: {{sceneManager.rs.models.ball.rotation.x}} {{sceneManager.rs.models.ball.rotation.y}} {{sceneManager.rs.models.ball.rotation.z}}</span>
+  <span>ballframe: {{sceneManager.ballFrame}}</span>
+  <span *ngIf="sceneManager.rs.models.ball">
+    ballpos: {{sceneManager.rs.models.ball.position.x}} {{sceneManager.rs.models.ball.position.y}} {{sceneManager.rs.models.ball.position.z}}
+  </span>
+  <span *ngIf="sceneManager.rs.models.ball">
+    ballrot: {{sceneManager.rs.models.ball.rotation.x}} {{sceneManager.rs.models.ball.rotation.y}} {{sceneManager.rs.models.ball.rotation.z}}
+  </span>
+  <span *ngIf="sceneManager.rs.models.ball">ballspeed: {{sceneManager.getBallSpeed()}}</span>
 </div>
 
 <div class="stats-container" #statsDiv></div>
