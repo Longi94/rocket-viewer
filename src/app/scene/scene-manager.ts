@@ -2,16 +2,18 @@ import { Replay } from '../model/replay/replay';
 import {
   AmbientLight,
   Color,
-  DefaultLoadingManager, DirectionalLight, DirectionalLightHelper,
+  DefaultLoadingManager,
+  DirectionalLight,
+  DirectionalLightHelper,
   PerspectiveCamera,
-  Scene, Texture,
+  Scene,
+  Texture,
   TextureLoader,
   WebGLRenderer,
   WebGLRenderTarget,
   WebGLRenderTargetCube
 } from 'three';
-import { PromiseLoader, GlobalWebGLContext } from 'rl-loadout-lib';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GlobalWebGLContext, PromiseLoader } from 'rl-loadout-lib';
 import { PMREMGenerator } from 'three/examples/jsm/pmrem/PMREMGenerator';
 import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
 import { loadMap } from './loader/map';
@@ -20,6 +22,8 @@ import { loadBall } from './loader/ball';
 import { setFromQuaternion } from '../util/three';
 import { AnimationManager } from './anim/animation-manager';
 import { loadCar } from './loader/car';
+import { CameraManager } from './camera/camera-manager';
+import { CameraType } from './camera/camera-type';
 
 export class SceneManager {
 
@@ -29,6 +33,7 @@ export class SceneManager {
   private cubeRenderTarget: WebGLRenderTarget;
 
   animationManager: AnimationManager;
+  cameraManager: CameraManager;
 
   currentAnimationTime: number;
   currentTime: number;
@@ -50,10 +55,12 @@ export class SceneManager {
 
     const width = canvasContainerElement.offsetWidth;
     const height = canvasContainerElement.offsetHeight;
-    this.rs.camera = new PerspectiveCamera(70, width / height, 0.01, 100000);
-    this.rs.camera.position.x = 1679.7478335547376;
-    this.rs.camera.position.y = 580.2658014964849;
-    this.rs.camera.position.z = -917.4632500987678;
+    const camera = new PerspectiveCamera(100, width / height, 0.01, 100000);
+    camera.position.x = 1679.7478335547376;
+    camera.position.y = 580.2658014964849;
+    camera.position.z = -917.4632500987678;
+
+    this.cameraManager = new CameraManager(camera);
 
     this.rs.scene = new Scene();
     this.rs.scene.background = new Color('#AAAAAA');
@@ -64,12 +71,6 @@ export class SceneManager {
       logarithmicDepthBuffer: true
     });
     this.renderer.setSize(width, height);
-
-    this.rs.controls = new OrbitControls(this.rs.camera, this.renderer.domElement);
-    this.rs.controls.enablePan = false;
-    this.rs.controls.minDistance = 100;
-    this.rs.controls.maxDistance = 10000;
-    this.rs.controls.update();
 
     this.addLights();
 
@@ -129,8 +130,7 @@ export class SceneManager {
 
     if (canvasElement.width !== width || canvasElement.height !== height) {
       this.renderer.setSize(width, height, false);
-      this.rs.camera.aspect = width / height;
-      this.rs.camera.updateProjectionMatrix();
+      this.cameraManager.resize(width, height);
     }
   }
 
@@ -184,13 +184,15 @@ export class SceneManager {
       body.scene.quaternion.w = replay.frame_data.players[playerId].rotations[3];
     }
 
+    this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
     this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs);
   }
 
   render(time: number) {
+    this.cameraManager.update(this.rs);
     if (this.currentAnimationTime == undefined) {
       this.currentAnimationTime = time;
-      this.renderer.render(this.rs.scene, this.rs.camera);
+      this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
       return;
     }
 
@@ -205,7 +207,7 @@ export class SceneManager {
 
       this.animationManager?.update(this.currentTime);
     }
-    this.renderer.render(this.rs.scene, this.rs.camera);
+    this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     this.currentAnimationTime = time;
   }
 

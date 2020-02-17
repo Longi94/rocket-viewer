@@ -12,12 +12,7 @@ export class ModelStore {
 
 export class ReplayScene {
   models: ModelStore = new ModelStore();
-
   replay: Replay;
-
   scene: Scene;
-  camera: PerspectiveCamera;
-  controls: OrbitControls;
-
   envMap: Texture;
 }
