@@ -185,7 +185,7 @@ export class SceneManager {
     }
 
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
-    this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs);
+    this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs, this.debug);
   }
 
   render(time: number) {

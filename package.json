@@ -24,6 +24,7 @@
     "@angular/platform-browser": "~9.0.0",
     "@angular/platform-browser-dynamic": "~9.0.0",
     "@angular/router": "~9.0.0",
+    "color-hash": "^1.0.3",
     "ng5-slider": "^1.2.4",
     "rl-loadout-lib": "^0.5.1",
     "rxjs": "~6.5.4",
