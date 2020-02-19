@@ -13,7 +13,7 @@
   justify-content: center;
   flex-flow: column;
   font-size: 16px;
-  z-index: 1000;
+  z-index: 500;
 }
 
 .upload-div span {
@@ -26,7 +26,7 @@
 }
 
 .playback-control-div {
-  z-index: 1500;
+  z-index: 500;
   position: absolute;
   bottom: 0;
   width: 100%;

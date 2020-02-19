@@ -5,16 +5,11 @@
   padding: 16px;
   box-sizing: border-box;
   align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
 
   .time-slider {
+    margin-left: 16px;
     flex-grow: 1;
     margin-top: 15px;
-  }
-
-  .play-button {
-    margin-right: 16px;
-  }
-  .more-button {
-    margin-left: 16px;
   }
 }

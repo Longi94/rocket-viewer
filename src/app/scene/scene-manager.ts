@@ -24,6 +24,7 @@ import { AnimationManager } from './anim/animation-manager';
 import { loadCar } from './loader/car';
 import { CameraManager } from './camera/camera-manager';
 import { CameraType } from './camera/camera-type';
+import { PlaybackInfo, PlayerPlaybackInfo } from '../model/playback-info';
 
 export class SceneManager {
 
@@ -38,8 +39,8 @@ export class SceneManager {
   currentAnimationTime: number;
   currentTime: number;
   currentFrame: number;
-  maxTime: number;
-  minTime: number;
+
+  playbackInfo: PlaybackInfo = new PlaybackInfo();
 
   private isPlaying = false;
   private playbackSpeed = 1;
@@ -137,9 +138,10 @@ export class SceneManager {
   async prepareReplay(replay: Replay) {
     this.rs.replay = replay;
 
-    this.minTime = replay.frame_data.times[9];
-    this.maxTime = replay.frame_data.times[replay.frame_data.times.length - 1];
-    this.currentTime = this.minTime;
+    this.playbackInfo.players = Object.values(this.rs.replay.frame_data.players).map(PlayerPlaybackInfo.from);
+    this.playbackInfo.minTime = replay.frame_data.times[9];
+    this.playbackInfo.maxTime = replay.frame_data.times[replay.frame_data.times.length - 1];
+    this.currentTime = this.playbackInfo.minTime;
     this.currentFrame = 0;
 
     // Load necessary models
@@ -249,6 +251,14 @@ export class SceneManager {
 
   setSpeed(speed: number) {
     this.playbackSpeed = speed;
+  }
+
+  changeCamera(type: CameraType, targetPlayer?: number) {
+    if (targetPlayer == undefined) {
+      this.cameraManager.setCamera(type);
+    } else {
+      this.cameraManager.setCamera(type, this.rs.models.players[targetPlayer].scene);
+    }
   }
 
   // anything down here is for debug purposes only

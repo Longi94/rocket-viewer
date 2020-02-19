@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { PlaybackCameraChange, PlaybackInfo } from '../model/playback-info';
+import { CameraType } from '../scene/camera/camera-type';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +14,8 @@ export class PlaybackService {
   private pauseSubject = new Subject<any>();
   onPause = this.pauseSubject.asObservable();
 
-  private timeLimitSubject = new Subject<number[]>();
-  onTimeLimit = this.timeLimitSubject.asObservable();
+  private playbackInfoSubject = new Subject<PlaybackInfo>();
+  onPlaybackInfo = this.playbackInfoSubject.asObservable();
 
   private timeUpdateSubject = new Subject<number>();
   onTimeUpdate = this.timeUpdateSubject.asObservable();
@@ -23,6 +25,9 @@ export class PlaybackService {
 
   private speedSubject = new Subject<number>();
   onSpeed = this.speedSubject.asObservable();
+
+  private cameraChangeSubject = new Subject<PlaybackCameraChange>();
+  onCameraChange = this.cameraChangeSubject.asObservable();
 
   constructor() {
   }
@@ -35,8 +40,8 @@ export class PlaybackService {
     this.pauseSubject.next();
   }
 
-  setLimits(min: number, max: number) {
-    this.timeLimitSubject.next([min, max]);
+  setPlaybackInfo(playbackInfo: PlaybackInfo) {
+    this.playbackInfoSubject.next(playbackInfo);
   }
 
   updateTime(time: number) {
@@ -49,5 +54,12 @@ export class PlaybackService {
 
   setSpeed(speed: number) {
     this.speedSubject.next(speed);
+  }
+
+  setCamera(type: CameraType, playerId?: number) {
+    this.cameraChangeSubject.next({
+      type: type,
+      targetPlayer: playerId
+    });
   }
 }

@@ -45,6 +45,7 @@ export class CanvasComponent implements OnInit {
     this.playbackService.onPause.subscribe(() => this.sceneManager.pause());
     this.playbackService.onTimeScroll.subscribe(t => this.sceneManager.scrollToTime(t));
     this.playbackService.onSpeed.subscribe(t => this.sceneManager.setSpeed(t));
+    this.playbackService.onCameraChange.subscribe(e => this.sceneManager.changeCamera(e.type, e.targetPlayer));
 
     this.sceneManager.onTimeUpdate = time => this.playbackService.updateTime(time);
 
@@ -57,7 +58,7 @@ export class CanvasComponent implements OnInit {
       this.isLoading = true;
       this.sceneManager.prepareReplay(replay).then(() => {
         this.isLoading = false;
-        this.playbackService.setLimits(this.sceneManager.minTime, this.sceneManager.maxTime);
+        this.playbackService.setPlaybackInfo(this.sceneManager.playbackInfo);
       });
     }
   }

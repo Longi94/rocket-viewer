@@ -2,6 +2,9 @@
   <button class="play-button" mat-icon-button (click)="playClick()">
     <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
   </button>
+  <button class="more-button" mat-icon-button [matMenuTriggerFor]="moreMenu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
   <ng5-slider
     class="time-slider"
     [options]="sliderOptions"
@@ -9,12 +12,10 @@
     (userChangeStart)="slideStart($event)"
     (userChangeEnd)="slideEnd($event)"
   ></ng5-slider>
-  <button class="more-button" mat-icon-button [matMenuTriggerFor]="moreMenu">
-    <mat-icon>more_vert</mat-icon>
-  </button>
 </div>
 
 <mat-menu #moreMenu="matMenu">
+  <button mat-menu-item [matMenuTriggerFor]="cameraMenu">Camera</button>
   <button mat-menu-item [matMenuTriggerFor]="playbackSpeedMenu">Playback speed</button>
 </mat-menu>
 
@@ -24,4 +25,13 @@
     <mat-icon *ngIf="speed !== selectedSpeed">radio_button_unchecked</mat-icon>
     <span>{{speed}}</span>
   </button>
+</mat-menu>
+
+<mat-menu #cameraMenu="matMenu">
+  <button mat-menu-item [matMenuTriggerFor]="playerCameraMenu">Player</button>
+  <button mat-menu-item (click)="setCameraFree()">Free</button>
+</mat-menu>
+
+<mat-menu #playerCameraMenu="matMenu">
+  <button *ngFor="let player of players" mat-menu-item (click)="setPlayerCamera(player.id)">{{player.name}}</button>
 </mat-menu>

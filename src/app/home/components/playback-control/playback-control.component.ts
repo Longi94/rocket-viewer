@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { PlaybackService } from '../../../service/playback.service';
 import { ChangeContext, Options } from 'ng5-slider';
+import { PlayerPlaybackInfo } from '../../../model/playback-info';
+import { CameraType } from '../../../scene/camera/camera-type';
 
 @Component({
   selector: 'app-playback-control',
@@ -18,11 +20,13 @@ export class PlaybackControlComponent implements OnInit {
 
   playbackSpeeds = [0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   selectedSpeed = 1;
+  players: PlayerPlaybackInfo[];
 
   constructor(private readonly playbackService: PlaybackService) {
-    this.playbackService.onTimeLimit.subscribe(limits => {
-      this.sliderOptions = this.createSliderOption(limits[0], limits[1]);
-      this.currentTime = limits[0];
+    this.playbackService.onPlaybackInfo.subscribe(info => {
+      this.players = info.players;
+      this.sliderOptions = this.createSliderOption(info.minTime, info.maxTime);
+      this.currentTime = info.minTime;
     });
     this.playbackService.onTimeUpdate.subscribe(t => {
       this.currentTime = t;
@@ -69,5 +73,13 @@ export class PlaybackControlComponent implements OnInit {
   setSpeed(speed: number) {
     this.selectedSpeed = speed;
     this.playbackService.setSpeed(speed);
+  }
+
+  setCameraFree() {
+    this.playbackService.setCamera(CameraType.FREE_FLY);
+  }
+
+  setPlayerCamera(playerId: number) {
+    this.playbackService.setCamera(CameraType.PLAYER_VIEW, playerId);
   }
 }
