@@ -13,16 +13,16 @@ export class PlaybackControlComponent implements OnInit {
 
   sliderValue: number;
   currentTime: number;
-  sliderOptions: Options = this.createSliderOption(100);
+  sliderOptions: Options = this.createSliderOption(0, 100);
   isSliding = false;
 
-  playbackSpeeds = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  playbackSpeeds = [0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   selectedSpeed = 1;
 
   constructor(private readonly playbackService: PlaybackService) {
-    this.playbackService.onTimeLimit.subscribe(max => {
-      this.sliderOptions = this.createSliderOption(max);
-      this.currentTime = 0;
+    this.playbackService.onTimeLimit.subscribe(limits => {
+      this.sliderOptions = this.createSliderOption(limits[0], limits[1]);
+      this.currentTime = limits[0];
     });
     this.playbackService.onTimeUpdate.subscribe(t => {
       this.currentTime = t;
@@ -32,10 +32,11 @@ export class PlaybackControlComponent implements OnInit {
     });
   }
 
-  createSliderOption(max: number): Options {
+  createSliderOption(min: number, max: number): Options {
+    this.sliderValue = min;
     return {
       animate: false,
-      floor: 0,
+      floor: min,
       ceil: max,
       step: 0.01,
       hidePointerLabels: true,

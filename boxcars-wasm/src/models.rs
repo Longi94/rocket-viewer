@@ -1,6 +1,6 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use boxcars::{HeaderProp, KeyFrame, TickMark};
+use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
@@ -53,6 +53,7 @@ pub struct BallData {
     pub positions: Vec<f32>,
     pub position_times: Vec<f32>,
     pub rotations: Vec<f32>,
+    pub linear_velocity: Vec<Option<Vector3f>>,
 }
 
 impl BallData {
@@ -62,6 +63,7 @@ impl BallData {
             positions: Vec::new(),
             position_times: Vec::new(),
             rotations: Vec::new(),
+            linear_velocity: Vec::new(),
         }
     }
 }

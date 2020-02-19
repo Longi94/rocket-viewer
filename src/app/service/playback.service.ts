@@ -12,7 +12,7 @@ export class PlaybackService {
   private pauseSubject = new Subject<any>();
   onPause = this.pauseSubject.asObservable();
 
-  private timeLimitSubject = new Subject<number>();
+  private timeLimitSubject = new Subject<number[]>();
   onTimeLimit = this.timeLimitSubject.asObservable();
 
   private timeUpdateSubject = new Subject<number>();
@@ -35,8 +35,8 @@ export class PlaybackService {
     this.pauseSubject.next();
   }
 
-  setLimits(max: number) {
-    this.timeLimitSubject.next(max);
+  setLimits(min: number, max: number) {
+    this.timeLimitSubject.next([min, max]);
   }
 
   updateTime(time: number) {

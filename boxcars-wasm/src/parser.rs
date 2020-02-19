@@ -1,5 +1,5 @@
 use crate::models::{ReplayVersion, FrameData};
-use boxcars::{Replay, Attribute};
+use boxcars::{Replay, Attribute, Vector3f};
 use std::collections::HashMap;
 use crate::actor::{get_handler, ActorHandler};
 
@@ -89,26 +89,45 @@ impl<'a> FrameParser<'a> {
                     Some(object_name) => object_name
                 };
 
-                handler.update(real_time, i, &mut frame_data, &attributes, &object_name, &actors,
+                handler.update(i, &mut frame_data, &attributes, &object_name, &actors,
                                &actor_objects);
             }
         }
 
+//        let mut c_total: f32 = 0.0;
+//        for i in 0..frame_data.ball_data.position_times.len() - 1 {
+//            let dt = frame_data.ball_data.position_times[i + 1] - frame_data.ball_data.position_times[i];
+//            let v_vec = v_len(frame_data.ball_data.linear_velocity[i]);
+//            let p_vec = p_len(&frame_data.ball_data.positions, i);
+//            let vp = p_vec / dt;
+//            let d2 = p_vec / v_vec;
+//
+//            if v_vec == 0.0 {
+//                c_total += dt;
+//            } else {
+//                c_total += d2;
+//            }
+//
+//
+//            //println!("DIST {} | V1 {} | V2 {} | D1 {} | D2 {} | T1 {} | T2 {}", p_vec, v_vec, vp, dt, d2,
+//            frame_data.ball_data.position_times[i + 1], c_total);
+//        }
+
         // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
         // the interpolation to slowly drift the models. Add artificial frames to prevent that.
-        fix_position_frames(
-            &mut frame_data.ball_data.positions,
-            &mut frame_data.ball_data.rotations,
-            &mut frame_data.ball_data.position_times
-        );
-
-        for (_, player_data) in &mut frame_data.players {
-            fix_position_frames(
-                &mut player_data.positions,
-                &mut player_data.rotations,
-                &mut player_data.position_times
-            );
-        }
+//        fix_position_frames(
+//            &mut frame_data.ball_data.positions,
+//            &mut frame_data.ball_data.rotations,
+//            &mut frame_data.ball_data.position_tim    es
+//        );
+//
+//        for (_, player_data) in &mut frame_data.players {
+//            fix_position_frames(
+//                &mut player_data.positions,
+//                &mut player_data.rotations,
+//                &mut player_data.position_times
+//            );
+//        }
 
         Ok(frame_data)
     }
@@ -128,4 +147,19 @@ fn fix_position_frames(p: &mut Vec<f32>, q: &mut Vec<f32>, times: &mut Vec<f32>)
             q.insert((i + 1) * 4, q[i * 4]);
         }
     }
+}
+
+
+fn v_len(v: Option<Vector3f>) -> f32 {
+    match v {
+        None => 0.0,
+        Some(v) => (v.x.powi(2) + v.y.powi(2) + v.z.powi(2)).sqrt()
+    }
+}
+
+fn p_len(p: &Vec<f32>, i: usize) -> f32 {
+    return ((p[i * 3] - p[(i + 1) * 3]).powi(2) +
+        (p[i * 3 + 1] - p[(i + 1) * 3 + 1]).powi(2) +
+        (p[i * 3 + 2] - p[(i + 1) * 3 + 2]).powi(2)
+    ).sqrt();
 }

@@ -39,7 +39,7 @@ export class SceneManager {
   currentTime: number;
   currentFrame: number;
   maxTime: number;
-  realFrameTimes: number[];
+  minTime: number;
 
   private isPlaying = false;
   private playbackSpeed = 1;
@@ -137,17 +137,9 @@ export class SceneManager {
   async prepareReplay(replay: Replay) {
     this.rs.replay = replay;
 
-    this.realFrameTimes = [];
-    let total = 0;
-
-    for (let i = 0; i < replay.frame_data.deltas.length; i++) {
-      const delta = replay.frame_data.deltas[i];
-      total += delta;
-      this.realFrameTimes.push(total);
-    }
-
-    this.maxTime = total;
-    this.currentTime = 0;
+    this.minTime = replay.frame_data.times[9];
+    this.maxTime = replay.frame_data.times[replay.frame_data.times.length - 1];
+    this.currentTime = this.minTime;
     this.currentFrame = 0;
 
     // Load necessary models
@@ -185,7 +177,7 @@ export class SceneManager {
     }
 
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
-    this.animationManager = new AnimationManager(this.realFrameTimes, replay.frame_data, this.rs, this.debug);
+    this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
   }
 
   render(time: number) {
@@ -200,7 +192,7 @@ export class SceneManager {
       const d = time - this.currentAnimationTime;
       this.currentTime += d * this.playbackSpeed / 1000.0;
 
-      while (this.currentTime > this.realFrameTimes[this.currentFrame + 1]) {
+      while (this.currentTime > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
         this.currentFrame++;
       }
 
@@ -229,7 +221,7 @@ export class SceneManager {
   scrollToTime(time: number) {
 
     if (time > this.currentTime) {
-      while (time > this.realFrameTimes[this.currentFrame + 1]) {
+      while (time > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
         this.currentFrame++;
       }
 
@@ -240,7 +232,7 @@ export class SceneManager {
       }
 
     } else if (time < this.currentTime) {
-      while (time < this.realFrameTimes[this.currentFrame - 1]) {
+      while (time < this.rs.replay.frame_data.times[this.currentFrame - 1]) {
         this.currentFrame--;
       }
 
