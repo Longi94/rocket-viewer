@@ -1,7 +1,8 @@
 use crate::models::{ReplayVersion, FrameData};
-use boxcars::{Replay, Attribute, Vector3f};
+use boxcars::{Replay, Attribute};
 use std::collections::HashMap;
 use crate::actor::{get_handler, ActorHandler};
+use crate::clean::clean_frame_data;
 
 pub struct FrameParser<'a> {
     pub replay: &'a Replay
@@ -29,13 +30,10 @@ impl<'a> FrameParser<'a> {
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
         let mut actors: HashMap<i32, HashMap<String, Attribute>> = HashMap::new();
         let mut actor_objects: HashMap<i32, String> = HashMap::new();
-        let mut real_time: f32 = 0.0;
 
         for (i, frame) in frames.frames.iter().enumerate() {
             frame_data.times.push(frame.time);
             frame_data.deltas.push(frame.delta);
-
-            real_time += frame.delta;
 
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);
@@ -94,72 +92,23 @@ impl<'a> FrameParser<'a> {
             }
         }
 
-//        let mut c_total: f32 = 0.0;
-//        for i in 0..frame_data.ball_data.position_times.len() - 1 {
-//            let dt = frame_data.ball_data.position_times[i + 1] - frame_data.ball_data.position_times[i];
-//            let v_vec = v_len(frame_data.ball_data.linear_velocity[i]);
-//            let p_vec = p_len(&frame_data.ball_data.positions, i);
-//            let vp = p_vec / dt;
-//            let d2 = p_vec / v_vec;
-//
-//            if v_vec == 0.0 {
-//                c_total += dt;
-//            } else {
-//                c_total += d2;
-//            }
-//
-//
-//            //println!("DIST {} | V1 {} | V2 {} | D1 {} | D2 {} | T1 {} | T2 {}", p_vec, v_vec, vp, dt, d2,
-//            frame_data.ball_data.position_times[i + 1], c_total);
-//        }
+        let frame_data = clean_frame_data(frame_data);
 
-        // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
-        // the interpolation to slowly drift the models. Add artificial frames to prevent that.
-//        fix_position_frames(
-//            &mut frame_data.ball_data.positions,
-//            &mut frame_data.ball_data.rotations,
-//            &mut frame_data.ball_data.position_tim    es
-//        );
-//
-//        for (_, player_data) in &mut frame_data.players {
-//            fix_position_frames(
-//                &mut player_data.positions,
-//                &mut player_data.rotations,
-//                &mut player_data.position_times
-//            );
-//        }
+        // for i in 0..frame_data.ball_data.position_times.len() - 1 {
+        //     if frame_data.ball_data.position_times[i] > 37.55469 {
+        //         break;
+        //     }
+        //     println!("{},{},{},{},{},{},{}  ",
+        //              frame_data.ball_data.position_times[i],
+        //              frame_data.ball_data.positions[i * 3],
+        //              frame_data.ball_data.positions[i * 3 + 1],
+        //              frame_data.ball_data.positions[i * 3 + 2],
+        //              frame_data.ball_data.linear_velocity[i].x,
+        //              frame_data.ball_data.linear_velocity[i].y,
+        //              frame_data.ball_data.linear_velocity[i].z,
+        //     );
+        // }
 
         Ok(frame_data)
     }
-}
-
-fn fix_position_frames(p: &mut Vec<f32>, q: &mut Vec<f32>, times: &mut Vec<f32>) {
-    for i in (0..(times.len() - 2)).rev() {
-        if times[i + 1] - times[i] > 1.0 {
-            times.insert(i + 1, times[i + 1] - 1.0 / 30.0);
-            p.insert((i + 1) * 3, p[i * 3 + 2]);
-            p.insert((i + 1) * 3, p[i * 3 + 1]);
-            p.insert((i + 1) * 3, p[i * 3]);
-
-            q.insert((i + 1) * 4, q[i * 4 + 3]);
-            q.insert((i + 1) * 4, q[i * 4 + 2]);
-            q.insert((i + 1) * 4, q[i * 4 + 1]);
-            q.insert((i + 1) * 4, q[i * 4]);
-        }
-    }
-}
-
-
-fn v_len(v: Option<Vector3f>) -> f32 {
-    match v {
-        None => 0.0,
-        Some(v) => (v.x.powi(2) + v.y.powi(2) + v.z.powi(2)).sqrt()
-    }
-}
-
-fn p_len(p: &Vec<f32>, i: usize) -> f32 {
-    return ((p[i * 3] - p[(i + 1) * 3]).powi(2) +
-        (p[i * 3 + 1] - p[(i + 1) * 3 + 1]).powi(2) +
-        (p[i * 3 + 2] - p[(i + 1) * 3 + 2]).powi(2)
-    ).sqrt();
 }
