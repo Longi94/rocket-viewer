@@ -4,6 +4,41 @@ use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
+pub struct Vector3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+impl Vector3 {
+    pub fn from_vector3f(v: Vector3f) -> Option<Vector3> {
+        Some(Vector3 {
+            x: v.x,
+            y: v.y,
+            z: v.z,
+        })
+    }
+
+    pub fn subtract(&mut self, a: &Vector3, b: &Vector3) {
+        self.x = a.x - b.x;
+        self.y = a.y - b.y;
+        self.z = a.z - b.z;
+    }
+
+    pub fn len(&self) -> f32 {
+        return (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt();
+    }
+
+    pub fn dot(&self, other: &Vector3) -> f32 {
+        return self.x * other.x + self.y * other.y + self.z * other.z;
+    }
+
+    pub fn cos_angle(&self, other: &Vector3) -> f32 {
+        return self.dot(other) / (self.len() * other.len());
+    }
+}
+
+#[derive(Serialize, Debug)]
 pub struct CleanedReplay {
     pub major_version: i32,
     pub minor_version: i32,
@@ -53,7 +88,7 @@ pub struct BallData {
     pub positions: Vec<f32>,
     pub position_times: Vec<f32>,
     pub rotations: Vec<f32>,
-    pub linear_velocity: Vec<Option<Vector3f>>,
+    pub linear_velocity: Vec<Vector3>,
 }
 
 impl BallData {
@@ -77,6 +112,7 @@ pub struct PlayerData {
     pub position_times: Vec<f32>,
     pub rotations: Vec<f32>,
     pub visible: Vec<bool>,
+    pub linear_velocity: Vec<Vector3>,
 }
 
 impl PlayerData {
@@ -89,6 +125,7 @@ impl PlayerData {
             position_times: Vec::new(),
             rotations: Vec::new(),
             visible: Vec::new(),
+            linear_velocity: Vec::new(),
         }
     }
 }

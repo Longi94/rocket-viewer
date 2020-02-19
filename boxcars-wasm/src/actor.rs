@@ -1,5 +1,5 @@
-use boxcars::{Attribute, Vector3f};
-use crate::models::{FrameData, BallType, PlayerData};
+use boxcars::{Attribute};
+use crate::models::{FrameData, BallType, PlayerData, Vector3};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 fn get_actor_attribute(actor_id: i32, attr_name: &str,
@@ -49,25 +49,9 @@ impl ActorHandler for BallHandler {
                         frame_data.ball_data.rotations.push(rigid_body.rotation.w);
 
                         frame_data.ball_data.position_times.push(frame_data.times[frame]);
-//                        frame_data.ball_data.linear_velocity.push(rigid_body.linear_velocity);
-
-//                        let null_vec = Vector3f {
-//                            x: 0.0,
-//                            y: 0.0,
-//                            z: 0.0,
-//                        };
-//
-//                        println!("{},{},{},{},{},{},{},{},{}",
-//                                 _frame,
-//                                 frame_data.times[_frame],
-//                                 time,
-//                                 rigid_body.location.x,
-//                                 rigid_body.location.y,
-//                                 rigid_body.location.z,
-//                                 rigid_body.linear_velocity.unwrap_or(null_vec).x,
-//                                 rigid_body.linear_velocity.unwrap_or(null_vec).y,
-//                                 rigid_body.linear_velocity.unwrap_or(null_vec).z,
-//                        )
+                        frame_data.ball_data.linear_velocity.push(rigid_body.linear_velocity
+                            .and_then(Vector3::from_vector3f)
+                            .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
                     }
                     _ => return
                 }
@@ -117,6 +101,9 @@ impl ActorHandler for CarHandler {
                         player_data.rotations.push(rigid_body.rotation.w);
 
                         player_data.position_times.push(frame_data.times[frame]);
+                        player_data.linear_velocity.push(rigid_body.linear_velocity
+                            .and_then(Vector3::from_vector3f)
+                            .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
                     }
                     _ => return
                 }
