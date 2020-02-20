@@ -8,6 +8,7 @@ export class CameraManager {
   private target: Object3D;
 
   private pointingVector = new Vector3();
+  private tempVector = new Vector3();
 
   constructor(private camera: PerspectiveCamera) {
   }
@@ -26,17 +27,18 @@ export class CameraManager {
       if (this.target == undefined) {
         return;
       }
-      this.camera.lookAt(rs.models.ball.position);
-      this.camera.position.copy(this.target.position);
-      this.camera.position.y += 100;
 
       this.pointingVector.subVectors(rs.models.ball.position, this.camera.position)
         .normalize()
         .multiplyScalar(-280);
 
-      this.camera.position.add(this.pointingVector);
+      this.tempVector.copy(this.target.position);
+      this.tempVector.y += 100;
+      this.tempVector.add(this.pointingVector);
+      this.tempVector.y = Math.max(this.tempVector.y, 10);
 
-      this.camera.position.y = Math.max(this.camera.position.y, 10);
+      this.camera.position.lerp(this.tempVector, 0.9);
+      this.camera.lookAt(rs.models.ball.position);
     }
   }
 
