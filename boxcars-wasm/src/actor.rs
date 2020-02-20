@@ -1,5 +1,5 @@
 use boxcars::{Attribute};
-use crate::models::{FrameData, BallType, PlayerData, Vector3};
+use crate::models::{FrameData, BallType, PlayerData};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 fn get_actor_attribute(actor_id: i32, attr_name: &str,
@@ -35,26 +35,7 @@ impl ActorHandler for BallHandler {
 
         if updated_attr == "TAGame.RBActor_TA:ReplicatedRBState" {
             match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
-                Some(rigid_body) => match rigid_body {
-                    Attribute::RigidBody(rigid_body) => {
-                        // convert vectors from Z-up to Y-up coordinate system
-                        frame_data.ball_data.positions.push(rigid_body.location.x);
-                        frame_data.ball_data.positions.push(rigid_body.location.z);
-                        frame_data.ball_data.positions.push(rigid_body.location.y);
-
-                        // convert quaternions from Z-up to Y-up coordinate system
-                        frame_data.ball_data.rotations.push(-rigid_body.rotation.x);
-                        frame_data.ball_data.rotations.push(-rigid_body.rotation.z);
-                        frame_data.ball_data.rotations.push(-rigid_body.rotation.y);
-                        frame_data.ball_data.rotations.push(rigid_body.rotation.w);
-
-                        frame_data.ball_data.position_times.push(real_time);
-                        frame_data.ball_data.linear_velocity.push(rigid_body.linear_velocity
-                            .and_then(Vector3::from_vector3f)
-                            .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
-                    }
-                    _ => return
-                }
+                Some(rigid_body) => frame_data.ball_data.body_states.push(real_time, &rigid_body),
                 _ => return
             }
         }
@@ -87,26 +68,7 @@ impl ActorHandler for CarHandler {
 
         if updated_attr == "TAGame.RBActor_TA:ReplicatedRBState" {
             match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
-                Some(rigid_body) => match rigid_body {
-                    Attribute::RigidBody(rigid_body) => {
-                        // convert vectors from Z-up to Y-up coordinate system
-                        player_data.positions.push(rigid_body.location.x);
-                        player_data.positions.push(rigid_body.location.z);
-                        player_data.positions.push(rigid_body.location.y);
-
-                        // convert quaternions from Z-up to Y-up coordinate system
-                        player_data.rotations.push(-rigid_body.rotation.x);
-                        player_data.rotations.push(-rigid_body.rotation.z);
-                        player_data.rotations.push(-rigid_body.rotation.y);
-                        player_data.rotations.push(rigid_body.rotation.w);
-
-                        player_data.position_times.push(real_time);
-                        player_data.linear_velocity.push(rigid_body.linear_velocity
-                            .and_then(Vector3::from_vector3f)
-                            .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
-                    }
-                    _ => return
-                }
+                Some(rigid_body) => player_data.body_states.push(real_time, &rigid_body),
                 _ => return
             }
         }

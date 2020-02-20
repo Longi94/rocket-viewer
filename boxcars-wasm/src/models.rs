@@ -1,6 +1,6 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f};
+use boxcars::{HeaderProp, KeyFrame, TickMark, Vector3f, Attribute};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
@@ -71,6 +71,70 @@ impl FrameData {
     }
 }
 
+#[derive(Serialize, Debug)]
+pub struct BodyStates {
+    pub positions: Vec<f32>,
+    pub times: Vec<f32>,
+    pub rotations: Vec<f32>,
+    pub linear_velocity: Vec<Vector3>,
+}
+
+fn compare(v: &Vector3, v3f: &Option<Vector3f>) -> bool {
+    match v3f {
+        None => false,
+        Some(v3f) => {
+            v.x == v3f.x && v.y == v3f.z && v.z == v3f.y
+        }
+    }
+}
+
+impl BodyStates {
+    fn new() -> BodyStates {
+        BodyStates {
+            positions: Vec::new(),
+            times: Vec::new(),
+            rotations: Vec::new(),
+            linear_velocity: Vec::new(),
+        }
+    }
+
+    pub fn push(&mut self, time: f32, attr: &Attribute) {
+        match attr {
+            Attribute::RigidBody(rigid_body) => {
+                let current_len = self.times.len();
+                if current_len > 0 &&
+                    self.positions[(current_len - 1) * 3] == rigid_body.location.x &&
+                    self.positions[(current_len - 1) * 3 + 1] == rigid_body.location.z &&
+                    self.positions[(current_len - 1) * 3 + 2] == rigid_body.location.y &&
+                    self.rotations[(current_len - 1) * 4] == -rigid_body.rotation.x &&
+                    self.rotations[(current_len - 1) * 4 + 1] == -rigid_body.rotation.z &&
+                    self.rotations[(current_len - 1) * 4 + 2] == -rigid_body.rotation.y &&
+                    self.rotations[(current_len - 1) * 4 + 3] == rigid_body.rotation.w {
+                    // ignore dupes, if this is legit it will be caught by the cleaner
+                    return;
+                }
+
+                // convert vectors from Z-up to Y-up coordinate system
+                self.positions.push(rigid_body.location.x);
+                self.positions.push(rigid_body.location.z);
+                self.positions.push(rigid_body.location.y);
+
+                // convert quaternions from Z-up to Y-up coordinate system
+                self.rotations.push(-rigid_body.rotation.x);
+                self.rotations.push(-rigid_body.rotation.z);
+                self.rotations.push(-rigid_body.rotation.y);
+                self.rotations.push(rigid_body.rotation.w);
+
+                self.times.push(time);
+                self.linear_velocity.push(rigid_body.linear_velocity
+                    .and_then(Vector3::from_vector3f)
+                    .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
+            }
+            _ => return
+        }
+    }
+}
+
 // BALL
 #[derive(Serialize, Debug, PartialEq, Copy, Clone)]
 pub enum BallType {
@@ -85,20 +149,14 @@ pub enum BallType {
 #[derive(Serialize, Debug)]
 pub struct BallData {
     pub ball_type: BallType,
-    pub positions: Vec<f32>,
-    pub position_times: Vec<f32>,
-    pub rotations: Vec<f32>,
-    pub linear_velocity: Vec<Vector3>,
+    pub body_states: BodyStates,
 }
 
 impl BallData {
     pub fn new() -> Self {
         BallData {
             ball_type: BallType::Unknown,
-            positions: Vec::new(),
-            position_times: Vec::new(),
-            rotations: Vec::new(),
-            linear_velocity: Vec::new(),
+            body_states: BodyStates::new(),
         }
     }
 }
@@ -108,11 +166,8 @@ pub struct PlayerData {
     pub id: i32,
     pub name: Option<String>,
     pub team: Option<u32>,
-    pub positions: Vec<f32>,
-    pub position_times: Vec<f32>,
-    pub rotations: Vec<f32>,
+    pub body_states: BodyStates,
     pub visible: Vec<bool>,
-    pub linear_velocity: Vec<Vector3>,
 }
 
 impl PlayerData {
@@ -121,11 +176,8 @@ impl PlayerData {
             id: -1,
             name: None,
             team: None,
-            positions: Vec::new(),
-            position_times: Vec::new(),
-            rotations: Vec::new(),
+            body_states: BodyStates::new(),
             visible: Vec::new(),
-            linear_velocity: Vec::new(),
         }
     }
 }

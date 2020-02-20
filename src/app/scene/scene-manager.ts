@@ -137,7 +137,7 @@ export class SceneManager {
 
     this.playbackInfo.players = Object.values(this.rs.replay.frame_data.players).map(PlayerPlaybackInfo.from);
     this.playbackInfo.minTime = 0;
-    this.playbackInfo.maxTime = replay.frame_data.ball_data.position_times[replay.frame_data.ball_data.position_times.length - 1];
+    this.playbackInfo.maxTime = replay.frame_data.ball_data.body_states.times[replay.frame_data.ball_data.body_states.times.length - 1];
     this.currentTime = this.playbackInfo.minTime;
     this.currentFrame = 0;
 
@@ -163,22 +163,22 @@ export class SceneManager {
     this.rs.scene.add(this.rs.models.map);
     this.rs.scene.add(this.rs.models.ball);
 
-    this.rs.models.ball.position.x = replay.frame_data.ball_data.positions[0];
-    this.rs.models.ball.position.y = replay.frame_data.ball_data.positions[1];
-    this.rs.models.ball.position.z = replay.frame_data.ball_data.positions[2];
-    setFromQuaternion(this.rs.models.ball.rotation, replay.frame_data.ball_data.rotations);
+    this.rs.models.ball.position.x = replay.frame_data.ball_data.body_states.positions[0];
+    this.rs.models.ball.position.y = replay.frame_data.ball_data.body_states.positions[1];
+    this.rs.models.ball.position.z = replay.frame_data.ball_data.body_states.positions[2];
+    setFromQuaternion(this.rs.models.ball.rotation, replay.frame_data.ball_data.body_states.rotations);
 
     for (const playerId in this.rs.models.players) {
       const body = this.rs.models.players[playerId];
       body.addToScene(this.rs.scene);
-      body.scene.position.x = replay.frame_data.players[playerId].positions[0];
-      body.scene.position.y = replay.frame_data.players[playerId].positions[1];
-      body.scene.position.z = replay.frame_data.players[playerId].positions[2];
+      body.scene.position.x = replay.frame_data.players[playerId].body_states.positions[0];
+      body.scene.position.y = replay.frame_data.players[playerId].body_states.positions[1];
+      body.scene.position.z = replay.frame_data.players[playerId].body_states.positions[2];
 
-      body.scene.quaternion.x = replay.frame_data.players[playerId].rotations[0];
-      body.scene.quaternion.y = replay.frame_data.players[playerId].rotations[1];
-      body.scene.quaternion.z = replay.frame_data.players[playerId].rotations[2];
-      body.scene.quaternion.w = replay.frame_data.players[playerId].rotations[3];
+      body.scene.quaternion.x = replay.frame_data.players[playerId].body_states.rotations[0];
+      body.scene.quaternion.y = replay.frame_data.players[playerId].body_states.rotations[1];
+      body.scene.quaternion.z = replay.frame_data.players[playerId].body_states.rotations[2];
+      body.scene.quaternion.w = replay.frame_data.players[playerId].body_states.rotations[3];
     }
 
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
@@ -204,12 +204,12 @@ export class SceneManager {
       }
 
       if (this.debug) {
-        while (this.currentTime > this.rs.replay.frame_data.ball_data.position_times[this.ballFrame + 1]) {
+        while (this.currentTime > this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame + 1]) {
           this.ballFrame++;
         }
 
         for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-          while (this.currentTime > this.rs.replay.frame_data.players[playerId].position_times[this.playerFrames[playerId] + 1]) {
+          while (this.currentTime > this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId] + 1]) {
             this.playerFrames[playerId]++;
           }
         }
@@ -242,12 +242,12 @@ export class SceneManager {
       }
 
       if (this.debug) {
-        while (time > this.rs.replay.frame_data.ball_data.position_times[this.ballFrame + 1]) {
+        while (time > this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame + 1]) {
           this.ballFrame++;
         }
 
         for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-          while (time > this.rs.replay.frame_data.players[playerId].position_times[this.playerFrames[playerId] + 1]) {
+          while (time > this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId] + 1]) {
             this.playerFrames[playerId]++;
           }
         }
@@ -259,12 +259,12 @@ export class SceneManager {
       }
 
       if (this.debug) {
-        while (time < this.rs.replay.frame_data.ball_data.position_times[this.ballFrame - 1]) {
+        while (time < this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame - 1]) {
           this.ballFrame--;
         }
 
         for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-          while (time < this.rs.replay.frame_data.players[playerId].position_times[this.playerFrames[playerId] - 1]) {
+          while (time < this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId] - 1]) {
             this.playerFrames[playerId]--;
           }
         }
@@ -295,8 +295,8 @@ export class SceneManager {
   playerFrames: { [id: number]: number } = {};
 
   getBallSpeed(): number {
-    const ballData = this.rs.replay.frame_data.ball_data;
-    const dt = ballData.position_times[this.ballFrame + 1] - ballData.position_times[this.ballFrame];
+    const ballData = this.rs.replay.frame_data.ball_data.body_states;
+    const dt = ballData.times[this.ballFrame + 1] - ballData.times[this.ballFrame];
     this.v1.x = ballData.positions[this.ballFrame * 3];
     this.v1.y = ballData.positions[this.ballFrame * 3 + 1];
     this.v1.z = ballData.positions[this.ballFrame * 3 + 2];
@@ -308,8 +308,8 @@ export class SceneManager {
   }
 
   getPlayerSpeed(id: number) {
-    const playerData = this.rs.replay.frame_data.players[id];
-    const dt = playerData.position_times[this.playerFrames[id] + 1] - playerData.position_times[this.playerFrames[id]];
+    const playerData = this.rs.replay.frame_data.players[id].body_states;
+    const dt = playerData.times[this.playerFrames[id] + 1] - playerData.times[this.playerFrames[id]];
     this.v1.x = playerData.positions[this.playerFrames[id] * 3];
     this.v1.y = playerData.positions[this.playerFrames[id] * 3 + 1];
     this.v1.z = playerData.positions[this.playerFrames[id] * 3 + 2];

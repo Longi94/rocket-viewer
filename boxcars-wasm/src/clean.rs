@@ -1,10 +1,9 @@
 use crate::models::{FrameData, Vector3};
 
 pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
-
-    fix_position_times(&frame_data.ball_data.positions,
-                       &mut frame_data.ball_data.position_times,
-                       &frame_data.ball_data.linear_velocity);
+    smooth_ball_path(&frame_data.ball_data.body_states.positions,
+                     &mut frame_data.ball_data.body_states.times,
+                     &frame_data.ball_data.body_states.linear_velocity);
 
 //    for (_, player_data) in &mut frame_data.players {
 //        fix_position_times(
@@ -16,19 +15,19 @@ pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
 
     // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
     // the interpolation to slowly drift the models. Add artificial frames to prevent that.
-//    fix_position_frames(
-//        &mut frame_data.ball_data.positions,
-//        &mut frame_data.ball_data.rotations,
-//        &mut frame_data.ball_data.position_times,
-//    );
-//
-//    for (_, player_data) in &mut frame_data.players {
-//        fix_position_frames(
-//            &mut player_data.positions,
-//            &mut player_data.rotations,
-//            &mut player_data.position_times,
-//        );
-//    }
+    fix_position_frames(
+        &mut frame_data.ball_data.body_states.positions,
+        &mut frame_data.ball_data.body_states.rotations,
+        &mut frame_data.ball_data.body_states.times,
+    );
+
+    for (_, player_data) in &mut frame_data.players {
+        fix_position_frames(
+            &mut player_data.body_states.positions,
+            &mut player_data.body_states.rotations,
+            &mut player_data.body_states.times,
+        );
+    }
     frame_data
 }
 
@@ -49,7 +48,7 @@ fn fix_position_frames(p: &mut Vec<f32>, q: &mut Vec<f32>, times: &mut Vec<f32>)
     }
 }
 
-fn fix_position_times(p: &Vec<f32>, times: &mut Vec<f32>, velocities: &Vec<Vector3>) {
+fn smooth_ball_path(p: &Vec<f32>, times: &mut Vec<f32>, velocities: &Vec<Vector3>) {
     let mut path_vectors: Vec<Vector3> = Vec::with_capacity(times.len() - 1);
     let v: Vec<f32> = velocities.iter().map(|x| x.len()).collect();
 
@@ -69,10 +68,17 @@ fn fix_position_times(p: &Vec<f32>, times: &mut Vec<f32>, velocities: &Vec<Vecto
 
         // Find all the pivot points, aka positions where the angle of the path is less than a
         // certain magic value
+        // ball pivots are:
+        // - points where velocity is 0
+        // - points with big deltas between them
+        // - points where the angle is smaller (indicates that ball trajectory was influenced by
+        // something, or just reached the top of the parabola)
         if i > 0 && (
             v[i - 1] == 0.0 ||
-            v[i] == 0.0 ||
-            path_vectors[i - 1].cos_angle(&current_vec) < 0.9
+                v[i] == 0.0 ||
+                times[i] - times[i - 1] > 0.1 ||
+                times[i + 1] - times[i] > 0.1 ||
+                path_vectors[i - 1].cos_angle(&current_vec) < 0.95
         ) {
             pivots.push(i);
         }

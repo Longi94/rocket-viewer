@@ -1,7 +1,6 @@
 import { Camera, Object3D, PerspectiveCamera, Vector3 } from 'three';
 import { CameraType } from './camera-type';
 import { ReplayScene } from '../replay-scene';
-import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export class CameraManager {

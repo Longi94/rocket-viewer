@@ -6,14 +6,13 @@ import { ColorHasher } from '../../util/util';
 
 export function createBallAnimationMixer(frameData: FrameData, rs: ReplayScene, debug: boolean):
   AnimationMixer {
+  const states = frameData.ball_data.body_states;
   const mixer = new AnimationMixer(rs.models.ball);
-  const ballPositionTrack = new VectorKeyframeTrack('.position', frameData.ball_data.position_times,
-    frameData.ball_data.positions);
-  const ballRotationTrack = new QuaternionKeyframeTrack('.quaternion', frameData.ball_data.position_times,
-    frameData.ball_data.rotations);
+  const ballPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
+  const ballRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
   const ballAnimationClip = new AnimationClip(
     'ball_clip',
-    frameData.ball_data.position_times[frameData.ball_data.position_times.length - 1],
+    states.times[states.times.length - 1],
     [ballPositionTrack, ballRotationTrack]
   );
   mixer.clipAction(ballAnimationClip).setLoop(LoopOnce, 0).play();
