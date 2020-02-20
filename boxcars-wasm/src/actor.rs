@@ -14,7 +14,7 @@ fn get_actor_attribute(actor_id: i32, attr_name: &str,
 }
 
 pub trait ActorHandler {
-    fn update(&self, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, real_time: f32, frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               actor_objects: &HashMap<i32, String>);
@@ -25,7 +25,7 @@ pub struct BallHandler {
 }
 
 impl ActorHandler for BallHandler {
-    fn update(&self, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, real_time: f32, frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               _all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               _actor_objects: &HashMap<i32, String>) {
@@ -48,7 +48,7 @@ impl ActorHandler for BallHandler {
                         frame_data.ball_data.rotations.push(-rigid_body.rotation.y);
                         frame_data.ball_data.rotations.push(rigid_body.rotation.w);
 
-                        frame_data.ball_data.position_times.push(frame_data.times[frame]);
+                        frame_data.ball_data.position_times.push(real_time);
                         frame_data.ball_data.linear_velocity.push(rigid_body.linear_velocity
                             .and_then(Vector3::from_vector3f)
                             .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
@@ -64,7 +64,7 @@ impl ActorHandler for BallHandler {
 pub struct CarHandler {}
 
 impl ActorHandler for CarHandler {
-    fn update(&self, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, real_time: f32, frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               _actor_objects: &HashMap<i32, String>) {
@@ -100,7 +100,7 @@ impl ActorHandler for CarHandler {
                         player_data.rotations.push(-rigid_body.rotation.y);
                         player_data.rotations.push(rigid_body.rotation.w);
 
-                        player_data.position_times.push(frame_data.times[frame]);
+                        player_data.position_times.push(real_time);
                         player_data.linear_velocity.push(rigid_body.linear_velocity
                             .and_then(Vector3::from_vector3f)
                             .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
@@ -116,7 +116,7 @@ impl ActorHandler for CarHandler {
 pub struct PlayerHandler {}
 
 impl ActorHandler for PlayerHandler {
-    fn update(&self, _frame: usize, frame_data: &mut FrameData,
+    fn update(&self, real_time: f32, _frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, _updated_attr: &String,
               _all_actors: &HashMap<i32, HashMap<String, Attribute>>,
               actor_objects: &HashMap<i32, String>) {

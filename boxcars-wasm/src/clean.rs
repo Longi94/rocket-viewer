@@ -6,13 +6,13 @@ pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
                        &mut frame_data.ball_data.position_times,
                        &frame_data.ball_data.linear_velocity);
 
-    for (_, player_data) in &mut frame_data.players {
-        fix_position_times(
-            &mut player_data.positions,
-            &mut player_data.position_times,
-            &mut player_data.linear_velocity,
-        );
-    }
+//    for (_, player_data) in &mut frame_data.players {
+//        fix_position_times(
+//            &mut player_data.positions,
+//            &mut player_data.position_times,
+//            &mut player_data.linear_velocity,
+//        );
+//    }
 
     // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
     // the interpolation to slowly drift the models. Add artificial frames to prevent that.
@@ -72,7 +72,7 @@ fn fix_position_times(p: &Vec<f32>, times: &mut Vec<f32>, velocities: &Vec<Vecto
         if i > 0 && (
             v[i - 1] == 0.0 ||
             v[i] == 0.0 ||
-            path_vectors[i - 1].cos_angle(&current_vec) < 0.8
+            path_vectors[i - 1].cos_angle(&current_vec) < 0.9
         ) {
             pivots.push(i);
         }

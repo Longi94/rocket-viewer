@@ -1,6 +1,6 @@
 import { Replay } from '../model/replay/replay';
 import {
-  AmbientLight,
+  AmbientLight, Clock,
   Color,
   DefaultLoadingManager,
   DirectionalLight,
@@ -44,6 +44,8 @@ export class SceneManager {
 
   private isPlaying = false;
   private playbackSpeed = 1;
+
+  private clock = new Clock(false);
 
   // callbacks
   onTimeUpdate = (time: number) => {
@@ -184,6 +186,7 @@ export class SceneManager {
 
   render(time: number) {
     this.cameraManager.update(this.rs);
+
     if (this.currentAnimationTime == undefined) {
       this.currentAnimationTime = time;
       this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
@@ -191,8 +194,8 @@ export class SceneManager {
     }
 
     if (this.isPlaying) {
-      const d = time - this.currentAnimationTime;
-      this.currentTime += d * this.playbackSpeed / 1000.0;
+      const d = this.clock.getDelta();
+      this.currentTime += d * this.playbackSpeed;
 
       while (this.currentTime > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
         this.currentFrame++;
@@ -214,10 +217,12 @@ export class SceneManager {
 
   play() {
     this.isPlaying = true;
+    this.clock.start();
   }
 
   pause() {
     this.isPlaying = false;
+    this.clock.stop();
   }
 
   scrollToTime(time: number) {
