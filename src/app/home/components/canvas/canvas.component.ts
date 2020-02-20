@@ -79,7 +79,10 @@ export class CanvasComponent implements OnInit {
       this.statsDiv.nativeElement.appendChild(this.stats.dom);
     }
 
-    this.sceneManager.init(this.canvas.nativeElement, this.canvasContainer.nativeElement).then(() => {
+    const width = this.canvasContainer.nativeElement.offsetWidth;
+    const height = this.canvasContainer.nativeElement.offsetHeight;
+
+    this.sceneManager.init(this.canvas.nativeElement, width, height).then(() => {
       this.isLoading = false;
       requestAnimationFrame(t => this.animate(t));
     }).catch(console.log);
@@ -89,9 +92,18 @@ export class CanvasComponent implements OnInit {
     requestAnimationFrame(t => this.animate(t));
 
     this.stats?.begin();
-    this.sceneManager.resizeCanvas(this.canvas.nativeElement, this.canvasContainer.nativeElement);
+    this.resizeCanvas();
     this.sceneManager.render(time);
     this.stats?.end();
+  }
+
+  resizeCanvas() {
+    const width = this.canvasContainer.nativeElement.offsetWidth;
+    const height = this.canvasContainer.nativeElement.offsetHeight;
+
+    if (this.canvas.nativeElement.width !== width || this.canvas.nativeElement.height !== height) {
+      this.sceneManager.resize(width, height);
+    }
   }
 
   private resetProgress() {

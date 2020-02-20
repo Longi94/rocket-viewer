@@ -1,6 +1,7 @@
 import { Replay } from '../model/replay/replay';
 import {
-  AmbientLight, Clock,
+  AmbientLight,
+  Clock,
   Color,
   DefaultLoadingManager,
   DirectionalLight,
@@ -8,7 +9,8 @@ import {
   PerspectiveCamera,
   Scene,
   Texture,
-  TextureLoader, Vector3,
+  TextureLoader,
+  Vector3,
   WebGLRenderer,
   WebGLRenderTarget,
   WebGLRenderTargetCube
@@ -54,10 +56,8 @@ export class SceneManager {
   constructor(private readonly debug = false) {
   }
 
-  async init(canvasElement: HTMLCanvasElement, canvasContainerElement: HTMLDivElement) {
+  async init(canvas: HTMLCanvasElement | OffscreenCanvas, width: number, height: number) {
 
-    const width = canvasContainerElement.offsetWidth;
-    const height = canvasContainerElement.offsetHeight;
     const camera = new PerspectiveCamera(100, width / height, 0.01, 100000);
     camera.position.x = 1679.7478335547376;
     camera.position.y = 580.2658014964849;
@@ -69,7 +69,7 @@ export class SceneManager {
     this.rs.scene.background = new Color('#AAAAAA');
 
     this.renderer = new WebGLRenderer({
-      canvas: canvasElement,
+      canvas: canvas,
       antialias: true,
       logarithmicDepthBuffer: true
     });
@@ -127,14 +127,9 @@ export class SceneManager {
     pmremCubeUVPacker.dispose();
   }
 
-  resizeCanvas(canvasElement: HTMLCanvasElement, canvasContainerElement: HTMLDivElement) {
-    const width = canvasContainerElement.offsetWidth;
-    const height = canvasContainerElement.offsetHeight;
-
-    if (canvasElement.width !== width || canvasElement.height !== height) {
-      this.renderer.setSize(width, height, false);
-      this.cameraManager.resize(width, height);
-    }
+  resize(width: number, height: number) {
+    this.renderer.setSize(width, height, false);
+    this.cameraManager.resize(width, height);
   }
 
   async prepareReplay(replay: Replay) {
