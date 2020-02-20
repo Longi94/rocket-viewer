@@ -141,8 +141,8 @@ export class SceneManager {
     this.rs.replay = replay;
 
     this.playbackInfo.players = Object.values(this.rs.replay.frame_data.players).map(PlayerPlaybackInfo.from);
-    this.playbackInfo.minTime = replay.frame_data.times[9];
-    this.playbackInfo.maxTime = replay.frame_data.times[replay.frame_data.times.length - 1];
+    this.playbackInfo.minTime = 0;
+    this.playbackInfo.maxTime = replay.frame_data.ball_data.position_times[replay.frame_data.ball_data.position_times.length - 1];
     this.currentTime = this.playbackInfo.minTime;
     this.currentFrame = 0;
 
