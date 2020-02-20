@@ -1,3 +1,3 @@
 export enum CameraType {
-  PLAYER_VIEW, FREE_FLY
+  PLAYER_VIEW, ORBITAL
 }

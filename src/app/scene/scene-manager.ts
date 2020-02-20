@@ -56,14 +56,14 @@ export class SceneManager {
   constructor(private readonly debug = false) {
   }
 
-  async init(canvas: HTMLCanvasElement | OffscreenCanvas, width: number, height: number) {
+  async init(canvas: HTMLCanvasElement, width: number, height: number) {
 
     const camera = new PerspectiveCamera(100, width / height, 0.01, 100000);
     camera.position.x = 1679.7478335547376;
     camera.position.y = 580.2658014964849;
     camera.position.z = -917.4632500987678;
 
-    this.cameraManager = new CameraManager(camera);
+    this.cameraManager = new CameraManager(camera, canvas);
 
     this.rs.scene = new Scene();
     this.rs.scene.background = new Color('#AAAAAA');
@@ -182,7 +182,7 @@ export class SceneManager {
     }
 
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
-    this.cameraManager.update(this.rs);
+    this.cameraManager.update(this.currentAnimationTime, this.rs);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
   }
 
@@ -190,7 +190,7 @@ export class SceneManager {
 
     if (this.currentAnimationTime == undefined) {
       this.currentAnimationTime = time;
-      this.cameraManager.update(this.rs);
+      this.cameraManager.update(time, this.rs);
       this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
       return;
     }
@@ -218,8 +218,8 @@ export class SceneManager {
       this.onTimeUpdate(this.currentTime);
 
       this.animationManager?.update(this.currentTime);
-      this.cameraManager.update(this.rs);
     }
+    this.cameraManager.update(time, this.rs);
     this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     this.currentAnimationTime = time;
   }

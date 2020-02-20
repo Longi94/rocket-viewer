@@ -75,8 +75,8 @@ export class PlaybackControlComponent implements OnInit {
     this.playbackService.setSpeed(speed);
   }
 
-  setCameraFree() {
-    this.playbackService.setCamera(CameraType.FREE_FLY);
+  setCameraOrbital() {
+    this.playbackService.setCamera(CameraType.ORBITAL);
   }
 
   setPlayerCamera(playerId: number) {

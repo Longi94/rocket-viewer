@@ -1,9 +1,12 @@
 <div class="playback-control-div">
-  <button class="play-button" mat-icon-button (click)="playClick()">
+  <button mat-icon-button (click)="playClick()">
     <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
   </button>
-  <button class="more-button" mat-icon-button [matMenuTriggerFor]="moreMenu">
-    <mat-icon>more_vert</mat-icon>
+  <button mat-icon-button [matMenuTriggerFor]="playbackSpeedMenu">
+    <mat-icon>speed</mat-icon>
+  </button>
+  <button mat-icon-button [matMenuTriggerFor]="cameraMenu">
+    <mat-icon>videocam</mat-icon>
   </button>
   <ng5-slider
     class="time-slider"
@@ -13,11 +16,6 @@
     (userChangeEnd)="slideEnd($event)"
   ></ng5-slider>
 </div>
-
-<mat-menu #moreMenu="matMenu">
-  <button mat-menu-item [matMenuTriggerFor]="cameraMenu">Camera</button>
-  <button mat-menu-item [matMenuTriggerFor]="playbackSpeedMenu">Playback speed</button>
-</mat-menu>
 
 <mat-menu #playbackSpeedMenu="matMenu">
   <button *ngFor="let speed of playbackSpeeds" mat-menu-item (click)="setSpeed(speed)">
@@ -29,7 +27,7 @@
 
 <mat-menu #cameraMenu="matMenu">
   <button mat-menu-item [matMenuTriggerFor]="playerCameraMenu">Player</button>
-  <button mat-menu-item (click)="setCameraFree()">Free</button>
+  <button mat-menu-item (click)="setCameraOrbital()">Orbital</button>
 </mat-menu>
 
 <mat-menu #playerCameraMenu="matMenu">
