@@ -30,6 +30,10 @@ export class PlaybackControlComponent implements OnInit {
       if (!this.isSliding) {
         this.currentTime = t;
       }
+
+      if (t >= this.sliderOptions.ceil) {
+        this.isPlaying = false;
+      }
     });
   }
 

@@ -41,6 +41,7 @@ export class SceneManager {
   currentAnimationTime: number;
   currentTime: number;
   currentFrame: number;
+  frameCount = 0;
 
   playbackInfo: PlaybackInfo = new PlaybackInfo();
 
@@ -139,7 +140,7 @@ export class SceneManager {
     this.playbackInfo.minTime = 0;
     this.playbackInfo.maxTime = replay.frame_data.ball_data.body_states.times[replay.frame_data.ball_data.body_states.times.length - 1];
     this.currentTime = this.playbackInfo.minTime;
-    this.currentFrame = 0;
+    this.currentFrame = this.rs.replay.frame_data.times.length;
 
     if (this.debug) {
       for (const player of Object.values(replay.frame_data.players)) {
@@ -195,11 +196,18 @@ export class SceneManager {
       return;
     }
 
+    const d = this.clock.getDelta();
+
     if (this.isPlaying) {
-      const d = this.clock.getDelta();
       this.currentTime += d * this.playbackSpeed;
 
-      while (this.currentTime > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
+      if (this.currentTime >= this.playbackInfo.maxTime) {
+        this.currentTime = this.playbackInfo.maxTime;
+        this.pause();
+      }
+
+      while (this.currentFrame < this.frameCount - 1 &&
+      this.currentTime > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
         this.currentFrame++;
       }
 
@@ -237,7 +245,8 @@ export class SceneManager {
   scrollToTime(time: number) {
 
     if (time > this.currentTime) {
-      while (time > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
+      while (this.currentFrame < this.frameCount - 1 &&
+      time > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
         this.currentFrame++;
       }
 
@@ -254,7 +263,7 @@ export class SceneManager {
       }
 
     } else if (time < this.currentTime) {
-      while (time < this.rs.replay.frame_data.times[this.currentFrame - 1]) {
+      while (this.currentFrame > 0 && time < this.rs.replay.frame_data.times[this.currentFrame - 1]) {
         this.currentFrame--;
       }
 

@@ -19,7 +19,7 @@ export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene,
   const carAnimationClip = new AnimationClip(`car_${playerData.id}_clip`,
     states.times[states.times.length - 1],
     [carPositionTrack, carRotationTrack]);
-  mixer.clipAction(carAnimationClip).setLoop(LoopOnce, 0).play();
+  mixer.clipAction(carAnimationClip).play();
 
   // if (debug) {
   //   addAnimPathHelper(playerData.positions, ColorHasher.hex(playerData.name), rs.scene);
