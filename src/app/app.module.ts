@@ -14,6 +14,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { FormsModule } from '@angular/forms';
 import { Ng5SliderModule } from 'ng5-slider';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { MatMenuModule } from '@angular/material/menu';
     MatMenuModule,
     MatProgressBarModule,
     MatSliderModule,
+    MatTooltipModule,
     Ng5SliderModule
   ],
   providers: [],

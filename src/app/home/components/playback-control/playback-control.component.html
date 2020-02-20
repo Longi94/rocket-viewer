@@ -1,11 +1,11 @@
 <div class="playback-control-div">
-  <button mat-icon-button (click)="playClick()">
+  <button mat-icon-button (click)="playClick()" [matTooltip]="isPlaying ? 'Pause' : 'Play'">
     <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
   </button>
-  <button mat-icon-button [matMenuTriggerFor]="playbackSpeedMenu">
+  <button mat-icon-button [matMenuTriggerFor]="playbackSpeedMenu" matTooltip="Playback speed">
     <mat-icon>speed</mat-icon>
   </button>
-  <button mat-icon-button [matMenuTriggerFor]="cameraMenu">
+  <button mat-icon-button [matMenuTriggerFor]="cameraMenu" matTooltip="Camera">
     <mat-icon>videocam</mat-icon>
   </button>
   <ng5-slider
