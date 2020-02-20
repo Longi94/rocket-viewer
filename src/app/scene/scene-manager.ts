@@ -187,14 +187,15 @@ export class SceneManager {
     }
 
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
+    this.cameraManager.update(this.rs);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
   }
 
   render(time: number) {
-    this.cameraManager.update(this.rs);
 
     if (this.currentAnimationTime == undefined) {
       this.currentAnimationTime = time;
+      this.cameraManager.update(this.rs);
       this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
       return;
     }
@@ -222,6 +223,7 @@ export class SceneManager {
       this.onTimeUpdate(this.currentTime);
 
       this.animationManager?.update(this.currentTime);
+      this.cameraManager.update(this.rs);
     }
     this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     this.currentAnimationTime = time;

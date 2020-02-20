@@ -37,7 +37,7 @@ export class CameraManager {
       this.tempVector.add(this.pointingVector);
       this.tempVector.y = Math.max(this.tempVector.y, 10);
 
-      this.camera.position.lerp(this.tempVector, 0.9);
+      this.camera.position.copy(this.tempVector);
       this.camera.lookAt(rs.models.ball.position);
     }
   }
