@@ -24,7 +24,7 @@ export class CanvasComponent implements OnInit {
   statsDiv: ElementRef<HTMLDivElement>;
 
   // Loading stuff
-  isLoading = true;
+  isLoading = false;
   progress = {
     percent: 0,
     start: 0,

@@ -11,9 +11,10 @@
   <ng5-slider
     class="time-slider"
     [options]="sliderOptions"
-    [(value)]="sliderValue"
+    [(value)]="currentTime"
     (userChangeStart)="slideStart($event)"
     (userChangeEnd)="slideEnd($event)"
+    (userChange)="slideChange($event)"
   ></ng5-slider>
 </div>
 

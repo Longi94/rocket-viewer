@@ -13,7 +13,6 @@ export class PlaybackControlComponent implements OnInit {
 
   isPlaying = false;
 
-  sliderValue: number;
   currentTime: number;
   sliderOptions: Options = this.createSliderOption(0, 100);
   isSliding = false;
@@ -26,18 +25,16 @@ export class PlaybackControlComponent implements OnInit {
     this.playbackService.onPlaybackInfo.subscribe(info => {
       this.players = info.players;
       this.sliderOptions = this.createSliderOption(info.minTime, info.maxTime);
-      this.currentTime = info.minTime;
     });
     this.playbackService.onTimeUpdate.subscribe(t => {
-      this.currentTime = t;
       if (!this.isSliding) {
-        this.sliderValue = t;
+        this.currentTime = t;
       }
     });
   }
 
   createSliderOption(min: number, max: number): Options {
-    this.sliderValue = min;
+    this.currentTime = min;
     return {
       animate: false,
       floor: min,
@@ -62,11 +59,15 @@ export class PlaybackControlComponent implements OnInit {
 
   slideStart($event: ChangeContext) {
     this.isSliding = true;
-    console.log($event);
+    this.playbackService.scrollToTime($event.value);
   }
 
   slideEnd($event: ChangeContext) {
     this.isSliding = false;
+    this.playbackService.scrollToTime($event.value);
+  }
+
+  slideChange($event: ChangeContext) {
     this.playbackService.scrollToTime($event.value);
   }
 
