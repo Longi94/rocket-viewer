@@ -8,19 +8,29 @@
 </div>
 
 <div class="debug-overlay" *ngIf="isDebug">
-  <span>maxtime: {{sceneManager.maxTime}}</span>
-  <span>mintime: {{sceneManager.minTime}}</span>
+  <span>maxtime: {{sceneManager.playbackInfo.maxTime}}</span>
+  <span>mintime: {{sceneManager.playbackInfo.minTime}}</span>
   <span>animtime: {{sceneManager.currentAnimationTime}}</span>
   <span>frame: {{sceneManager.currentFrame}}</span>
   <span>time: {{sceneManager.currentTime}}</span>
   <span>ballframe: {{sceneManager.ballFrame}}</span>
   <span *ngIf="sceneManager.rs.models.ball">
-    ballpos: {{sceneManager.rs.models.ball.position.x}} {{sceneManager.rs.models.ball.position.y}} {{sceneManager.rs.models.ball.position.z}}
+    ballpos:
+    {{sceneManager.rs.models.ball.position.x | number}}
+    {{sceneManager.rs.models.ball.position.y | number}}
+    {{sceneManager.rs.models.ball.position.z | number}}
   </span>
-  <span *ngIf="sceneManager.rs.models.ball">
-    ballrot: {{sceneManager.rs.models.ball.rotation.x}} {{sceneManager.rs.models.ball.rotation.y}} {{sceneManager.rs.models.ball.rotation.z}}
-  </span>
-  <span *ngIf="sceneManager.rs.models.ball">ballspeed: {{sceneManager.getBallSpeed()}}</span>
+  <span *ngIf="sceneManager.rs.models.ball">ballvel: {{sceneManager.getBallSpeed() | number}}</span>
+  <div class="player-debug-overlay" *ngFor="let player of sceneManager.playbackInfo.players">
+    <span>name: {{player.name}}</span>
+    <span>frame: {{sceneManager.playerFrames[player.id]}}</span>
+    <span *ngIf="sceneManager.rs.models.players[player.id]">position:
+      {{sceneManager.rs.models.players[player.id].scene.position.x | number}}
+      {{sceneManager.rs.models.players[player.id].scene.position.y | number}}
+      {{sceneManager.rs.models.players[player.id].scene.position.z | number}}
+    </span>
+    <span *ngIf="sceneManager.rs.models.players[player.id]">velocity: {{sceneManager.getPlayerSpeed(player.id) | number}}</span>
+  </div>
 </div>
 
 <div class="stats-container" #statsDiv></div>

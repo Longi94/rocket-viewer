@@ -60,6 +60,15 @@ canvas {
   position: absolute;
   display: flex;
   flex-flow: column;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10px;
+  line-height: 10px;
+  background-color: rgba(0, 0, 0, 0.21);
+
+  .player-debug-overlay {
+    display: flex;
+    flex-flow: column;
+  }
 }
 
 .stats-container {

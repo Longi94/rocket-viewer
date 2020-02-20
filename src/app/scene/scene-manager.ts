@@ -146,6 +146,12 @@ export class SceneManager {
     this.currentTime = this.playbackInfo.minTime;
     this.currentFrame = 0;
 
+    if (this.debug) {
+      for (const player of Object.values(replay.frame_data.players)) {
+        this.playerFrames[player.id] = 0;
+      }
+    }
+
     // Load necessary models
 
     const map = replay.properties['MapName'];
@@ -205,6 +211,12 @@ export class SceneManager {
         while (this.currentTime > this.rs.replay.frame_data.ball_data.position_times[this.ballFrame + 1]) {
           this.ballFrame++;
         }
+
+        for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
+          while (this.currentTime > this.rs.replay.frame_data.players[playerId].position_times[this.playerFrames[playerId] + 1]) {
+            this.playerFrames[playerId]++;
+          }
+        }
       }
 
       this.onTimeUpdate(this.currentTime);
@@ -236,6 +248,12 @@ export class SceneManager {
         while (time > this.rs.replay.frame_data.ball_data.position_times[this.ballFrame + 1]) {
           this.ballFrame++;
         }
+
+        for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
+          while (time > this.rs.replay.frame_data.players[playerId].position_times[this.playerFrames[playerId] + 1]) {
+            this.playerFrames[playerId]++;
+          }
+        }
       }
 
     } else if (time < this.currentTime) {
@@ -246,6 +264,12 @@ export class SceneManager {
       if (this.debug) {
         while (time < this.rs.replay.frame_data.ball_data.position_times[this.ballFrame - 1]) {
           this.ballFrame--;
+        }
+
+        for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
+          while (time < this.rs.replay.frame_data.players[playerId].position_times[this.playerFrames[playerId] - 1]) {
+            this.playerFrames[playerId]--;
+          }
         }
       }
     }
@@ -271,6 +295,8 @@ export class SceneManager {
   v1 = new Vector3();
   v2 = new Vector3();
 
+  playerFrames: { [id: number]: number } = {};
+
   getBallSpeed(): number {
     const ballData = this.rs.replay.frame_data.ball_data;
     const dt = ballData.position_times[this.ballFrame + 1] - ballData.position_times[this.ballFrame];
@@ -280,6 +306,19 @@ export class SceneManager {
     this.v2.x = ballData.positions[(this.ballFrame + 1) * 3];
     this.v2.y = ballData.positions[(this.ballFrame + 1) * 3 + 1];
     this.v2.z = ballData.positions[(this.ballFrame + 1) * 3 + 2];
+    const ds = this.v1.distanceTo(this.v2);
+    return ds / dt;
+  }
+
+  getPlayerSpeed(id: number) {
+    const playerData = this.rs.replay.frame_data.players[id];
+    const dt = playerData.position_times[this.playerFrames[id] + 1] - playerData.position_times[this.playerFrames[id]];
+    this.v1.x = playerData.positions[this.playerFrames[id] * 3];
+    this.v1.y = playerData.positions[this.playerFrames[id] * 3 + 1];
+    this.v1.z = playerData.positions[this.playerFrames[id] * 3 + 2];
+    this.v2.x = playerData.positions[(this.playerFrames[id] + 1) * 3];
+    this.v2.y = playerData.positions[(this.playerFrames[id] + 1) * 3 + 1];
+    this.v2.z = playerData.positions[(this.playerFrames[id] + 1) * 3 + 2];
     const ds = this.v1.distanceTo(this.v2);
     return ds / dt;
   }
