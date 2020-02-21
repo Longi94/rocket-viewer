@@ -79,15 +79,6 @@ pub struct BodyStates {
     pub linear_velocity: Vec<Vector3>,
 }
 
-fn compare(v: &Vector3, v3f: &Option<Vector3f>) -> bool {
-    match v3f {
-        None => false,
-        Some(v3f) => {
-            v.x == v3f.x && v.y == v3f.z && v.z == v3f.y
-        }
-    }
-}
-
 impl BodyStates {
     fn new() -> BodyStates {
         BodyStates {
@@ -162,10 +153,57 @@ impl BallData {
 }
 
 #[derive(Serialize, Debug)]
+pub struct PlayerLoadout {
+    pub body: u32,
+    pub decal: u32,
+    pub wheels: u32,
+    pub boost: u32,
+    pub antenna: u32,
+    pub topper: u32,
+    pub engine_audio: u32,
+    pub trail: u32,
+    pub goal_explosion: u32,
+    pub banner: u32,
+}
+
+impl PlayerLoadout {
+    pub fn new() -> Self {
+        PlayerLoadout {
+            body: 0,
+            decal: 0,
+            wheels: 0,
+            boost: 0,
+            antenna: 0,
+            topper: 0,
+            engine_audio: 0,
+            trail: 0,
+            goal_explosion: 0,
+            banner: 0,
+        }
+    }
+}
+
+#[derive(Serialize, Debug)]
+pub struct PlayerLoadouts {
+    pub blue: PlayerLoadout,
+    pub orange: Option<PlayerLoadout>,
+}
+
+impl PlayerLoadouts {
+    fn new() -> Self {
+        PlayerLoadouts {
+            blue: PlayerLoadout::new(),
+            orange: None,
+        }
+    }
+}
+
+#[derive(Serialize, Debug)]
 pub struct PlayerData {
     pub id: i32,
     pub name: Option<String>,
     pub team: Option<u32>,
+    pub loadouts: PlayerLoadouts,
     pub body_states: BodyStates,
     pub visible: Vec<bool>,
 }
@@ -177,6 +215,7 @@ impl PlayerData {
             name: None,
             team: None,
             body_states: BodyStates::new(),
+            loadouts: PlayerLoadouts::new(),
             visible: Vec::new(),
         }
     }

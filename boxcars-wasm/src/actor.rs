@@ -1,5 +1,5 @@
 use boxcars::{Attribute};
-use crate::models::{FrameData, BallType, PlayerData};
+use crate::models::{FrameData, BallType, PlayerData, PlayerLoadout};
 use wasm_bindgen::__rt::std::collections::HashMap;
 
 fn get_actor_attribute(actor_id: i32, attr_name: &str,
@@ -129,6 +129,37 @@ impl ActorHandler for PlayerHandler {
                     };
                 }
             },
+            "TAGame.PRI_TA:ClientLoadouts" => {
+                let loadouts = match attributes.get("TAGame.PRI_TA:ClientLoadouts") {
+                    Some(Attribute::TeamLoadout(loadouts)) => loadouts,
+                    Some(_) => return,
+                    None => return,
+                };
+
+                player_data.loadouts.blue.body = loadouts.blue.body;
+                player_data.loadouts.blue.decal = loadouts.blue.decal;
+                player_data.loadouts.blue.wheels = loadouts.blue.wheels;
+                player_data.loadouts.blue.boost = loadouts.blue.rocket_trail;
+                player_data.loadouts.blue.antenna = loadouts.blue.antenna;
+                player_data.loadouts.blue.topper = loadouts.blue.topper;
+                player_data.loadouts.blue.engine_audio = loadouts.blue.engine_audio.unwrap_or(0);
+                player_data.loadouts.blue.trail = loadouts.blue.trail.unwrap_or(0);
+                player_data.loadouts.blue.goal_explosion = loadouts.blue.goal_explosion.unwrap_or(0);
+                player_data.loadouts.blue.banner = loadouts.blue.banner.unwrap_or(0);
+
+                player_data.loadouts.orange = Some(PlayerLoadout {
+                    body: loadouts.blue.body,
+                    decal: loadouts.blue.decal,
+                    wheels: loadouts.blue.wheels,
+                    boost: loadouts.blue.rocket_trail,
+                    antenna: loadouts.blue.antenna,
+                    topper: loadouts.blue.topper,
+                    engine_audio: loadouts.blue.engine_audio.unwrap_or(0),
+                    trail: loadouts.blue.trail.unwrap_or(0),
+                    goal_explosion: loadouts.blue.goal_explosion.unwrap_or(0),
+                    banner: loadouts.blue.banner.unwrap_or(0),
+                });
+            }
             _ => return
         }
     }
