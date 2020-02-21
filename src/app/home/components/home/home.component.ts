@@ -31,7 +31,12 @@ export class HomeComponent implements OnInit {
 
     const file = $event.dataTransfer.files[0];
     this.boxcarsService.parse(file);
+  }
 
+  onFileSelect($event: Event) {
+    const target = $event.target as HTMLInputElement;
+    const file = target.files[0];
+    this.boxcarsService.parse(file);
   }
 
   onDragEnter($event: DragEvent) {

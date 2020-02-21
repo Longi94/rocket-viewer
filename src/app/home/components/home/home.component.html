@@ -3,7 +3,9 @@
        (dragover)="onDragOver($event)" *ngIf="!replayLoaded">
     <span>Drop a replay file into the page...</span>
     <span>or</span>
-    <button mat-raised-button color="accent">Choose one from your computer</button>
+    <input #replayInput hidden type="file" onclick="this.value=null" (change)="onFileSelect($event)"
+           accept=".replay"/>
+    <button mat-raised-button color="accent" (click)="replayInput.click()">Choose one from your computer</button>
     <div class="error-div" *ngIf="errorMessage != undefined">
       <span>{{errorMessage}}</span>
     </div>
