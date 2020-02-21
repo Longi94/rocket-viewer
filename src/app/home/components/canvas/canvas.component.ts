@@ -89,12 +89,12 @@ export class CanvasComponent implements OnInit {
   }
 
   private animate(time: number) {
-    requestAnimationFrame(t => this.animate(t));
-
     this.stats?.begin();
     this.resizeCanvas();
     this.sceneManager.render(time);
     this.stats?.end();
+
+    requestAnimationFrame(t => this.animate(t));
   }
 
   resizeCanvas() {
