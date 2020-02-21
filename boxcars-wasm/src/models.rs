@@ -171,9 +171,9 @@ pub struct PlayerData {
 }
 
 impl PlayerData {
-    pub fn new() -> Self {
+    pub fn new(id: i32) -> Self {
         PlayerData {
-            id: -1,
+            id,
             name: None,
             team: None,
             body_states: BodyStates::new(),
