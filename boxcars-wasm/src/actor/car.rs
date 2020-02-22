@@ -9,7 +9,7 @@ impl ActorHandler for CarHandler {
     fn update(&self, real_time: f32, _frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              _actor_objects: &HashMap<i32, String>) {
+              _actor_objects: &HashMap<i32, String>, _objects: &Vec<String>) {
         let player_actor_id = match attributes.get("Engine.Pawn:PlayerReplicationInfo") {
             None => return,
             Some(Attribute::Flagged(_, id)) => id.clone() as i32,

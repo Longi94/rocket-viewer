@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use boxcars::Attribute;
 use crate::model::player_data::PlayerData;
 use crate::model::player_loadout::PlayerLoadout;
+use crate::model::player_loadout_paints::PlayerLoadoutPaints;
 
 pub struct PlayerHandler {}
 
@@ -11,7 +12,7 @@ impl ActorHandler for PlayerHandler {
     fn update(&self, _real_time: f32, _frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               _all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              actor_objects: &HashMap<i32, String>) {
+              actor_objects: &HashMap<i32, String>, objects: &Vec<String>) {
         let player_id = match attributes.get("Engine.PlayerReplicationInfo:PlayerID") {
             Some(Attribute::Int(id)) => id,
             Some(_) => return,
@@ -67,6 +68,16 @@ impl ActorHandler for PlayerHandler {
 
                 player_data.loadouts.blue.copy(&loadouts.blue);
                 player_data.loadouts.orange = Some(PlayerLoadout::from(&loadouts.orange));
+            }
+            "TAGame.PRI_TA:ClientLoadoutsOnline" => {
+                let loadouts = match attributes.get("TAGame.PRI_TA:ClientLoadoutsOnline") {
+                    Some(Attribute::LoadoutsOnline(loadouts)) => loadouts,
+                    Some(_) => return,
+                    None => return,
+                };
+
+                player_data.paints.blue.copy(&loadouts.blue, &objects);
+                player_data.paints.orange = Some(PlayerLoadoutPaints::from(&loadouts.orange, &objects));
             }
             _ => return
         }

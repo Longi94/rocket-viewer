@@ -12,7 +12,7 @@ impl ActorHandler for BallHandler {
     fn update(&self, real_time: f32, _frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               _all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              _actor_objects: &HashMap<i32, String>) {
+              _actor_objects: &HashMap<i32, String>, _objects: &Vec<String>) {
         if frame_data.ball_data.ball_type == BallType::Unknown {
             frame_data.ball_data.ball_type = self.ball_type;
         }

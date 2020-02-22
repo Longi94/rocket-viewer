@@ -84,7 +84,7 @@ impl<'a> FrameParser<'a> {
                 };
 
                 handler.update(real_time, i, &mut frame_data, &attributes, &object_name, &actors,
-                               &actor_objects);
+                               &actor_objects, &self.replay.objects);
             }
         }
 

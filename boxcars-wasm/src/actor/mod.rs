@@ -25,7 +25,7 @@ pub trait ActorHandler {
     fn update(&self, real_time: f32, frame: usize, frame_data: &mut FrameData,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
               all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              actor_objects: &HashMap<i32, String>);
+              actor_objects: &HashMap<i32, String>, objects: &Vec<String>);
 }
 
 pub fn get_handler(object_name: &str) -> Option<Box<dyn ActorHandler>> {

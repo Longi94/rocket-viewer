@@ -1,4 +1,5 @@
 use serde::Serialize;
+use boxcars::attributes::Loadout;
 
 #[derive(Serialize, Debug)]
 pub struct PlayerLoadout {
@@ -30,7 +31,7 @@ impl PlayerLoadout {
         }
     }
 
-    pub fn copy(&mut self, &loadout: &boxcars::attributes::Loadout) {
+    pub fn copy(&mut self, loadout: &Loadout) {
         self.body = loadout.body;
         self.decal = loadout.decal;
         self.wheels = loadout.wheels;
@@ -43,7 +44,7 @@ impl PlayerLoadout {
         self.banner = loadout.banner.unwrap_or(0);
     }
 
-    pub fn from(&loadout: &boxcars::attributes::Loadout) -> PlayerLoadout {
+    pub fn from(loadout: &Loadout) -> PlayerLoadout {
         let mut lo = PlayerLoadout::new();
         lo.copy(&loadout);
         lo
