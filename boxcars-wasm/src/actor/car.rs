@@ -2,6 +2,7 @@ use crate::actor::{ActorHandler, get_actor_attribute};
 use crate::model::frame_data::FrameData;
 use boxcars::Attribute;
 use std::collections::HashMap;
+use crate::model::team_paint::TeamPaint;
 
 pub struct CarHandler {}
 
@@ -27,11 +28,26 @@ impl ActorHandler for CarHandler {
             Some(player_data) => player_data
         };
 
-        if updated_attr == "TAGame.RBActor_TA:ReplicatedRBState" {
-            match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
-                Some(rigid_body) => player_data.body_states.push(real_time, &rigid_body),
-                _ => return
-            }
+        match updated_attr.as_ref() {
+            "TAGame.RBActor_TA:ReplicatedRBState" => {
+                match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
+                    Some(rigid_body) => player_data.body_states.push(real_time, &rigid_body),
+                    _ => return
+                }
+            },
+            "TAGame.Car_TA:TeamPaint" => {
+                match attributes.get("TAGame.Car_TA:TeamPaint") {
+                    Some(Attribute::TeamPaint(team_paint)) => {
+                        if team_paint.team == 0 {
+                            player_data.team_paint_blue = Some(TeamPaint::from(&team_paint));
+                        } else {
+                            player_data.team_paint_orange = Some(TeamPaint::from(&team_paint));
+                        }
+                    },
+                    _ => return
+                }
+            },
+            _ => return
         }
     }
 }

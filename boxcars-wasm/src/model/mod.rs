@@ -7,4 +7,5 @@ pub mod player_loadout;
 pub mod player_loadout_paints;
 pub mod player_loadouts;
 pub mod player_loadouts_paints;
+pub mod team_paint;
 pub mod vector;

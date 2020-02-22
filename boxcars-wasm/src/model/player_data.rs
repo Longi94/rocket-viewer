@@ -2,6 +2,7 @@ use serde::Serialize;
 use crate::model::player_loadouts::PlayerLoadouts;
 use crate::model::body_states::BodyStates;
 use crate::model::player_loadouts_paints::PlayerLoadoutsPaints;
+use crate::model::team_paint::TeamPaint;
 
 #[derive(Serialize, Debug)]
 pub struct PlayerData {
@@ -12,6 +13,8 @@ pub struct PlayerData {
     pub paints: PlayerLoadoutsPaints,
     pub body_states: BodyStates,
     pub visible: Vec<bool>,
+    pub team_paint_blue: Option<TeamPaint>,
+    pub team_paint_orange: Option<TeamPaint>,
 }
 
 impl PlayerData {
@@ -24,6 +27,8 @@ impl PlayerData {
             loadouts: PlayerLoadouts::new(),
             paints: PlayerLoadoutsPaints::new(),
             visible: Vec::new(),
+            team_paint_blue: None,
+            team_paint_orange: None,
         }
     }
 }
