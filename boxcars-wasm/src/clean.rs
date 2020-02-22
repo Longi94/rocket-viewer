@@ -1,4 +1,5 @@
-use crate::models::{FrameData, Vector3};
+use crate::model::frame_data::FrameData;
+use crate::model::vector::Vector3;
 
 pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
     smooth_ball_path(&frame_data.ball_data.body_states.positions,

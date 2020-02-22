@@ -1,8 +1,8 @@
-use crate::models::{ReplayVersion, FrameData};
 use boxcars::{Replay, Attribute};
 use std::collections::HashMap;
 use crate::actor::{get_handler, ActorHandler};
 use crate::clean::clean_frame_data;
+use crate::model::frame_data::FrameData;
 
 pub struct FrameParser<'a> {
     pub replay: &'a Replay
@@ -19,12 +19,6 @@ impl<'a> FrameParser<'a> {
         if count == 0 {
             return Ok(FrameData::with_capacity(0));
         }
-
-        let _replay_version = ReplayVersion(
-            self.replay.major_version,
-            self.replay.minor_version,
-            self.replay.net_version.unwrap_or(0),
-        );
 
         let mut frame_data = FrameData::with_capacity(count);
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();

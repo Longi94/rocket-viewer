@@ -1,13 +1,13 @@
 mod utils;
-mod models;
+mod model;
 mod parser;
 mod actor;
 mod clean;
 
 use wasm_bindgen::prelude::*;
 use crate::utils::set_panic_hook;
-use crate::models::CleanedReplay;
 use crate::parser::FrameParser;
+use crate::model::cleaned_replay::CleanedReplay;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
