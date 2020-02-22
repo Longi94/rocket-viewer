@@ -20,7 +20,6 @@ impl ActorHandler for PlayerHandler {
 
         if !frame_data.players.contains_key(player_id) {
             frame_data.players.insert(player_id.clone(), PlayerData::new(player_id.clone()));
-
         }
 
         let player_data = match frame_data.players.get_mut(player_id) {
@@ -37,7 +36,7 @@ impl ActorHandler for PlayerHandler {
                         None => None,
                     };
                 }
-            },
+            }
             "Engine.PlayerReplicationInfo:Team" => {
                 if player_data.team.is_none() {
                     player_data.team = match attributes.get("Engine.PlayerReplicationInfo:Team") {
@@ -58,7 +57,7 @@ impl ActorHandler for PlayerHandler {
                         None => None,
                     };
                 }
-            },
+            }
             "TAGame.PRI_TA:ClientLoadouts" => {
                 let loadouts = match attributes.get("TAGame.PRI_TA:ClientLoadouts") {
                     Some(Attribute::TeamLoadout(loadouts)) => loadouts,
@@ -66,29 +65,8 @@ impl ActorHandler for PlayerHandler {
                     None => return,
                 };
 
-                player_data.loadouts.blue.body = loadouts.blue.body;
-                player_data.loadouts.blue.decal = loadouts.blue.decal;
-                player_data.loadouts.blue.wheels = loadouts.blue.wheels;
-                player_data.loadouts.blue.boost = loadouts.blue.rocket_trail;
-                player_data.loadouts.blue.antenna = loadouts.blue.antenna;
-                player_data.loadouts.blue.topper = loadouts.blue.topper;
-                player_data.loadouts.blue.engine_audio = loadouts.blue.engine_audio.unwrap_or(0);
-                player_data.loadouts.blue.trail = loadouts.blue.trail.unwrap_or(0);
-                player_data.loadouts.blue.goal_explosion = loadouts.blue.goal_explosion.unwrap_or(0);
-                player_data.loadouts.blue.banner = loadouts.blue.banner.unwrap_or(0);
-
-                player_data.loadouts.orange = Some(PlayerLoadout {
-                    body: loadouts.blue.body,
-                    decal: loadouts.blue.decal,
-                    wheels: loadouts.blue.wheels,
-                    boost: loadouts.blue.rocket_trail,
-                    antenna: loadouts.blue.antenna,
-                    topper: loadouts.blue.topper,
-                    engine_audio: loadouts.blue.engine_audio.unwrap_or(0),
-                    trail: loadouts.blue.trail.unwrap_or(0),
-                    goal_explosion: loadouts.blue.goal_explosion.unwrap_or(0),
-                    banner: loadouts.blue.banner.unwrap_or(0),
-                });
+                player_data.loadouts.blue.copy(&loadouts.blue);
+                player_data.loadouts.orange = Some(PlayerLoadout::from(&loadouts.orange));
             }
             _ => return
         }

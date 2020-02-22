@@ -29,4 +29,23 @@ impl PlayerLoadout {
             banner: 0,
         }
     }
+
+    pub fn copy(&mut self, &loadout: &boxcars::attributes::Loadout) {
+        self.body = loadout.body;
+        self.decal = loadout.decal;
+        self.wheels = loadout.wheels;
+        self.boost = loadout.rocket_trail;
+        self.antenna = loadout.antenna;
+        self.topper = loadout.topper;
+        self.engine_audio = loadout.engine_audio.unwrap_or(0);
+        self.trail = loadout.trail.unwrap_or(0);
+        self.goal_explosion = loadout.goal_explosion.unwrap_or(0);
+        self.banner = loadout.banner.unwrap_or(0);
+    }
+
+    pub fn from(&loadout: &boxcars::attributes::Loadout) -> PlayerLoadout {
+        let mut lo = PlayerLoadout::new();
+        lo.copy(&loadout);
+        lo
+    }
 }
