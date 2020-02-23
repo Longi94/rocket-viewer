@@ -2,7 +2,7 @@ import { PlayerData } from '../../model/replay/player-data';
 import {
   AnimationClip,
   AnimationMixer,
-  LoopOnce,
+  BooleanKeyframeTrack,
   QuaternionKeyframeTrack,
   VectorKeyframeTrack
 } from 'three';
@@ -16,9 +16,15 @@ export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene,
   const mixer = new AnimationMixer(rs.models.players[playerData.id].scene);
   const carPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
   const carRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
-  const carAnimationClip = new AnimationClip(`car_${playerData.id}_clip`,
-    states.times[states.times.length - 1],
-    [carPositionTrack, carRotationTrack]);
+
+  const tracks = [carPositionTrack, carRotationTrack];
+
+  if (states.visible_times.length > 0) {
+    const carVisibleTrack = new BooleanKeyframeTrack('.visible', states.visible_times, states.visible);
+    tracks.push(carVisibleTrack);
+  }
+
+  const carAnimationClip = new AnimationClip(`car_${playerData.id}_clip`, states.times[states.times.length - 1], tracks);
   mixer.clipAction(carAnimationClip).play();
 
   // if (debug) {

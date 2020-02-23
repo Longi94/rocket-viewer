@@ -19,8 +19,8 @@ impl BodyStates {
             times: Vec::new(),
             rotations: Vec::new(),
             linear_velocity: Vec::new(),
-            visible: Vec::new(),
-            visible_times: Vec::new(),
+            visible: vec![true],
+            visible_times: vec![0.0],
         }
     }
 
