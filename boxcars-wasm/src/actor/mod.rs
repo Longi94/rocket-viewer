@@ -13,9 +13,9 @@ use crate::model::ball::BallType;
 use crate::actor::jump::{JumpHandler, DoubleJumpHandler, DodgeHandler};
 use crate::model::frame_state::FrameState;
 
-fn get_actor_attribute(actor_id: i32, attr_name: &str,
+fn get_actor_attribute(actor_id: &i32, attr_name: &str,
                        all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<Attribute> {
-    match all_actors.get(&actor_id) {
+    match all_actors.get(actor_id) {
         None => None,
         Some(actor) => match actor.get(attr_name) {
             None => None,
@@ -25,8 +25,8 @@ fn get_actor_attribute(actor_id: i32, attr_name: &str,
 }
 
 pub trait ActorHandler {
-    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
-              attributes: &HashMap<String, Attribute>, updated_attr: &String,
+    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState,
+              actor_id: i32, updated_attr: &String,
               objects: &Vec<String>);
 }
 

@@ -1,6 +1,5 @@
 use crate::actor::ActorHandler;
 use crate::model::frame_data::FrameData;
-use std::collections::HashMap;
 use boxcars::Attribute;
 use crate::model::player_data::PlayerData;
 use crate::model::player_loadout::PlayerLoadout;
@@ -10,9 +9,13 @@ use crate::model::frame_state::FrameState;
 pub struct PlayerHandler {}
 
 impl ActorHandler for PlayerHandler {
-    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
-              attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              objects: &Vec<String>) {
+    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState, actor_id: i32,
+              updated_attr: &String, objects: &Vec<String>) {
+        let attributes = match state.actors.get(&actor_id) {
+            None => return,
+            Some(attributes) => attributes
+        };
+
         let player_id = match attributes.get("Engine.PlayerReplicationInfo:PlayerID") {
             Some(Attribute::Int(id)) => id,
             Some(_) => return,

@@ -13,7 +13,6 @@ pub struct PlayerData {
     pub loadouts: PlayerLoadouts,
     pub paints: PlayerLoadoutsPaints,
     pub body_states: BodyStates,
-    pub visible: Vec<bool>,
     pub team_paint_blue: Option<TeamPaint>,
     pub team_paint_orange: Option<TeamPaint>,
     pub jump_data: JumpData,
@@ -29,7 +28,6 @@ impl PlayerData {
             loadouts: PlayerLoadouts::new(),
             paints: PlayerLoadoutsPaints::new(),
             jump_data: JumpData::new(),
-            visible: Vec::new(),
             team_paint_blue: None,
             team_paint_orange: None,
         }

@@ -7,9 +7,13 @@ use crate::model::frame_state::FrameState;
 pub struct JumpHandler {}
 
 impl ActorHandler for JumpHandler {
-    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
-              attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              _objects: &Vec<String>) {
+    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState, actor_id: i32,
+              updated_attr: &String, _objects: &Vec<String>) {
+        let attributes = match state.actors.get(&actor_id) {
+            None => return,
+            Some(attributes) => attributes
+        };
+
         let player_id = match get_player_id(&attributes, &state.actors) {
             None => return,
             Some(id) => id
@@ -37,9 +41,13 @@ impl ActorHandler for JumpHandler {
 pub struct DoubleJumpHandler {}
 
 impl ActorHandler for DoubleJumpHandler {
-    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
-              attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              _objects: &Vec<String>) {
+    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState, actor_id: i32,
+              updated_attr: &String, _objects: &Vec<String>) {
+        let attributes = match state.actors.get(&actor_id) {
+            None => return,
+            Some(attributes) => attributes
+        };
+
         let player_id = match get_player_id(&attributes, &state.actors) {
             None => return,
             Some(id) => id
@@ -67,9 +75,13 @@ impl ActorHandler for DoubleJumpHandler {
 pub struct DodgeHandler {}
 
 impl ActorHandler for DodgeHandler {
-    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
-              attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              _objects: &Vec<String>) {
+    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState, actor_id: i32,
+              updated_attr: &String, _objects: &Vec<String>) {
+        let attributes = match state.actors.get(&actor_id) {
+            None => return,
+            Some(attributes) => attributes
+        };
+
         let player_id = match get_player_id(&attributes, &state.actors) {
             None => return,
             Some(id) => id
@@ -111,14 +123,14 @@ fn get_player_id(attributes: &HashMap<String, Attribute>,
     };
 
     let player_actor_id = match get_actor_attribute(
-        car_actor_id, "Engine.Pawn:PlayerReplicationInfo", &all_actors,
+        &car_actor_id, "Engine.Pawn:PlayerReplicationInfo", &all_actors,
     ) {
         None => return None,
         Some(Attribute::Flagged(_, id)) => id.clone() as i32,
         Some(_) => return None,
     };
 
-    match get_actor_attribute(player_actor_id, "Engine.PlayerReplicationInfo:PlayerID", all_actors) {
+    match get_actor_attribute(&player_actor_id, "Engine.PlayerReplicationInfo:PlayerID", all_actors) {
         None => None,
         Some(Attribute::Int(player_id)) => Some(player_id),
         Some(_) => None,

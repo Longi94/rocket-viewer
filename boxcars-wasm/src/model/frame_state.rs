@@ -6,6 +6,7 @@ pub struct FrameState {
     pub frame: usize,
     pub actors: HashMap<i32, HashMap<String, Attribute>>,
     pub actor_objects: HashMap<i32, String>,
+    pub car_player_map: HashMap<i32, i32>,
 }
 
 impl FrameState {
@@ -15,6 +16,7 @@ impl FrameState {
             frame: 0,
             actors: HashMap::new(),
             actor_objects: HashMap::new(),
+            car_player_map: HashMap::new(),
         }
     }
 }

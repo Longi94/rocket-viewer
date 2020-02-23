@@ -73,17 +73,12 @@ impl<'a> FrameParser<'a> {
                     Some(handler) => handler
                 };
 
-                let attributes = match state.actors.get(&updated_actor.actor_id.0) {
-                    None => continue,
-                    Some(attributes) => attributes
-                };
-
                 let object_name = match self.replay.objects.get(updated_actor.object_id.0 as usize) {
                     None => continue,
                     Some(object_name) => object_name
                 };
 
-                handler.update(&mut frame_data, &state, &attributes, &object_name,
+                handler.update(&mut frame_data, &mut state, updated_actor.actor_id.0, &object_name,
                                &self.replay.objects);
             }
         }

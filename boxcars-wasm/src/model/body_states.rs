@@ -8,6 +8,8 @@ pub struct BodyStates {
     pub times: Vec<f32>,
     pub rotations: Vec<f32>,
     pub linear_velocity: Vec<Vector3>,
+    pub visible: Vec<bool>,
+    pub visible_times: Vec<f32>,
 }
 
 impl BodyStates {
@@ -17,6 +19,8 @@ impl BodyStates {
             times: Vec::new(),
             rotations: Vec::new(),
             linear_velocity: Vec::new(),
+            visible: Vec::new(),
+            visible_times: Vec::new(),
         }
     }
 
@@ -51,6 +55,11 @@ impl BodyStates {
                 self.linear_velocity.push(rigid_body.linear_velocity
                     .and_then(Vector3::from_vector3f)
                     .unwrap_or(Vector3 { x: 0.0, y: 0.0, z: 0.0 }));
+
+                if !self.visible.last().unwrap_or(&true).clone() {
+                    self.visible.push(true);
+                    self.visible_times.push(time);
+                }
             }
             _ => return
         }
