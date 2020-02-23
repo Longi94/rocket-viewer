@@ -1,5 +1,5 @@
 import { createOffscreenCanvas } from 'rl-loadout-lib/dist/utils/offscreen-canvas';
-import { DataTexture, LinearFilter, Sprite, SpriteMaterial } from 'three';
+import { DataTexture, LinearFilter, PerspectiveCamera, Sprite, SpriteMaterial, Vector3 } from 'three';
 import { roundRect } from '../../util/canvas';
 
 const WIDTH = 2048;
@@ -11,7 +11,13 @@ const NAMEPLATE_MIN_HEIGHT = 450;
 const COLOR_BLUE = '#206DFF';
 const COLOR_ORANGE = '#F98522';
 
+const SCALE_TO_CAMERA = 1;
+
 export class Nameplate {
+
+  private readonly dummy = new Vector3();
+  private readonly dummy2 = new Vector3();
+
   readonly sprite: Sprite;
 
   constructor(name: string, team: number) {
@@ -22,8 +28,9 @@ export class Nameplate {
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = `${Math.floor(NAMEPLATE_HEIGHT * 9 / 10)}px Roboto`;
+    ctx.font = `bold ${Math.floor(NAMEPLATE_HEIGHT * 9 / 10)}px Roboto`;
     ctx.fillStyle = team == 0 ? COLOR_BLUE : COLOR_ORANGE;
+    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     const textWidth = ctx.measureText(name).width;
     const plateWidth = Math.min(WIDTH, Math.max(NAMEPLATE_MIN_HEIGHT, textWidth + NAMEPLATE_HEIGHT));
@@ -41,5 +48,14 @@ export class Nameplate {
     this.sprite = new Sprite(spriteMaterial);
     this.sprite.scale.setScalar(1000);
     this.sprite.position.y = 100;
+  }
+
+  update(camera: PerspectiveCamera) {
+    this.dummy.set(0, 0, 0);
+    this.dummy2.set(0, 0, 0);
+    const spritePos = this.sprite.localToWorld(this.dummy);
+    const camPos = camera.localToWorld(this.dummy2);
+    const scale = spritePos.distanceTo(camPos) * SCALE_TO_CAMERA;
+    this.sprite.scale.setScalar(scale);
   }
 }

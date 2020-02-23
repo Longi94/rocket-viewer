@@ -2,6 +2,7 @@ import { RigidBodyActor } from './rigid-body';
 import { PlayerData } from '../../model/replay/player-data';
 import { Nameplate } from '../object/nameplate';
 import { BodyModel } from 'rl-loadout-lib';
+import { PerspectiveCamera } from 'three';
 
 export class PlayerActor extends RigidBodyActor {
 
@@ -16,4 +17,11 @@ export class PlayerActor extends RigidBodyActor {
   update(time: number) {
   }
 
+  nameplateVisible(visible: boolean) {
+    this.nameplate.sprite.visible = visible;
+  }
+
+  updateNameplate(camera: PerspectiveCamera) {
+    this.nameplate.update(camera);
+  }
 }

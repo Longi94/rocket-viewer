@@ -20,7 +20,6 @@ import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
 import { loadMap } from './loader/map';
 import { ReplayScene } from './replay-scene';
 import { loadBall } from './loader/ball';
-import { setFromQuaternion } from '../util/three';
 import { AnimationManager } from './anim/animation-manager';
 import { loadCar } from './loader/car';
 import { CameraManager } from './camera/camera-manager';
@@ -56,12 +55,12 @@ export class SceneManager {
 
   async init(canvas: HTMLCanvasElement, width: number, height: number) {
 
-    const camera = new PerspectiveCamera(100, width / height, 0.01, 100000);
-    camera.position.x = 1679.7478335547376;
-    camera.position.y = 580.2658014964849;
-    camera.position.z = -917.4632500987678;
+    this.rs.camera = new PerspectiveCamera(100, width / height, 0.01, 100000);
+    this.rs.camera.position.x = 1679.7478335547376;
+    this.rs.camera.position.y = 580.2658014964849;
+    this.rs.camera.position.z = -917.4632500987678;
 
-    this.cameraManager = new CameraManager(camera, canvas);
+    this.cameraManager = new CameraManager(this.rs.camera, canvas);
 
     this.rs.scene = new Scene();
     this.rs.scene.background = new Color('#AAAAAA');
@@ -166,26 +165,35 @@ export class SceneManager {
 
     for (const playerId in this.rs.players) {
       const player = this.rs.players[playerId];
-      player.setPositionFromArray( replay.frame_data.players[playerId].body_states.positions, 0);
-      player.setQuaternionFromArray( replay.frame_data.players[playerId].body_states.rotations, 0);
+      player.setPositionFromArray(replay.frame_data.players[playerId].body_states.positions, 0);
+      player.setQuaternionFromArray(replay.frame_data.players[playerId].body_states.rotations, 0);
       player.addToScene(this.rs.scene);
     }
-
-    this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0].body);
-    this.cameraManager.update(this.currentAnimationTime, this.rs);
+    this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
+    this.update();
+    this.cameraManager.update(this.currentAnimationTime, this.rs);
+    this.updateNameplates();
   }
 
   private update() {
-    this.rs.ball_actor.update(this.currentTime);
     this.animationManager?.update(this.currentTime);
+    this.rs.ball_actor.update(this.currentTime);
   }
+
+  private updateNameplates() {
+    for (const player of Object.values(this.rs.players)) {
+      player.updateNameplate(this.rs.camera);
+    }
+  }
+
 
   render(time: number) {
 
     if (this.currentAnimationTime == undefined) {
       this.currentAnimationTime = time;
       this.cameraManager.update(time, this.rs);
+      this.updateNameplates();
       this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
       return;
     }
@@ -220,6 +228,7 @@ export class SceneManager {
       this.update();
     }
     this.cameraManager.update(time, this.rs);
+    this.updateNameplates();
     this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     this.currentAnimationTime = time;
   }
@@ -272,6 +281,8 @@ export class SceneManager {
 
     this.currentTime = time;
     this.update();
+    this.cameraManager.update(time, this.rs);
+    this.updateNameplates();
   }
 
   setSpeed(speed: number) {
@@ -282,7 +293,7 @@ export class SceneManager {
     if (targetPlayer == undefined) {
       this.cameraManager.setCamera(type);
     } else {
-      this.cameraManager.setCamera(type, this.rs.players[targetPlayer].body);
+      this.cameraManager.setCamera(type, this.rs.players[targetPlayer]);
     }
   }
 

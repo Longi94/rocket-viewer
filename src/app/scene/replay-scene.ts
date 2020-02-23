@@ -1,7 +1,5 @@
-import { Object3D, Scene, Texture } from 'three';
+import { Object3D, PerspectiveCamera, Scene, Texture } from 'three';
 import { Replay } from '../model/replay/replay';
-import { BodyModel } from 'rl-loadout-lib';
-import { Actor } from './actor/actor';
 import { BallActor } from './actor/ball';
 import { PlayerActor } from './actor/player';
 
@@ -17,4 +15,5 @@ export class ReplayScene {
   replay: Replay;
   scene: Scene;
   envMap: Texture;
+  camera: PerspectiveCamera;
 }

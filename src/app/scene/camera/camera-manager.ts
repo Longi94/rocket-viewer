@@ -1,12 +1,13 @@
-import { Camera, Object3D, PerspectiveCamera, Vector3 } from 'three';
+import { Camera, PerspectiveCamera, Vector3 } from 'three';
 import { CameraType } from './camera-type';
 import { ReplayScene } from '../replay-scene';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { PlayerActor } from '../actor/player';
 
 export class CameraManager {
 
   private type = CameraType.PLAYER_VIEW;
-  private target: Object3D;
+  private target: PlayerActor;
 
   private pointingVector = new Vector3();
   private tempVector = new Vector3();
@@ -19,9 +20,14 @@ export class CameraManager {
     this.orbitControls.enabled = false;
   }
 
-  setCamera(type: CameraType, target?: Object3D) {
+  setCamera(type: CameraType, target?: PlayerActor) {
     this.type = type;
+
+    if (this.target != undefined) {
+      this.target.nameplateVisible(true);
+    }
     this.target = target;
+    this.target.nameplateVisible(false);
 
     this.orbitControls.enabled = false;
     switch (type) {
@@ -46,7 +52,7 @@ export class CameraManager {
           .normalize()
           .multiplyScalar(-280);
 
-        this.tempVector.copy(this.target.position);
+        this.tempVector.copy(this.target.body.position);
         this.tempVector.y += 100;
         this.tempVector.add(this.pointingVector);
         this.tempVector.y = Math.max(this.tempVector.y, 10);
