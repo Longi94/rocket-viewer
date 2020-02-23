@@ -11,6 +11,7 @@ use crate::actor::car::CarHandler;
 use crate::actor::player::PlayerHandler;
 use crate::model::ball::BallType;
 use crate::actor::jump::{JumpHandler, DoubleJumpHandler, DodgeHandler};
+use crate::model::frame_state::FrameState;
 
 fn get_actor_attribute(actor_id: i32, attr_name: &str,
                        all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<Attribute> {
@@ -24,10 +25,9 @@ fn get_actor_attribute(actor_id: i32, attr_name: &str,
 }
 
 pub trait ActorHandler {
-    fn update(&self, real_time: f32, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              actor_objects: &HashMap<i32, String>, objects: &Vec<String>);
+              objects: &Vec<String>);
 }
 
 pub fn get_handler(object_name: &str) -> Option<Box<dyn ActorHandler>> {

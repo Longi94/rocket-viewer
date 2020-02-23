@@ -5,14 +5,14 @@ use boxcars::Attribute;
 use crate::model::player_data::PlayerData;
 use crate::model::player_loadout::PlayerLoadout;
 use crate::model::player_loadout_paints::PlayerLoadoutPaints;
+use crate::model::frame_state::FrameState;
 
 pub struct PlayerHandler {}
 
 impl ActorHandler for PlayerHandler {
-    fn update(&self, _real_time: f32, _frame: usize, frame_data: &mut FrameData,
+    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              _all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              actor_objects: &HashMap<i32, String>, objects: &Vec<String>) {
+              objects: &Vec<String>) {
         let player_id = match attributes.get("Engine.PlayerReplicationInfo:PlayerID") {
             Some(Attribute::Int(id)) => id,
             Some(_) => return,
@@ -43,7 +43,7 @@ impl ActorHandler for PlayerHandler {
                     player_data.team = match attributes.get("Engine.PlayerReplicationInfo:Team") {
                         Some(Attribute::Flagged(_, team)) => {
                             let team_actor = team.clone() as i32;
-                            match actor_objects.get(&team_actor) {
+                            match state.actor_objects.get(&team_actor) {
                                 None => None,
                                 Some(team_object) => {
                                     if team_object.chars().last().unwrap() == '0' {

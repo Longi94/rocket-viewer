@@ -2,15 +2,15 @@ use crate::actor::{ActorHandler, get_actor_attribute};
 use boxcars::Attribute;
 use wasm_bindgen::__rt::std::collections::HashMap;
 use crate::model::frame_data::FrameData;
+use crate::model::frame_state::FrameState;
 
 pub struct JumpHandler {}
 
 impl ActorHandler for JumpHandler {
-    fn update(&self, _real_time: f32, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              _actor_objects: &HashMap<i32, String>, _objects: &Vec<String>) {
-        let player_id = match get_player_id(&attributes, &all_actors) {
+              _objects: &Vec<String>) {
+        let player_id = match get_player_id(&attributes, &state.actors) {
             None => return,
             Some(id) => id
         };
@@ -30,18 +30,17 @@ impl ActorHandler for JumpHandler {
             _ => return
         };
 
-        player_data.jump_data.jump_active.push((frame, active));
+        player_data.jump_data.jump_active.push((state.frame, active));
     }
 }
 
 pub struct DoubleJumpHandler {}
 
 impl ActorHandler for DoubleJumpHandler {
-    fn update(&self, _real_time: f32, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              _actor_objects: &HashMap<i32, String>, _objects: &Vec<String>) {
-        let player_id = match get_player_id(&attributes, &all_actors) {
+              _objects: &Vec<String>) {
+        let player_id = match get_player_id(&attributes, &state.actors) {
             None => return,
             Some(id) => id
         };
@@ -61,18 +60,17 @@ impl ActorHandler for DoubleJumpHandler {
             _ => return
         };
 
-        player_data.jump_data.double_jump_active.push((frame, active));
+        player_data.jump_data.double_jump_active.push((state.frame, active));
     }
 }
 
 pub struct DodgeHandler {}
 
 impl ActorHandler for DodgeHandler {
-    fn update(&self, _real_time: f32, frame: usize, frame_data: &mut FrameData,
+    fn update(&self, frame_data: &mut FrameData, state: &FrameState,
               attributes: &HashMap<String, Attribute>, updated_attr: &String,
-              all_actors: &HashMap<i32, HashMap<String, Attribute>>,
-              _actor_objects: &HashMap<i32, String>, _objects: &Vec<String>) {
-        let player_id = match get_player_id(&attributes, &all_actors) {
+              _objects: &Vec<String>) {
+        let player_id = match get_player_id(&attributes, &state.actors) {
             None => return,
             Some(id) => id
         };
@@ -92,7 +90,7 @@ impl ActorHandler for DodgeHandler {
             _ => return
         };
 
-        player_data.jump_data.dodge_active.push((frame, active));
+        player_data.jump_data.dodge_active.push((state.frame, active));
     }
 }
 

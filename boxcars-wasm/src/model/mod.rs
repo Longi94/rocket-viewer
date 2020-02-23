@@ -2,6 +2,7 @@ pub mod ball;
 pub mod body_states;
 pub mod cleaned_replay;
 pub mod frame_data;
+pub mod frame_state;
 pub mod jump;
 pub mod player_data;
 pub mod player_loadout;

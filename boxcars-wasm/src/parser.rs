@@ -1,8 +1,9 @@
-use boxcars::{Replay, Attribute};
+use boxcars::Replay;
 use std::collections::HashMap;
 use crate::actor::{get_handler, ActorHandler};
 use crate::clean::clean_frame_data;
 use crate::model::frame_data::FrameData;
+use crate::model::frame_state::FrameState;
 
 pub struct FrameParser<'a> {
     pub replay: &'a Replay
@@ -21,29 +22,28 @@ impl<'a> FrameParser<'a> {
         }
 
         let mut frame_data = FrameData::with_capacity(count);
+        let mut state = FrameState::new();
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
-        let mut actors: HashMap<i32, HashMap<String, Attribute>> = HashMap::new();
-        let mut actor_objects: HashMap<i32, String> = HashMap::new();
-        let mut real_time: f32 = 0.0;
 
         for (i, frame) in frames.frames.iter().enumerate() {
             frame_data.times.push(frame.time);
             frame_data.deltas.push(frame.delta);
-            real_time += frame.delta;
+            state.real_time += frame.delta;
+            state.frame = i;
 
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);
-                actors.remove(&deleted.0);
-                actor_objects.remove(&deleted.0);
+                state.actors.remove(&deleted.0);
+                state.actor_objects.remove(&deleted.0);
             }
 
             for new_actor in &frame.new_actors {
-                actors.insert(new_actor.actor_id.0, HashMap::new());
+                state.actors.insert(new_actor.actor_id.0, HashMap::new());
                 let object_name = match self.replay.objects.get(new_actor.object_id.0 as usize) {
                     None => continue,
                     Some(object_name) => object_name
                 };
-                actor_objects.insert(new_actor.actor_id.0, object_name.clone());
+                state.actor_objects.insert(new_actor.actor_id.0, object_name.clone());
 
                 let handler = match get_handler(object_name) {
                     None => continue,
@@ -54,7 +54,7 @@ impl<'a> FrameParser<'a> {
             }
 
             for updated_actor in &frame.updated_actors {
-                match actors.get_mut(&updated_actor.actor_id.0) {
+                match state.actors.get_mut(&updated_actor.actor_id.0) {
                     None => continue,
                     Some(attributes) => {
                         match self.replay.objects.get(updated_actor.object_id.0 as usize) {
@@ -73,7 +73,7 @@ impl<'a> FrameParser<'a> {
                     Some(handler) => handler
                 };
 
-                let attributes = match actors.get(&updated_actor.actor_id.0) {
+                let attributes = match state.actors.get(&updated_actor.actor_id.0) {
                     None => continue,
                     Some(attributes) => attributes
                 };
@@ -83,8 +83,8 @@ impl<'a> FrameParser<'a> {
                     Some(object_name) => object_name
                 };
 
-                handler.update(real_time, i, &mut frame_data, &attributes, &object_name, &actors,
-                               &actor_objects, &self.replay.objects);
+                handler.update(&mut frame_data, &state, &attributes, &object_name,
+                               &self.replay.objects);
             }
         }
 
