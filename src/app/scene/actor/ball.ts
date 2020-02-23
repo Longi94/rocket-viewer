@@ -7,7 +7,6 @@ const EMISSIVE_BLUE = new Color('#00bfff');
 
 export class BallActor extends RigidBodyActor {
 
-  private readonly emissive = new Color(1, 1, 1);
   private readonly material: MeshStandardMaterial;
 
   constructor(public readonly type: BallType, ball: Object3D) {
@@ -24,14 +23,11 @@ export class BallActor extends RigidBodyActor {
       case BallType.BASKETBALL:
       case BallType.CUBE:
         const posZ = this.body.position.z;
-        this.emissive.set(posZ > 0.0 ? EMISSIVE_ORANGE : EMISSIVE_BLUE);
-
+        this.material.emissive.set(posZ > 0.0 ? EMISSIVE_ORANGE : EMISSIVE_BLUE);
         const whiteAlpha = 1.0 - (Math.min(Math.abs(posZ), 1000.0) / 1000.0);
-        this.emissive.r = blend(this.emissive.r, 1.0, whiteAlpha);
-        this.emissive.g = blend(this.emissive.g, 1.0, whiteAlpha);
-        this.emissive.b = blend(this.emissive.b, 1.0, whiteAlpha);
-
-        this.material.emissive.set(this.emissive);
+        this.material.emissive.r = blend(this.material.emissive.r, 1.0, whiteAlpha);
+        this.material.emissive.g = blend(this.material.emissive.g, 1.0, whiteAlpha);
+        this.material.emissive.b = blend(this.material.emissive.b, 1.0, whiteAlpha);
         break;
       case BallType.BREAKOUT:
         // TODO breakout ball
