@@ -1,5 +1,6 @@
 mod ball;
 mod car;
+mod jump;
 mod player;
 
 use std::collections::HashMap;
@@ -9,6 +10,7 @@ use crate::actor::ball::BallHandler;
 use crate::actor::car::CarHandler;
 use crate::actor::player::PlayerHandler;
 use crate::model::ball::BallType;
+use crate::actor::jump::{JumpHandler, DoubleJumpHandler, DodgeHandler};
 
 fn get_actor_attribute(actor_id: i32, attr_name: &str,
                        all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<Attribute> {
@@ -38,6 +40,9 @@ pub fn get_handler(object_name: &str) -> Option<Box<dyn ActorHandler>> {
         "Archetypes.Ball.Ball_Breakout" => Some(Box::new(BallHandler { ball_type: BallType::Breakout })),
         "Archetypes.Car.Car_Default" => Some(Box::new(CarHandler {})),
         "TAGame.Default__PRI_TA" => Some(Box::new(PlayerHandler {})),
+        "Archetypes.CarComponents.CarComponent_Jump" => Some(Box::new(JumpHandler {})),
+        "Archetypes.CarComponents.CarComponent_DoubleJump" => Some(Box::new(DoubleJumpHandler {})),
+        "Archetypes.CarComponents.CarComponent_Dodge" => Some(Box::new(DodgeHandler {})),
         _ => None
     }
 }
