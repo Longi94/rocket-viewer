@@ -159,12 +159,10 @@ export class SceneManager {
     GlobalWebGLContext.dispose();
 
     this.rs.scene.add(this.rs.models.map);
-    this.rs.scene.add(this.rs.models.ball);
+    this.rs.ball_actor.addToScene(this.rs.scene);
 
-    this.rs.models.ball.position.x = replay.frame_data.ball_data.body_states.positions[0];
-    this.rs.models.ball.position.y = replay.frame_data.ball_data.body_states.positions[1];
-    this.rs.models.ball.position.z = replay.frame_data.ball_data.body_states.positions[2];
-    setFromQuaternion(this.rs.models.ball.rotation, replay.frame_data.ball_data.body_states.rotations);
+    this.rs.ball_actor.setPositionFromArray(replay.frame_data.ball_data.body_states.positions, 0);
+    this.rs.ball_actor.setQuaternionFromArray(replay.frame_data.ball_data.body_states.rotations, 0);
 
     for (const playerId in this.rs.models.players) {
       const body = this.rs.models.players[playerId];
@@ -182,6 +180,11 @@ export class SceneManager {
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
     this.cameraManager.update(this.currentAnimationTime, this.rs);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
+  }
+
+  private update() {
+    this.rs.ball_actor.update(this.currentTime);
+    this.animationManager?.update(this.currentTime);
   }
 
   render(time: number) {
@@ -220,8 +223,7 @@ export class SceneManager {
       }
 
       this.onTimeUpdate(this.currentTime);
-
-      this.animationManager?.update(this.currentTime);
+      this.update();
     }
     this.cameraManager.update(time, this.rs);
     this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
@@ -275,7 +277,7 @@ export class SceneManager {
     }
 
     this.currentTime = time;
-    this.animationManager?.update(this.currentTime);
+    this.update();
   }
 
   setSpeed(speed: number) {

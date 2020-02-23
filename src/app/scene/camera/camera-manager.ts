@@ -42,7 +42,7 @@ export class CameraManager {
           return;
         }
 
-        this.pointingVector.subVectors(rs.models.ball.position, this.camera.position)
+        this.pointingVector.subVectors(rs.ball_actor.getPosition(), this.camera.position)
           .normalize()
           .multiplyScalar(-280);
 
@@ -52,7 +52,7 @@ export class CameraManager {
         this.tempVector.y = Math.max(this.tempVector.y, 10);
 
         this.camera.position.copy(this.tempVector);
-        this.camera.lookAt(rs.models.ball.position);
+        this.camera.lookAt(rs.ball_actor.getPosition());
         break;
       case CameraType.ORBITAL:
         this.orbitControls.update();

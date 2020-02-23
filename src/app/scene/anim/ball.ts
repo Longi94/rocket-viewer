@@ -2,12 +2,11 @@ import { AnimationClip, AnimationMixer, LoopOnce, QuaternionKeyframeTrack, Vecto
 import { FrameData } from '../../model/replay/frame-data';
 import { ReplayScene } from '../replay-scene';
 import { addAnimPathHelper } from '../../util/debug';
-import { ColorHasher } from '../../util/util';
 
 export function createBallAnimationMixer(frameData: FrameData, rs: ReplayScene, debug: boolean):
   AnimationMixer {
   const states = frameData.ball_data.body_states;
-  const mixer = new AnimationMixer(rs.models.ball);
+  const mixer = new AnimationMixer(rs.ball_actor.body);
   const ballPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
   const ballRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
   const ballAnimationClip = new AnimationClip(
