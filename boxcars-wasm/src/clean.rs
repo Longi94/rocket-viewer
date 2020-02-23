@@ -2,17 +2,17 @@ use crate::model::frame_data::FrameData;
 use crate::model::vector::Vector3;
 
 pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
-    smooth_ball_path(&frame_data.ball_data.body_states.positions,
-                     &mut frame_data.ball_data.body_states.times,
-                     &frame_data.ball_data.body_states.linear_velocity);
+    smooth_path(&frame_data.ball_data.body_states.positions,
+                &mut frame_data.ball_data.body_states.times,
+                &frame_data.ball_data.body_states.linear_velocity);
 
-//    for (_, player_data) in &mut frame_data.players {
-//        fix_position_times(
-//            &mut player_data.positions,
-//            &mut player_data.position_times,
-//            &mut player_data.linear_velocity,
-//        );
-//    }
+    for (_, player_data) in &mut frame_data.players {
+        smooth_path(
+            &player_data.body_states.positions,
+            &mut player_data.body_states.times,
+            &player_data.body_states.linear_velocity,
+        );
+    }
 
     // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
     // the interpolation to slowly drift the models. Add artificial frames to prevent that.
@@ -49,7 +49,7 @@ fn fix_position_frames(p: &mut Vec<f32>, q: &mut Vec<f32>, times: &mut Vec<f32>)
     }
 }
 
-fn smooth_ball_path(p: &Vec<f32>, times: &mut Vec<f32>, velocities: &Vec<Vector3>) {
+fn smooth_path(p: &Vec<f32>, times: &mut Vec<f32>, velocities: &Vec<Vector3>) {
     let mut path_vectors: Vec<Vector3> = Vec::with_capacity(times.len() - 1);
     let v: Vec<f32> = velocities.iter().map(|x| x.len()).collect();
 
