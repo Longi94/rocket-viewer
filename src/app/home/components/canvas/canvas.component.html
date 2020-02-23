@@ -24,12 +24,12 @@
   <div class="player-debug-overlay" *ngFor="let player of sceneManager.playbackInfo.players">
     <span>name: {{player.name}}</span>
     <span>frame: {{sceneManager.playerFrames[player.id]}}</span>
-    <span *ngIf="sceneManager.rs.models.players[player.id]">position:
-      {{sceneManager.rs.models.players[player.id].scene.position.x | number}}
-      {{sceneManager.rs.models.players[player.id].scene.position.y | number}}
-      {{sceneManager.rs.models.players[player.id].scene.position.z | number}}
+    <span *ngIf="sceneManager.rs.players[player.id]">position:
+      {{sceneManager.rs.players[player.id].body.position.x | number}}
+      {{sceneManager.rs.players[player.id].body.position.y | number}}
+      {{sceneManager.rs.players[player.id].body.position.z | number}}
     </span>
-    <span *ngIf="sceneManager.rs.models.players[player.id]">velocity: {{sceneManager.getPlayerSpeed(player.id) | number}}</span>
+    <span *ngIf="sceneManager.rs.players[player.id]">velocity: {{sceneManager.getPlayerSpeed(player.id) | number}}</span>
   </div>
 </div>
 

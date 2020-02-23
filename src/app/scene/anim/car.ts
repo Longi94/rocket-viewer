@@ -13,7 +13,7 @@ import { addAnimPathHelper } from '../../util/debug';
 export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene, debug: boolean):
   AnimationMixer {
   const states = playerData.body_states;
-  const mixer = new AnimationMixer(rs.models.players[playerData.id].scene);
+  const mixer = new AnimationMixer(rs.players[playerData.id].body);
   const carPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
   const carRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
 

@@ -159,25 +159,19 @@ export class SceneManager {
     GlobalWebGLContext.dispose();
 
     this.rs.scene.add(this.rs.models.map);
-    this.rs.ball_actor.addToScene(this.rs.scene);
 
     this.rs.ball_actor.setPositionFromArray(replay.frame_data.ball_data.body_states.positions, 0);
     this.rs.ball_actor.setQuaternionFromArray(replay.frame_data.ball_data.body_states.rotations, 0);
+    this.rs.ball_actor.addToScene(this.rs.scene);
 
-    for (const playerId in this.rs.models.players) {
-      const body = this.rs.models.players[playerId];
-      body.addToScene(this.rs.scene);
-      body.scene.position.x = replay.frame_data.players[playerId].body_states.positions[0];
-      body.scene.position.y = replay.frame_data.players[playerId].body_states.positions[1];
-      body.scene.position.z = replay.frame_data.players[playerId].body_states.positions[2];
-
-      body.scene.quaternion.x = replay.frame_data.players[playerId].body_states.rotations[0];
-      body.scene.quaternion.y = replay.frame_data.players[playerId].body_states.rotations[1];
-      body.scene.quaternion.z = replay.frame_data.players[playerId].body_states.rotations[2];
-      body.scene.quaternion.w = replay.frame_data.players[playerId].body_states.rotations[3];
+    for (const playerId in this.rs.players) {
+      const player = this.rs.players[playerId];
+      player.setPositionFromArray( replay.frame_data.players[playerId].body_states.positions, 0);
+      player.setQuaternionFromArray( replay.frame_data.players[playerId].body_states.rotations, 0);
+      player.addToScene(this.rs.scene);
     }
 
-    this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.models.players)[0].scene);
+    this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0].body);
     this.cameraManager.update(this.currentAnimationTime, this.rs);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
   }
@@ -288,7 +282,7 @@ export class SceneManager {
     if (targetPlayer == undefined) {
       this.cameraManager.setCamera(type);
     } else {
-      this.cameraManager.setCamera(type, this.rs.models.players[targetPlayer].scene);
+      this.cameraManager.setCamera(type, this.rs.players[targetPlayer].body);
     }
   }
 

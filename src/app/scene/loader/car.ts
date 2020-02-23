@@ -2,6 +2,7 @@ import { PlayerData } from '../../model/replay/player-data';
 import { ReplayScene } from '../replay-scene';
 import { RocketManager } from './loader-config';
 import { Body, createPaintConfig, Wheel } from 'rl-loadout-lib';
+import { PlayerActor } from '../actor/player';
 
 
 export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
@@ -28,5 +29,5 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   wheels.setEnvMap(rs.envMap);
   body.addWheelsModel(wheels);
 
-  rs.models.players[playerData.id] = body;
+  rs.players[playerData.id] = new PlayerActor(playerData, body);
 }
