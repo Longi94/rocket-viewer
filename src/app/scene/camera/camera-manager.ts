@@ -26,8 +26,10 @@ export class CameraManager {
     if (this.target != undefined) {
       this.target.nameplateVisible(true);
     }
+    if (target != undefined) {
+      target.nameplateVisible(false);
+    }
     this.target = target;
-    this.target.nameplateVisible(false);
 
     this.orbitControls.enabled = false;
     switch (type) {

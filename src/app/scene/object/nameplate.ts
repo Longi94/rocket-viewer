@@ -45,6 +45,7 @@ export class Nameplate {
     texture.flipY = true;
     texture.magFilter = LinearFilter;
     const spriteMaterial = new SpriteMaterial({map: texture});
+    spriteMaterial.depthWrite = false; // Do not hide stuff behind transparent parts of the sprite
     this.sprite = new Sprite(spriteMaterial);
     this.sprite.scale.setScalar(1000);
     this.sprite.position.y = 100;
