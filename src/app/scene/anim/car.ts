@@ -11,25 +11,27 @@ import { ColorHasher } from '../../util/util';
 import { addAnimPathHelper } from '../../util/debug';
 
 export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene, debug: boolean):
-  AnimationMixer {
+  AnimationMixer[] {
   const states = playerData.body_states;
-  const mixer = new AnimationMixer(rs.players[playerData.id].body);
+
+  const positionMixer = new AnimationMixer(rs.players[playerData.id].body);
+  const rotationMixer = new AnimationMixer(rs.players[playerData.id].car);
+
   const carPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
   const carRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
+  const carVisibleTrack = new BooleanKeyframeTrack('.visible', states.visible_times, states.visible);
 
-  const tracks = [carPositionTrack, carRotationTrack];
+  const carPositionClip = new AnimationClip(`car_position_${playerData.id}_clip`, states.times[states.times.length - 1],
+    [carPositionTrack, carVisibleTrack]);
+  positionMixer.clipAction(carPositionClip).play();
 
-  if (states.visible_times.length > 0) {
-    const carVisibleTrack = new BooleanKeyframeTrack('.visible', states.visible_times, states.visible);
-    tracks.push(carVisibleTrack);
-  }
-
-  const carAnimationClip = new AnimationClip(`car_${playerData.id}_clip`, states.times[states.times.length - 1], tracks);
-  mixer.clipAction(carAnimationClip).play();
+  const carRotationClip = new AnimationClip(`car_rotation_${playerData.id}_clip`, states.times[states.times.length - 1],
+    [carRotationTrack]);
+  rotationMixer.clipAction(carRotationClip).play();
 
   // if (debug) {
   //   addAnimPathHelper(playerData.positions, ColorHasher.hex(playerData.name), rs.scene);
   // }
 
-  return mixer;
+  return [positionMixer, rotationMixer];
 }

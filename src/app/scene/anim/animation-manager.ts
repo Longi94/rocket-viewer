@@ -12,7 +12,9 @@ export class AnimationManager {
     this.ballMixer = createBallAnimationMixer(frameData, replayScene, debug);
 
     for (const playerData of Object.values(frameData.players)) {
-      this.playerMixers.push(createCarAnimationMixer(playerData, replayScene, debug));
+      const mixers = createCarAnimationMixer(playerData, replayScene, debug);
+      this.playerMixers.push(mixers[0]);
+      this.playerMixers.push(mixers[1]);
     }
   }
 
