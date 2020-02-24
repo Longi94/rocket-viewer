@@ -12,6 +12,8 @@ export class PlayerActor extends RigidBodyActor {
 
   private readonly nameplate: Nameplate;
   private boost: BoostEmitter;
+
+  private readonly boostJoint: Object3D;
   readonly car: Object3D;
 
   private readonly boostPos = new Vector3();
@@ -24,12 +26,18 @@ export class PlayerActor extends RigidBodyActor {
     this.nameplate = new Nameplate(playerData.name, playerData.team);
     this.body.add(this.nameplate.sprite);
     this.boostData = playerData.boost_data;
+    this.boostJoint = this.car.getObjectByName('RocketBoost');
   }
 
   update(time: number) {
-    this.boostPos.set(0, 0, 0);
-    this.car.localToWorld(this.boostPos);
     if (this.boost != undefined) {
+      if (this.boostJoint != undefined) {
+        this.boostPos.set(0, 0, 0);
+        this.boostJoint.localToWorld(this.boostPos);
+      } else {
+        this.boostPos.set(-48.505, 9, 0); // octane boost pos
+        this.car.localToWorld(this.boostPos)
+      }
       this.boost.update(time, this.boostPos);
     }
   }
