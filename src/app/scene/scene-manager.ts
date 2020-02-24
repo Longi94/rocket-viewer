@@ -25,6 +25,8 @@ import { loadCar } from './loader/car';
 import { CameraManager } from './camera/camera-manager';
 import { CameraType } from './camera/camera-type';
 import { PlaybackInfo, PlayerPlaybackInfo } from '../model/playback-info';
+import { loadBoostTexture } from './loader/boost';
+import { ParticleSystemManager } from './particle-system-manager';
 
 export class SceneManager {
 
@@ -35,6 +37,7 @@ export class SceneManager {
 
   animationManager: AnimationManager;
   cameraManager: CameraManager;
+  particleSystemManager: ParticleSystemManager;
 
   currentAnimationTime: number;
   currentTime: number;
@@ -71,6 +74,8 @@ export class SceneManager {
       logarithmicDepthBuffer: true
     });
     this.renderer.setSize(width, height);
+
+    this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
 
     this.addLights();
 
@@ -151,6 +156,7 @@ export class SceneManager {
     const ballPromise = loadBall(replay.frame_data.ball_data.ball_type, this.rs);
     const playerPromises = Object.values(replay.frame_data.players).map(player => loadCar(player, this.rs));
 
+    await loadBoostTexture(this.rs);
     await mapPromise;
     await ballPromise;
     await Promise.all(playerPromises);
@@ -167,6 +173,8 @@ export class SceneManager {
       const player = this.rs.players[playerId];
       player.setPositionFromArray(replay.frame_data.players[playerId].body_states.positions, 0);
       player.setQuaternionFromArray(replay.frame_data.players[playerId].body_states.rotations, 0);
+      player.createBoost(this.particleSystemManager.createEmitter(),
+        this.rs.boostSprite, this.rs.camera, this.renderer);
       player.addToScene(this.rs.scene);
     }
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
@@ -179,6 +187,10 @@ export class SceneManager {
   private update() {
     this.animationManager?.update(this.currentTime);
     this.rs.ball_actor.update(this.currentTime);
+    for (const playerActor of Object.values(this.rs.players)) {
+      playerActor.update(this.currentTime);
+    }
+    this.particleSystemManager.update(this.currentTime);
   }
 
   private updateNameplates() {
@@ -231,6 +243,10 @@ export class SceneManager {
     this.updateNameplates();
     this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     this.currentAnimationTime = time;
+
+    // if (this.debug) {
+    //   Debug.renderInfo(this.rs.particleSystem, 3);
+    // }
   }
 
   play() {

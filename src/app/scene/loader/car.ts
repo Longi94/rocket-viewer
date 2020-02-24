@@ -29,5 +29,5 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   wheels.setEnvMap(rs.envMap);
   body.addWheelsModel(wheels);
 
-  rs.players[playerData.id] = new PlayerActor(playerData, body);
+  rs.players[playerData.id] = new PlayerActor(playerData, body, rs);
 }

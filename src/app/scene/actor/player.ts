@@ -2,22 +2,34 @@ import { RigidBodyActor } from './rigid-body';
 import { PlayerData } from '../../model/replay/player-data';
 import { Nameplate } from '../object/nameplate';
 import { BodyModel } from 'rl-loadout-lib';
-import { Group, Object3D, PerspectiveCamera } from 'three';
+import { Camera, Group, Object3D, PerspectiveCamera, Sprite, Vector3, WebGLRenderer } from 'three';
+import { BoostEmitter } from '../object/boost-emitter';
+import { ReplayScene } from '../replay-scene';
+import { Emitter } from 'three-nebula';
 
 export class PlayerActor extends RigidBodyActor {
 
   private readonly nameplate: Nameplate;
+  private boost: BoostEmitter;
   readonly car: Object3D;
 
-  constructor(playerData: PlayerData, body: BodyModel) {
+  private readonly boostPos = new Vector3();
+
+  constructor(playerData: PlayerData, body: BodyModel, rs: ReplayScene) {
     super(new Group());
     this.car = body.scene;
     this.body.add(body.scene);
     this.nameplate = new Nameplate(playerData.name, playerData.team);
     this.body.add(this.nameplate.sprite);
+
   }
 
   update(time: number) {
+    this.boostPos.set(0, 0, 0);
+    this.car.localToWorld(this.boostPos);
+    if (this.boost != undefined) {
+      this.boost.update(this.boostPos);
+    }
   }
 
   nameplateVisible(visible: boolean) {
@@ -30,5 +42,9 @@ export class PlayerActor extends RigidBodyActor {
 
   setQuaternionFromArray(q: number[], i: number) {
     this.car.quaternion.set(q[i], q[i + 1], q[i + 2], q[i + 3]);
+  }
+
+  createBoost(emitter: Emitter, sprite: Sprite, camera: Camera, renderer: WebGLRenderer) {
+    this.boost = new BoostEmitter(emitter, sprite, camera, renderer);
   }
 }
