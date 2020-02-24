@@ -1,3 +1,5 @@
+/* tslint:disable:variable-name */
+
 import { Keyframe } from './keyframe';
 import { TickMark } from './tick-mark';
 import { FrameData } from './frame-data';

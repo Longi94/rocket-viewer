@@ -5,11 +5,11 @@ import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 import { MeshStandardMaterial } from 'three';
 
 const MAPPING: { [name: string]: string } = {
-  'HoopsStadium_P': '/assets/models/maps/HoopsStadium_P.draco.glb'
+  HoopsStadium_P: '/assets/models/maps/HoopsStadium_P.draco.glb'
 };
 
 const TRANSPARENT_MATERIALS: { [name: string]: Set<string> } = {
-  'HoopsStadium_P': new Set(['net_material', 'wall_material_0', 'backboard_material_1_orange', 'backboard_material_1_blue'])
+  HoopsStadium_P: new Set(['net_material', 'wall_material_0', 'backboard_material_1_orange', 'backboard_material_1_blue'])
 };
 
 export async function loadMap(name: string, rs: ReplayScene) {
@@ -22,7 +22,7 @@ export async function loadMap(name: string, rs: ReplayScene) {
 
   let transparentMats = TRANSPARENT_MATERIALS[name];
   if (transparentMats == undefined) {
-    transparentMats = new Set<string>(['goal_glass', 'wall_grate', 'center_grate_material'])
+    transparentMats = new Set<string>(['goal_glass', 'wall_grate', 'center_grate_material']);
   }
 
   traverseMaterials(rs.models.map, mat => {

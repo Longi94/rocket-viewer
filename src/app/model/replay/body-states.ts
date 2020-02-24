@@ -1,3 +1,5 @@
+/* tslint:disable:variable-name */
+
 export class BodyStates {
   positions: number[];
   rotations: number[];

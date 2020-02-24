@@ -1,3 +1,5 @@
+/* tslint:disable:variable-name */
+
 import { BodyStates } from './body-states';
 import { PlayerLoadouts } from './player-loadout';
 import { PlayerLoadoutsPaints } from './player-loadout-paints';

@@ -25,9 +25,9 @@ export class BallActor extends RigidBodyActor {
         const posZ = this.body.position.z;
         this.material.emissive.set(posZ > 0.0 ? EMISSIVE_ORANGE : EMISSIVE_BLUE);
         const whiteAlpha = 1.0 - (Math.min(Math.abs(posZ), 1000.0) / 1000.0);
-        this.material.emissive.r = blend(this.material.emissive.r, 1.0, whiteAlpha);
-        this.material.emissive.g = blend(this.material.emissive.g, 1.0, whiteAlpha);
-        this.material.emissive.b = blend(this.material.emissive.b, 1.0, whiteAlpha);
+        this.material.emissive.r = blendColor(this.material.emissive.r, 1.0, whiteAlpha);
+        this.material.emissive.g = blendColor(this.material.emissive.g, 1.0, whiteAlpha);
+        this.material.emissive.b = blendColor(this.material.emissive.b, 1.0, whiteAlpha);
         break;
       case BallType.BREAKOUT:
         // TODO breakout ball
@@ -36,6 +36,6 @@ export class BallActor extends RigidBodyActor {
   }
 }
 
-function blend(base: number, blend: number, alpha: number): number {
+function blendColor(base: number, blend: number, alpha: number): number {
   return (blend * alpha + base * (1.0 - alpha));
 }

@@ -49,9 +49,16 @@ export class SceneManager {
   private isPlaying = false;
   private playbackSpeed = 1;
 
+  // anything down here is for debug purposes only
+  ballFrame = 0;
+  v1 = new Vector3();
+  v2 = new Vector3();
+
+  playerFrames: { [id: number]: number } = {};
+
   // callbacks
-  onTimeUpdate = (time: number) => {
-  };
+  onTimeUpdate(time: number) {
+  }
 
   constructor(private readonly debug = false) {
   }
@@ -68,11 +75,7 @@ export class SceneManager {
     this.rs.scene = new Scene();
     this.rs.scene.background = new Color('#AAAAAA');
 
-    this.renderer = new WebGLRenderer({
-      canvas: canvas,
-      antialias: true,
-      logarithmicDepthBuffer: true
-    });
+    this.renderer = new WebGLRenderer({canvas, antialias: true, logarithmicDepthBuffer: true});
     this.renderer.setSize(width, height);
 
     this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
@@ -151,7 +154,7 @@ export class SceneManager {
 
     // Load necessary models
 
-    const map = replay.properties['MapName'];
+    const map = replay.properties.MapName;
     const mapPromise = loadMap(map, this.rs);
     const ballPromise = loadBall(replay.frame_data.ball_data.ball_type, this.rs);
     const playerPromises = Object.values(replay.frame_data.players).map(player => loadCar(player, this.rs));
@@ -165,11 +168,11 @@ export class SceneManager {
 
     this.rs.scene.add(this.rs.models.map);
 
-    this.rs.ball_actor.setPositionFromArray(replay.frame_data.ball_data.body_states.positions, 0);
-    this.rs.ball_actor.setQuaternionFromArray(replay.frame_data.ball_data.body_states.rotations, 0);
-    this.rs.ball_actor.addToScene(this.rs.scene);
+    this.rs.ballActor.setPositionFromArray(replay.frame_data.ball_data.body_states.positions, 0);
+    this.rs.ballActor.setQuaternionFromArray(replay.frame_data.ball_data.body_states.rotations, 0);
+    this.rs.ballActor.addToScene(this.rs.scene);
 
-    for (const playerId in this.rs.players) {
+    for (const playerId of Object.keys(this.rs.players)) {
       const player = this.rs.players[playerId];
       player.setPositionFromArray(replay.frame_data.players[playerId].body_states.positions, 0);
       player.setQuaternionFromArray(replay.frame_data.players[playerId].body_states.rotations, 0);
@@ -186,7 +189,7 @@ export class SceneManager {
 
   private update() {
     this.animationManager?.update(this.currentTime);
-    this.rs.ball_actor.update(this.currentTime);
+    this.rs.ballActor.update(this.currentTime);
     for (const playerActor of Object.values(this.rs.players)) {
       playerActor.update(this.currentTime);
     }
@@ -312,13 +315,6 @@ export class SceneManager {
       this.cameraManager.setCamera(type, this.rs.players[targetPlayer]);
     }
   }
-
-  // anything down here is for debug purposes only
-  ballFrame = 0;
-  v1 = new Vector3();
-  v2 = new Vector3();
-
-  playerFrames: { [id: number]: number } = {};
 
   getBallSpeed(): number {
     const ballData = this.rs.replay.frame_data.ball_data.body_states;

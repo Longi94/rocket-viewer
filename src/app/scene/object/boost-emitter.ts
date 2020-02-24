@@ -18,8 +18,8 @@ import { Camera, Sprite, Vector3, WebGLRenderer } from 'three';
 export class BoostEmitter {
 
   private active = false;
-  private currentFrame: number = 0;
-  private currentTime: number = 0;
+  private currentFrame = 0;
+  private currentTime = 0;
 
   constructor(
     private readonly emitter: Emitter,
@@ -64,13 +64,13 @@ export class BoostEmitter {
       if (!this.active) {
         this.emitter.emit();
       }
-    } else  {
+    } else {
       if (this.active) {
         this.emitter.stopEmit();
       }
     }
 
-    this.active = this.activeFrames[this.currentFrame]
+    this.active = this.activeFrames[this.currentFrame];
     this.currentTime = time;
   }
 }

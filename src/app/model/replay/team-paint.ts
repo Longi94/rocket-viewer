@@ -1,3 +1,5 @@
+/* tslint:disable:variable-name */
+
 export class TeamPaint {
   primary_color: number;
   accent_color: number;

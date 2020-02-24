@@ -1,3 +1,5 @@
+/* tslint:disable:variable-name */
+
 import { BodyStates } from './body-states';
 
 export enum BallType {

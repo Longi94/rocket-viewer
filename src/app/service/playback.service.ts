@@ -58,7 +58,7 @@ export class PlaybackService {
 
   setCamera(type: CameraType, playerId?: number) {
     this.cameraChangeSubject.next({
-      type: type,
+      type,
       targetPlayer: playerId
     });
   }

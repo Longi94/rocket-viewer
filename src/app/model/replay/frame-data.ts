@@ -5,5 +5,5 @@ export interface FrameData {
   times: number[];
   deltas: number[];
   ball_data: BallData;
-  players: { [player_id: number]: PlayerData }
+  players: { [playerId: number]: PlayerData };
 }

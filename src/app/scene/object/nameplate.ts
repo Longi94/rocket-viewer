@@ -29,7 +29,7 @@ export class Nameplate {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.font = `bold ${Math.floor(NAMEPLATE_HEIGHT * 9 / 10)}px Roboto`;
-    ctx.fillStyle = team == 0 ? COLOR_BLUE : COLOR_ORANGE;
+    ctx.fillStyle = team === 0 ? COLOR_BLUE : COLOR_ORANGE;
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     const textWidth = ctx.measureText(name).width;

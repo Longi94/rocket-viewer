@@ -6,7 +6,7 @@ import { addAnimPathHelper } from '../../util/debug';
 export function createBallAnimationMixer(frameData: FrameData, rs: ReplayScene, debug: boolean):
   AnimationMixer {
   const states = frameData.ball_data.body_states;
-  const mixer = new AnimationMixer(rs.ball_actor.body);
+  const mixer = new AnimationMixer(rs.ballActor.body);
   const ballPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
   const ballRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
   const ballAnimationClip = new AnimationClip(

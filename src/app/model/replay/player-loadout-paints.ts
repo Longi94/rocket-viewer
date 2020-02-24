@@ -1,3 +1,5 @@
+/* tslint:disable:variable-name */
+
 export class PlayerLoadoutsPaints {
   blue: PlayerLoadoutPaints;
   orange?: PlayerLoadoutPaints;

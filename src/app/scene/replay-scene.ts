@@ -10,8 +10,8 @@ export class ModelStore {
 
 export class ReplayScene {
   models: ModelStore = new ModelStore();
-  ball_actor: BallActor;
-  players: { [player_id: number]: PlayerActor } = {};
+  ballActor: BallActor;
+  players: { [playerId: number]: PlayerActor } = {};
   replay: Replay;
   scene: Scene;
   envMap: Texture;

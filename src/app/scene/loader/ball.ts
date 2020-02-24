@@ -7,7 +7,7 @@ import { BallType } from '../../model/replay/ball-data';
 const DEFAULT = '/assets/models/balls/ball_default.draco.glb';
 
 const BALL_MAPPING = {
-  'Basketball': '/assets/models/balls/ball_basketball.draco.glb'
+  Basketball: '/assets/models/balls/ball_basketball.draco.glb'
 };
 
 export async function loadBall(type: BallType, rs: ReplayScene) {
@@ -15,6 +15,6 @@ export async function loadBall(type: BallType, rs: ReplayScene) {
   if (url == undefined) {
     url = DEFAULT;
   }
-  rs.ball_actor = new BallActor(type, (await modelLoader.load(url)).scene.children[0]);
-  applyEnvMap(rs.ball_actor.body, rs.envMap);
+  rs.ballActor = new BallActor(type, (await modelLoader.load(url)).scene.children[0]);
+  applyEnvMap(rs.ballActor.body, rs.envMap);
 }

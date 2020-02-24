@@ -14,13 +14,13 @@
   <span>frame: {{sceneManager.currentFrame}}</span>
   <span>time: {{sceneManager.currentTime}}</span>
   <span>ballframe: {{sceneManager.ballFrame}}</span>
-  <span *ngIf="sceneManager.rs.ball_actor">
+  <span *ngIf="sceneManager.rs.ballActor">
     ballpos:
-    {{sceneManager.rs.ball_actor.body.position.x | number}}
-    {{sceneManager.rs.ball_actor.body.position.y | number}}
-    {{sceneManager.rs.ball_actor.body.position.z | number}}
+    {{sceneManager.rs.ballActor.body.position.x | number}}
+    {{sceneManager.rs.ballActor.body.position.y | number}}
+    {{sceneManager.rs.ballActor.body.position.z | number}}
   </span>
-  <span *ngIf="sceneManager.rs.ball_actor">ballvel: {{sceneManager.getBallSpeed() | number}}</span>
+  <span *ngIf="sceneManager.rs.ballActor">ballvel: {{sceneManager.getBallSpeed() | number}}</span>
   <div class="player-debug-overlay" *ngFor="let player of sceneManager.playbackInfo.players">
     <span>name: {{player.name}}</span>
     <span>frame: {{sceneManager.playerFrames[player.id]}}</span>
