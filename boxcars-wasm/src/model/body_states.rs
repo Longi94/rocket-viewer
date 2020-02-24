@@ -7,6 +7,7 @@ pub struct BodyStates {
     pub positions: Vec<f32>,
     pub times: Vec<f32>,
     pub rotations: Vec<f32>,
+    #[serde(skip_serializing)]
     pub linear_velocity: Vec<Vector3>,
     pub visible: Vec<bool>,
     pub visible_times: Vec<f32>,
