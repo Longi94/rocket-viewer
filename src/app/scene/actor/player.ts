@@ -6,6 +6,7 @@ import { Camera, Group, Object3D, PerspectiveCamera, Sprite, Vector3, WebGLRende
 import { BoostEmitter } from '../object/boost-emitter';
 import { ReplayScene } from '../replay-scene';
 import { Emitter } from 'three-nebula';
+import { BoostData } from '../../model/replay/boost-data';
 
 export class PlayerActor extends RigidBodyActor {
 
@@ -14,6 +15,7 @@ export class PlayerActor extends RigidBodyActor {
   readonly car: Object3D;
 
   private readonly boostPos = new Vector3();
+  private readonly boostData: BoostData;
 
   constructor(playerData: PlayerData, body: BodyModel, rs: ReplayScene) {
     super(new Group());
@@ -21,14 +23,14 @@ export class PlayerActor extends RigidBodyActor {
     this.body.add(body.scene);
     this.nameplate = new Nameplate(playerData.name, playerData.team);
     this.body.add(this.nameplate.sprite);
-
+    this.boostData = playerData.boost_data;
   }
 
   update(time: number) {
     this.boostPos.set(0, 0, 0);
     this.car.localToWorld(this.boostPos);
     if (this.boost != undefined) {
-      this.boost.update(this.boostPos);
+      this.boost.update(time, this.boostPos);
     }
   }
 
@@ -45,6 +47,6 @@ export class PlayerActor extends RigidBodyActor {
   }
 
   createBoost(emitter: Emitter, sprite: Sprite, camera: Camera, renderer: WebGLRenderer) {
-    this.boost = new BoostEmitter(emitter, sprite, camera, renderer);
+    this.boost = new BoostEmitter(emitter, sprite, camera, renderer, this.boostData.active, this.boostData.times);
   }
 }

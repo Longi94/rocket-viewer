@@ -1,6 +1,4 @@
-use crate::actor::{ActorHandler, get_actor_attribute};
-use boxcars::Attribute;
-use wasm_bindgen::__rt::std::collections::HashMap;
+use crate::actor::{ActorHandler, get_player_id_from_car_component, get_active_attribute};
 use crate::model::frame_data::FrameData;
 use crate::model::frame_state::FrameState;
 
@@ -14,7 +12,7 @@ impl ActorHandler for JumpHandler {
             Some(attributes) => attributes
         };
 
-        let player_id = match get_player_id(&attributes, &state.actors) {
+        let player_id = match get_player_id_from_car_component(&attributes, &state.actors) {
             None => return,
             Some(id) => id
         };
@@ -48,7 +46,7 @@ impl ActorHandler for DoubleJumpHandler {
             Some(attributes) => attributes
         };
 
-        let player_id = match get_player_id(&attributes, &state.actors) {
+        let player_id = match get_player_id_from_car_component(&attributes, &state.actors) {
             None => return,
             Some(id) => id
         };
@@ -82,7 +80,7 @@ impl ActorHandler for DodgeHandler {
             Some(attributes) => attributes
         };
 
-        let player_id = match get_player_id(&attributes, &state.actors) {
+        let player_id = match get_player_id_from_car_component(&attributes, &state.actors) {
             None => return,
             Some(id) => id
         };
@@ -103,36 +101,5 @@ impl ActorHandler for DodgeHandler {
         };
 
         player_data.jump_data.dodge_active.push((state.frame, active));
-    }
-}
-
-fn get_active_attribute(attributes: &HashMap<String, Attribute>) -> Option<u8> {
-    match attributes.get("TAGame.CarComponent_TA:ReplicatedActive") {
-        None => None,
-        Some(Attribute::Byte(b)) => Some(b.clone()),
-        Some(_) => None
-    }
-}
-
-fn get_player_id(attributes: &HashMap<String, Attribute>,
-                 all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<i32> {
-    let car_actor_id = match attributes.get("TAGame.CarComponent_TA:Vehicle") {
-        None => return None,
-        Some(Attribute::Flagged(_, id)) => id.clone() as i32,
-        Some(_) => return None,
-    };
-
-    let player_actor_id = match get_actor_attribute(
-        &car_actor_id, "Engine.Pawn:PlayerReplicationInfo", &all_actors,
-    ) {
-        None => return None,
-        Some(Attribute::Flagged(_, id)) => id.clone() as i32,
-        Some(_) => return None,
-    };
-
-    match get_actor_attribute(&player_actor_id, "Engine.PlayerReplicationInfo:PlayerID", all_actors) {
-        None => None,
-        Some(Attribute::Int(player_id)) => Some(player_id),
-        Some(_) => None,
     }
 }

@@ -4,6 +4,7 @@ use crate::model::body_states::BodyStates;
 use crate::model::player_loadouts_paints::PlayerLoadoutsPaints;
 use crate::model::team_paint::TeamPaint;
 use crate::model::jump::JumpData;
+use crate::model::boost::BoostData;
 
 #[derive(Serialize, Debug)]
 pub struct PlayerData {
@@ -16,6 +17,7 @@ pub struct PlayerData {
     pub team_paint_blue: Option<TeamPaint>,
     pub team_paint_orange: Option<TeamPaint>,
     pub jump_data: JumpData,
+    pub boost_data: BoostData,
 }
 
 impl PlayerData {
@@ -28,6 +30,7 @@ impl PlayerData {
             loadouts: PlayerLoadouts::new(),
             paints: PlayerLoadoutsPaints::new(),
             jump_data: JumpData::new(),
+            boost_data: BoostData::new(),
             team_paint_blue: None,
             team_paint_orange: None,
         }

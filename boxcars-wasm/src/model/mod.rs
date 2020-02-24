@@ -1,5 +1,6 @@
 pub mod ball;
 pub mod body_states;
+pub mod boost;
 pub mod cleaned_replay;
 pub mod frame_data;
 pub mod frame_state;
