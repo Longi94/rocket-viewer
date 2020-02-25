@@ -1,5 +1,6 @@
 use crate::model::frame_data::FrameData;
 use crate::model::vector::Vector3;
+use crate::model::player_data::PlayerData;
 
 pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
     smooth_path(&frame_data.ball_data.body_states.positions,
@@ -12,6 +13,8 @@ pub fn clean_frame_data(mut frame_data: FrameData) -> FrameData {
             &mut player_data.body_states.times,
             &player_data.body_states.linear_velocity,
         );
+
+        create_jump_frames(player_data);
     }
 
     // Sometimes there are big gaps between frames (kickoff, goals, demos) that would cause
@@ -121,5 +124,43 @@ fn v_subtract(p: &Vec<f32>, a: usize, b: usize) -> Vector3 {
         x: p[a * 3] - p[b * 3],
         y: p[a * 3 + 1] - p[b * 3 + 1],
         z: p[a * 3 + 2] - p[b * 3 + 2],
+    }
+}
+
+fn create_jump_frames(player_data: &mut PlayerData) {
+    let mut active_frames: Vec<f32> = Vec::new();
+
+    get_active_frames(&mut active_frames, &player_data.jump_data.jump_active);
+    get_active_frames(&mut active_frames, &player_data.jump_data.double_jump_active);
+    get_active_frames(&mut active_frames, &player_data.jump_data.dodge_active);
+
+    active_frames.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let mut active = false;
+    for i in 0..active_frames.len() {
+        if !active {
+            player_data.jump_data.jump_times.push(active_frames[i]);
+            player_data.jump_data.jump_visible.push(true);
+            active = true;
+        }
+
+        if i >= active_frames.len() - 1 || active_frames[i + 1] - active_frames[i] > 0.1 {
+            player_data.jump_data.jump_times.push(active_frames[i] + 0.1);
+            player_data.jump_data.jump_visible.push(false);
+            active = false;
+        }
+    }
+}
+
+fn get_active_frames(active_frames: &mut Vec<f32>, data: &Vec<(f32, u8)>) {
+    let mut active = false;
+
+    for (time, active_number) in data {
+        let current_active = active_number % 2 == 1;
+
+        if active != current_active && current_active {
+            active_frames.push(time.clone());
+        }
+
+        active = current_active;
     }
 }

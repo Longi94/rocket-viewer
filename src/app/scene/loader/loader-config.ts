@@ -1,4 +1,4 @@
-import { DefaultLoadingManager } from 'three';
+import { DefaultLoadingManager, TextureLoader } from 'three';
 import { createPaintConfig, PromiseLoader, RocketAssetManager, RocketConfig, TextureFormat } from 'rl-loadout-lib';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
@@ -10,6 +10,7 @@ const gltfLoader = new GLTFLoader(DefaultLoadingManager);
 gltfLoader.setDRACOLoader(dracoLoader);
 
 export const modelLoader = new PromiseLoader(gltfLoader);
+export const textureLoader = new PromiseLoader(new TextureLoader(DefaultLoadingManager));
 
 const ROCKET_CONFIG = new RocketConfig({
   loadingManager: DefaultLoadingManager,

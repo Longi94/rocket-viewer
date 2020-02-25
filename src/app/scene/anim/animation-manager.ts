@@ -13,8 +13,9 @@ export class AnimationManager {
 
     for (const playerData of Object.values(frameData.players)) {
       const mixers = createCarAnimationMixer(playerData, replayScene, debug);
-      this.playerMixers.push(mixers[0]);
-      this.playerMixers.push(mixers[1]);
+      for (const mixer of mixers) {
+        this.playerMixers.push(mixer);
+      }
     }
   }
 

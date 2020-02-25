@@ -1,9 +1,8 @@
-import { AdditiveBlending, DefaultLoadingManager, Sprite, SpriteMaterial, TextureLoader } from 'three';
-import { PromiseLoader } from 'rl-loadout-lib';
+import { AdditiveBlending, Sprite, SpriteMaterial } from 'three';
 import { ReplayScene } from '../replay-scene';
+import { textureLoader } from './loader-config';
 
 export async function loadBoostTexture(rs: ReplayScene) {
-  const textureLoader = new PromiseLoader(new TextureLoader(DefaultLoadingManager));
   const texture = await textureLoader.load('/assets/sprites/dot.png');
 
   const material = new SpriteMaterial({

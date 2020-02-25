@@ -32,7 +32,7 @@ impl ActorHandler for JumpHandler {
             _ => return
         };
 
-        player_data.jump_data.jump_active.push((state.frame, active));
+        player_data.jump_data.jump_active.push((state.real_time, active));
     }
 }
 
@@ -66,7 +66,7 @@ impl ActorHandler for DoubleJumpHandler {
             _ => return
         };
 
-        player_data.jump_data.double_jump_active.push((state.frame, active));
+        player_data.jump_data.double_jump_active.push((state.real_time, active));
     }
 }
 
@@ -100,6 +100,6 @@ impl ActorHandler for DodgeHandler {
             _ => return
         };
 
-        player_data.jump_data.dodge_active.push((state.frame, active));
+        player_data.jump_data.dodge_active.push((state.real_time, active));
     }
 }

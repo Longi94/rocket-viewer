@@ -16,10 +16,12 @@ export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene,
 
   const positionMixer = new AnimationMixer(rs.players[playerData.id].body);
   const rotationMixer = new AnimationMixer(rs.players[playerData.id].car);
+  const jumpMixer = new AnimationMixer(rs.players[playerData.id].jumpSprite);
 
   const carPositionTrack = new VectorKeyframeTrack('.position', states.times, states.positions);
   const carRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
   const carVisibleTrack = new BooleanKeyframeTrack('.visible', states.visible_times, states.visible);
+  const jumpVisibleTrack = new BooleanKeyframeTrack('.visible', playerData.jump_data.jump_times, playerData.jump_data.jump_visible);
 
   const carPositionClip = new AnimationClip(`car_position_${playerData.id}_clip`, states.times[states.times.length - 1],
     [carPositionTrack, carVisibleTrack]);
@@ -29,9 +31,13 @@ export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene,
     [carRotationTrack]);
   rotationMixer.clipAction(carRotationClip).play();
 
+  const jumpClip = new AnimationClip(`car_jump_${playerData.id}_clip`, playerData.jump_data.jump_times[playerData.jump_data.jump_times.length - 1],
+    [jumpVisibleTrack]);
+  jumpMixer.clipAction(jumpClip).play();
+
   // if (debug) {
   //   addAnimPathHelper(playerData.positions, ColorHasher.hex(playerData.name), rs.scene);
   // }
 
-  return [positionMixer, rotationMixer];
+  return [positionMixer, rotationMixer, jumpMixer];
 }

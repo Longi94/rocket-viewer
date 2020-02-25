@@ -27,6 +27,7 @@ import { CameraType } from './camera/camera-type';
 import { PlaybackInfo, PlayerPlaybackInfo } from '../model/playback-info';
 import { loadBoostTexture } from './loader/boost';
 import { ParticleSystemManager } from './particle-system-manager';
+import { loadJumpSprite } from './loader/jump';
 
 export class SceneManager {
 
@@ -160,6 +161,7 @@ export class SceneManager {
     const playerPromises = Object.values(replay.frame_data.players).map(player => loadCar(player, this.rs));
 
     await loadBoostTexture(this.rs);
+    await loadJumpSprite(this.rs);
     await mapPromise;
     await ballPromise;
     await Promise.all(playerPromises);
@@ -178,6 +180,7 @@ export class SceneManager {
       player.setQuaternionFromArray(replay.frame_data.players[playerId].body_states.rotations, 0);
       player.createBoost(this.particleSystemManager.createEmitter(),
         this.rs.boostSprite, this.rs.camera, this.renderer);
+      player.setJumpSprite(this.rs.jumpMaterial);
       player.addToScene(this.rs.scene);
     }
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);

@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, Sprite, Texture, WebGLRenderer } from 'three';
+import { Object3D, PerspectiveCamera, Scene, Sprite, SpriteMaterial, Texture, WebGLRenderer } from 'three';
 import { Replay } from '../model/replay/replay';
 import { BallActor } from './actor/ball';
 import { PlayerActor } from './actor/player';
@@ -19,4 +19,6 @@ export class ReplayScene {
 
   // boost
   boostSprite: Sprite;
+
+  jumpMaterial: SpriteMaterial;
 }

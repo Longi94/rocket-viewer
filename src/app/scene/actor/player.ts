@@ -2,7 +2,7 @@ import { RigidBodyActor } from './rigid-body';
 import { PlayerData } from '../../model/replay/player-data';
 import { Nameplate } from '../object/nameplate';
 import { BodyModel } from 'rl-loadout-lib';
-import { Camera, Group, Object3D, PerspectiveCamera, Sprite, Vector3, WebGLRenderer } from 'three';
+import { Camera, Group, Object3D, PerspectiveCamera, Sprite, SpriteMaterial, Vector3, WebGLRenderer } from 'three';
 import { BoostEmitter } from '../object/boost-emitter';
 import { ReplayScene } from '../replay-scene';
 import { Emitter } from 'three-nebula';
@@ -12,6 +12,7 @@ export class PlayerActor extends RigidBodyActor {
 
   private readonly nameplate: Nameplate;
   private boost: BoostEmitter;
+  readonly jumpSprite: Sprite;
 
   private readonly boostJoint: Object3D;
   readonly car: Object3D;
@@ -19,14 +20,22 @@ export class PlayerActor extends RigidBodyActor {
   private readonly boostPos = new Vector3();
   private readonly boostData: BoostData;
 
-  constructor(playerData: PlayerData, body: BodyModel, rs: ReplayScene) {
+  constructor(playerData: PlayerData, body: BodyModel) {
     super(new Group());
     this.car = body.scene;
     this.body.add(body.scene);
+
     this.nameplate = new Nameplate(playerData.name, playerData.team);
     this.body.add(this.nameplate.sprite);
+
     this.boostData = playerData.boost_data;
     this.boostJoint = this.car.getObjectByName('RocketBoost');
+
+    this.jumpSprite = new Sprite();
+    this.jumpSprite.scale.setScalar(80);
+    this.jumpSprite.position.y = -10;
+    this.jumpSprite.visible = false;
+    this.car.add(this.jumpSprite);
   }
 
   update(time: number) {
@@ -56,5 +65,10 @@ export class PlayerActor extends RigidBodyActor {
 
   createBoost(emitter: Emitter, sprite: Sprite, camera: Camera, renderer: WebGLRenderer) {
     this.boost = new BoostEmitter(emitter, sprite, camera, renderer, this.boostData.active, this.boostData.times);
+  }
+
+  setJumpSprite(material: SpriteMaterial) {
+    this.jumpSprite.material = material;
+    this.jumpSprite.material.needsUpdate = true;
   }
 }
