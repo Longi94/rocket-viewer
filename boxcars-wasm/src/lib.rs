@@ -3,6 +3,7 @@ mod model;
 mod parser;
 mod actor;
 mod clean;
+mod track;
 
 use wasm_bindgen::prelude::*;
 use crate::utils::set_panic_hook;

@@ -28,6 +28,9 @@ import { PlaybackInfo, PlayerPlaybackInfo } from '../model/playback-info';
 import { loadBoostTexture } from './loader/boost';
 import { ParticleSystemManager } from './particle-system-manager';
 import { loadJumpSprite } from './loader/jump';
+import { loadBoostPadModels } from './loader/boost-pad';
+import { getBoosts } from '../model/boost-pad';
+import { BoostPadActor } from './actor/boost-pad';
 
 export class SceneManager {
 
@@ -162,18 +165,29 @@ export class SceneManager {
 
     await loadBoostTexture(this.rs);
     await loadJumpSprite(this.rs);
+    await loadBoostPadModels(this.rs);
     await mapPromise;
     await ballPromise;
     await Promise.all(playerPromises);
 
     GlobalWebGLContext.dispose();
 
+    // add the map
     this.rs.scene.add(this.rs.models.map);
 
+    // add the boostpads
+    for (const boostPad of getBoosts(map)) {
+      const boostPadActor = BoostPadActor.create(boostPad, this.rs.models.bigBoostPad, this.rs.models.smallBoostPad);
+      boostPadActor.addToScene(this.rs.scene);
+      this.rs.boostPads.push(boostPadActor);
+    }
+
+    // add the ball to the starting position
     this.rs.ballActor.setPositionFromArray(replay.frame_data.ball_data.body_states.positions, 0);
     this.rs.ballActor.setQuaternionFromArray(replay.frame_data.ball_data.body_states.rotations, 0);
     this.rs.ballActor.addToScene(this.rs.scene);
 
+    // add the players to their starting position
     for (const playerId of Object.keys(this.rs.players)) {
       const player = this.rs.players[playerId];
       player.setPositionFromArray(replay.frame_data.players[playerId].body_states.positions, 0);
@@ -183,6 +197,7 @@ export class SceneManager {
       player.setJumpSprite(this.rs.jumpMaterial);
       player.addToScene(this.rs.scene);
     }
+
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
     this.update();
