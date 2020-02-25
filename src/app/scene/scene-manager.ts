@@ -190,11 +190,11 @@ export class SceneManager {
     this.updateNameplates();
   }
 
-  private update() {
+  private update(isUserInput = false) {
     this.animationManager?.update(this.currentTime);
     this.rs.ballActor.update(this.currentTime);
     for (const playerActor of Object.values(this.rs.players)) {
-      playerActor.update(this.currentTime);
+      playerActor.update(this.currentTime, isUserInput);
     }
     this.particleSystemManager.update(this.currentTime);
   }
@@ -302,7 +302,7 @@ export class SceneManager {
     }
 
     this.currentTime = time;
-    this.update();
+    this.update(true);
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
   }

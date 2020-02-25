@@ -38,7 +38,7 @@ export class PlayerActor extends RigidBodyActor {
     this.car.add(this.jumpSprite);
   }
 
-  update(time: number) {
+  update(time: number, isUserInput: boolean) {
     if (this.boost != undefined) {
       if (this.boostJoint != undefined) {
         this.boostPos.set(0, 0, 0);
@@ -47,7 +47,7 @@ export class PlayerActor extends RigidBodyActor {
         this.boostPos.set(-48.505, 9, 0); // octane boost pos
         this.car.localToWorld(this.boostPos);
       }
-      this.boost.update(time, this.boostPos);
+      this.boost.update(time, this.boostPos, isUserInput);
     }
   }
 

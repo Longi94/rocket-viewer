@@ -43,7 +43,7 @@ export class BoostEmitter {
     ]);
   }
 
-  update(time: number, position: Vector3) {
+    update(time: number, position: Vector3, isUserInput: boolean) {
     this.emitter.setPosition(position);
 
     if (time > this.currentTime) {
@@ -54,6 +54,14 @@ export class BoostEmitter {
       while (this.times[this.currentFrame - 1] > time) {
         this.currentFrame--;
       }
+    }
+
+    if (isUserInput) {
+      this.emitter.removeAllParticles();
+      this.emitter.stopEmit();
+      this.active = false;
+      this.currentTime = time;
+      return;
     }
 
     if (this.active === this.activeFrames[this.currentFrame]) {

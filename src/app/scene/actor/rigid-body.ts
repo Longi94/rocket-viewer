@@ -13,7 +13,7 @@ export abstract class RigidBodyActor implements Actor {
     return this.body.position;
   }
 
-  abstract update(time: number);
+  abstract update(time: number, isUserInput: boolean);
 
   setPosition(p: Vector3) {
     this.body.position.copy(p);
