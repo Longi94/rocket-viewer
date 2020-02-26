@@ -1,6 +1,5 @@
 mod ball;
 mod boost;
-mod boost_pickup;
 mod car;
 mod jump;
 mod player;
@@ -15,7 +14,6 @@ use crate::model::ball::BallType;
 use crate::actor::jump::{JumpHandler, DoubleJumpHandler, DodgeHandler};
 use crate::model::frame_state::FrameState;
 use crate::actor::boost::BoostHandler;
-use crate::actor::boost_pickup::BoostPickupHandler;
 
 fn get_actor_attribute(actor_id: &i32, attr_name: &str,
                        all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<Attribute> {
@@ -35,10 +33,6 @@ pub trait ActorHandler {
 }
 
 pub fn get_handler(object_name: &String) -> Option<Box<dyn ActorHandler>> {
-    if object_name.contains("VehiclePickup_Boost_TA") {
-        return Some(Box::new(BoostPickupHandler {}));
-    }
-
     match object_name.as_ref() {
         "Archetypes.Ball.Ball_Default" => Some(Box::new(BallHandler { ball_type: BallType::Default })),
         "Archetypes.Ball.Ball_Basketball" => Some(Box::new(BallHandler { ball_type: BallType::Basketball })),

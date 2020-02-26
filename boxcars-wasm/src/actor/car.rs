@@ -3,15 +3,14 @@ use crate::model::frame_data::FrameData;
 use boxcars::Attribute;
 use crate::model::team_paint::TeamPaint;
 use crate::model::frame_state::FrameState;
+use crate::model::boost_pad_data::BoostPadData;
 
-pub struct CarHandler {
-}
+pub struct CarHandler {}
 
-impl CarHandler {
-}
+impl CarHandler {}
 
 impl ActorHandler for CarHandler {
-    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState,  actor_id: i32,
+    fn update(&self, frame_data: &mut FrameData, state: &mut FrameState, actor_id: i32,
               updated_attr: &String, _objects: &Vec<String>) {
         let attributes = match state.actors.get(&actor_id) {
             None => return,
@@ -40,7 +39,39 @@ impl ActorHandler for CarHandler {
             "TAGame.RBActor_TA:ReplicatedRBState" => {
                 if player_id == -1 || player_data.is_none() { return; }
                 match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
-                    Some(rigid_body) => player_data.unwrap().body_states.push(state.real_time, &rigid_body),
+                    Some(rigid_body) => {
+                        player_data.unwrap().body_states.push(state.real_time, &rigid_body);
+
+                        // check if the car is over a boost pad
+                        match rigid_body {
+                            Attribute::RigidBody(rigid_body) => {
+                                for boost_pad in &state.boost_pads {
+                                    if boost_pad.in_range(&rigid_body.location) {
+
+                                        if !frame_data.boost_pads.contains_key(&boost_pad.id) {
+                                            frame_data.boost_pads.insert(boost_pad.id, BoostPadData::new());
+                                        }
+
+                                        let data = frame_data.boost_pads.get_mut(&boost_pad.id).unwrap();
+
+                                        if data.times.last().unwrap() > &state.real_time {
+                                            return
+                                        }
+
+                                        data.available.push(false);
+                                        data.available.push(true);
+                                        data.times.push(state.real_time);
+                                        if boost_pad.big {
+                                            data.times.push(state.real_time + 10.0);
+                                        } else {
+                                            data.times.push(state.real_time + 4.0);
+                                        }
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
                     _ => return
                 }
             }
