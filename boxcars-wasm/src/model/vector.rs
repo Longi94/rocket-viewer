@@ -17,6 +17,10 @@ impl Vector3 {
         })
     }
 
+    pub fn dist(&self, other: &Vector3f) -> f32 {
+        ((self.x - other.x).powi(2) + (self.y - other.z).powi(2) + (self.z - other.y).powi(2)).sqrt()
+    }
+
     pub fn len(&self) -> f32 {
         return (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt();
     }

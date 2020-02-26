@@ -17,7 +17,8 @@ export async function loadBoostPadModels(rs: ReplayScene) {
 
   rs.models.bigBoostPad = (await bigTask).scene;
   rs.models.smallBoostPad = (await smallTask).scene;
-  rs.models.bigBoostPad.add(boostSprite);
+
+  rs.models.bigBoostPad.getObjectByName("BoostPad_Large_Glow").add(boostSprite);
 
   traverseMaterials(rs.models.bigBoostPad, setDepthWrite);
 

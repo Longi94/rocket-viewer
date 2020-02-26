@@ -4,6 +4,7 @@ use crate::actor::{get_handler, ActorHandler};
 use crate::clean::clean_frame_data;
 use crate::model::frame_data::FrameData;
 use crate::model::frame_state::FrameState;
+use crate::model::boost_pad::get_boost_pads;
 
 pub struct FrameParser<'a> {
     pub replay: &'a Replay
@@ -24,6 +25,14 @@ impl<'a> FrameParser<'a> {
         let mut frame_data = FrameData::with_capacity(count);
         let mut state = FrameState::new();
         let mut actors_handlers: HashMap<i32, Box<dyn ActorHandler>> = HashMap::new();
+
+        // get boost pads
+        let map_name = match self.replay.properties.iter().find(|(name, _)| name.eq("MapName")) {
+            None => "",
+            Some(prop) => prop.1.as_string().unwrap_or("")
+        };
+        let map_name_str = String::from(map_name);
+        state.boost_pads.extend(get_boost_pads(&map_name_str));
 
         for (i, frame) in frames.frames.iter().enumerate() {
             frame_data.times.push(frame.time);

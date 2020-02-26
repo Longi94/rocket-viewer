@@ -176,6 +176,7 @@ export class SceneManager {
     this.rs.scene.add(this.rs.models.map);
 
     // add the boostpads
+    const boostPads =  getBoosts(map);
     for (const boostPad of getBoosts(map)) {
       const boostPadActor = BoostPadActor.create(boostPad, this.rs.models.bigBoostPad, this.rs.models.smallBoostPad);
       boostPadActor.addToScene(this.rs.scene);
@@ -199,7 +200,7 @@ export class SceneManager {
     }
 
     this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
-    this.animationManager = new AnimationManager(replay.frame_data, this.rs, this.debug);
+    this.animationManager = new AnimationManager(replay.frame_data, this.rs, boostPads, this.debug);
     this.update();
     this.cameraManager.update(this.currentAnimationTime, this.rs);
     this.updateNameplates();

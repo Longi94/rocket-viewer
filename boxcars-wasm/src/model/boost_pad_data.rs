@@ -1,3 +1,6 @@
+use serde::Serialize;
+
+#[derive(Serialize, Debug)]
 pub struct BoostPadData {
     pub available: Vec<bool>,
     pub times: Vec<f32>,
