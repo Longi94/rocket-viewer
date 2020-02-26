@@ -39,6 +39,7 @@ impl<'a> FrameParser<'a> {
             frame_data.deltas.push(frame.delta);
             state.real_time += frame.delta;
             state.frame = i;
+            frame_data.real_times.push(state.real_time);
 
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);

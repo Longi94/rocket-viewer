@@ -128,7 +128,8 @@ export class SceneManager {
     this.playbackInfo.minTime = 0;
     this.playbackInfo.maxTime = replay.frame_data.ball_data.body_states.times[replay.frame_data.ball_data.body_states.times.length - 1];
     this.currentTime = this.playbackInfo.minTime;
-    this.currentFrame = this.rs.replay.frame_data.times.length;
+    this.frameCount = this.rs.replay.frame_data.times.length;
+    this.currentFrame = 0;
 
     if (this.debug) {
       for (const player of Object.values(replay.frame_data.players)) {
@@ -156,7 +157,7 @@ export class SceneManager {
     this.rs.scene.add(this.rs.models.map);
 
     // add the boostpads
-    const boostPads =  getBoosts(map);
+    const boostPads = getBoosts(map);
     for (const boostPad of getBoosts(map)) {
       const boostPadActor = BoostPadActor.create(boostPad, this.rs.models.bigBoostPad, this.rs.models.smallBoostPad);
       boostPadActor.addToScene(this.rs.scene);
@@ -222,7 +223,7 @@ export class SceneManager {
       }
 
       while (this.currentFrame < this.frameCount - 1 &&
-      this.currentTime > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
+      this.currentTime > this.rs.replay.frame_data.real_times[this.currentFrame + 1]) {
         this.currentFrame++;
       }
 
@@ -263,7 +264,7 @@ export class SceneManager {
 
     if (time > this.currentTime) {
       while (this.currentFrame < this.frameCount - 1 &&
-      time > this.rs.replay.frame_data.times[this.currentFrame + 1]) {
+      time > this.rs.replay.frame_data.real_times[this.currentFrame + 1]) {
         this.currentFrame++;
       }
 
@@ -280,7 +281,7 @@ export class SceneManager {
       }
 
     } else if (time < this.currentTime) {
-      while (this.currentFrame > 0 && time < this.rs.replay.frame_data.times[this.currentFrame - 1]) {
+      while (this.currentFrame > 0 && time < this.rs.replay.frame_data.real_times[this.currentFrame - 1]) {
         this.currentFrame--;
       }
 
