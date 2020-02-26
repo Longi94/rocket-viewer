@@ -3,6 +3,8 @@ import { ReplayScene } from '../replay-scene';
 import { RocketManager } from './loader-config';
 import { Body, createPaintConfig, Wheel } from 'rl-loadout-lib';
 import { PlayerActor } from '../actor/player';
+import { setEncoding } from '../../util/three';
+import { LinearEncoding } from 'three';
 
 
 export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
@@ -27,6 +29,10 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   const wheels = await wheelsTask;
   body.setEnvMap(rs.envMap);
   wheels.setEnvMap(rs.envMap);
+
+  setEncoding(body.scene, LinearEncoding);
+  setEncoding(wheels.scene, LinearEncoding);
+
   body.addWheelsModel(wheels);
 
   rs.players[playerData.id] = new PlayerActor(playerData, body);

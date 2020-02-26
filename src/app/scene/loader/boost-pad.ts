@@ -21,9 +21,6 @@ export async function loadBoostPadModels(rs: ReplayScene) {
   rs.models.bigBoostPad.getObjectByName("BoostPad_Large_Glow").add(boostSprite);
 
   traverseMaterials(rs.models.bigBoostPad, setDepthWrite);
-
-  applyEnvMap(rs.models.bigBoostPad, rs.envMap);
-  applyEnvMap(rs.models.smallBoostPad, rs.envMap);
 }
 
 function setDepthWrite(mat: MeshStandardMaterial) {

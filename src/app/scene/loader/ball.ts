@@ -16,5 +16,4 @@ export async function loadBall(type: BallType, rs: ReplayScene) {
     url = DEFAULT;
   }
   rs.ballActor = new BallActor(type, (await modelLoader.load(url)).scene.children[0]);
-  applyEnvMap(rs.ballActor.body, rs.envMap);
 }

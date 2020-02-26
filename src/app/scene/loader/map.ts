@@ -18,7 +18,6 @@ export async function loadMap(name: string, rs: ReplayScene) {
     mapUrl = '/assets/models/maps/TrainStation_Night_P.draco.glb';
   }
   rs.models.map = (await modelLoader.load(mapUrl)).scene;
-  applyEnvMap(rs.models.map, rs.envMap);
 
   let transparentMats = TRANSPARENT_MATERIALS[name];
   if (transparentMats == undefined) {

@@ -1,4 +1,6 @@
-import { Texture } from 'three';
+import { Object3D, Texture } from 'three';
+import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
+import { TextureEncoding } from 'three/src/constants';
 
 export function applyEnvMap(o, envMap: Texture) {
   o.traverse(object => {
@@ -10,6 +12,20 @@ export function applyEnvMap(o, envMap: Texture) {
       if (mat.isMeshStandardMaterial) {
         mat.envMap = envMap;
       }
+    }
+  });
+}
+
+export function setEncoding(o: Object3D, encoding: TextureEncoding) {
+  traverseMaterials(o, material => {
+    if (material.map) {
+      material.map.encoding = encoding;
+    }
+    if (material.emissiveMap) {
+      material.emissiveMap.encoding = encoding;
+    }
+    if (material.map || material.emissiveMap) {
+      material.needsUpdate = true;
     }
   });
 }
