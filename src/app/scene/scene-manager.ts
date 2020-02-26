@@ -69,7 +69,7 @@ export class SceneManager {
 
   async init(canvas: HTMLCanvasElement, width: number, height: number) {
 
-    this.rs.camera = new PerspectiveCamera(100, width / height, 0.01, 100000);
+    this.rs.camera = new PerspectiveCamera(80, width / height, 0.01, 100000);
     this.rs.camera.position.x = 1679.7478335547376;
     this.rs.camera.position.y = 580.2658014964849;
     this.rs.camera.position.z = -917.4632500987678;
