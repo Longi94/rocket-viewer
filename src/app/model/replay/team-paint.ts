@@ -1,6 +1,6 @@
 /* tslint:disable:variable-name */
 
-export class TeamPaint {
+export interface TeamPaint {
   primary_color: number;
   accent_color: number;
   primary_finish: number;

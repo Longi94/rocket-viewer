@@ -1,6 +1,6 @@
 /* tslint:disable:variable-name */
 
-export class JumpData {
+export interface JumpData {
   jump_visible: boolean[];
   jump_times: number[];
 }

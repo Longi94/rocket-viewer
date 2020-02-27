@@ -1,4 +1,4 @@
-export class BoostPadData {
+export interface BoostPadData {
   times: number[];
   available: boolean[];
 }

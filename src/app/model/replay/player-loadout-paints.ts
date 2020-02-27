@@ -1,12 +1,12 @@
 /* tslint:disable:variable-name */
 
-export class PlayerLoadoutsPaints {
+export interface PlayerLoadoutsPaints {
   blue: PlayerLoadoutPaints;
   orange?: PlayerLoadoutPaints;
 }
 
 
-export class PlayerLoadoutPaints {
+export interface PlayerLoadoutPaints {
   body: number;
   decal: number;
   wheels: number;

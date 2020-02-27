@@ -1,4 +1,4 @@
-export class BoostData {
+export interface BoostData {
   times: number[];
   active: boolean[];
 }

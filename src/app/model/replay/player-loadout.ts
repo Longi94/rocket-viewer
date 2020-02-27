@@ -1,11 +1,11 @@
 /* tslint:disable:variable-name */
 
-export class PlayerLoadouts {
+export interface PlayerLoadouts {
   blue: PlayerLoadout;
   orange?: PlayerLoadout;
 }
 
-export class PlayerLoadout {
+export interface PlayerLoadout {
   body: number;
   decal: number;
   wheels: number;

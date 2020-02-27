@@ -1,6 +1,6 @@
 /* tslint:disable:variable-name */
 
-export class BodyStates {
+export interface BodyStates {
   positions: number[];
   rotations: number[];
   times: number[];
