@@ -112,7 +112,42 @@ impl ActorHandler for CarHandler {
                     Some(_) => return
                 }
             }
+            "TAGame.Vehicle_TA:ReplicatedSteer" => {
+                if player_id == -1 || player_data.is_none() { return; }
+
+                let steer = match attributes.get("TAGame.Vehicle_TA:ReplicatedSteer") {
+                    None => return,
+                    Some(Attribute::Byte(b)) => b.clone(),
+                    Some(_) => return
+                };
+
+                let data = player_data.unwrap();
+
+                match data.car_data.steer_times.last() {
+                    None => {}
+                    Some(t) => {
+                        if state.real_time - t.clone() >= 0.1 {
+                            // add in an extra frame
+                            data.car_data.steer_times.push(state.real_time - 0.1);
+                            for _ in 0..4 {
+                                data.car_data.steer_values.push(data.car_data.steer_values[data.car_data.steer_values.len() - 4]);
+                            }
+                        }
+                    }
+                };
+
+                insert_yaw_as_quaternion(&mut data.car_data.steer_values, -(steer as f32 - 128.0) / 256.0);
+                data.car_data.steer_times.push(state.real_time);
+            }
             _ => return
         }
     }
+}
+
+// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Source_Code
+fn insert_yaw_as_quaternion(values: &mut Vec<f32>, yaw: f32) {
+    values.push(0.0);
+    values.push(0.0);
+    values.push((yaw * 0.5).sin());
+    values.push((yaw * 0.5).cos());
 }

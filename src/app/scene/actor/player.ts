@@ -4,7 +4,6 @@ import { Nameplate } from '../object/nameplate';
 import { BodyModel } from 'rl-loadout-lib';
 import { Camera, Group, Object3D, PerspectiveCamera, Sprite, SpriteMaterial, Vector3, WebGLRenderer } from 'three';
 import { BoostEmitter } from '../object/boost-emitter';
-import { ReplayScene } from '../replay-scene';
 import { Emitter } from 'three-nebula';
 import { BoostData } from '../../model/replay/boost-data';
 
@@ -20,10 +19,10 @@ export class PlayerActor extends RigidBodyActor {
   private readonly boostPos = new Vector3();
   private readonly boostData: BoostData;
 
-  constructor(playerData: PlayerData, body: BodyModel) {
+  constructor(playerData: PlayerData, public readonly bodyModel: BodyModel) {
     super(new Group());
-    this.car = body.scene;
-    this.body.add(body.scene);
+    this.car = bodyModel.scene;
+    this.body.add(bodyModel.scene);
 
     this.nameplate = new Nameplate(playerData.name, playerData.team);
     this.body.add(this.nameplate.sprite);
