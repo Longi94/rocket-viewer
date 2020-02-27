@@ -3,8 +3,6 @@ import {
   AmbientLight,
   Color,
   DefaultLoadingManager,
-  DirectionalLight,
-  DirectionalLightHelper,
   PerspectiveCamera,
   Scene,
   Texture,
@@ -39,6 +37,8 @@ export class SceneManager {
 
   private renderer: WebGLRenderer;
   private cubeRenderTarget: WebGLRenderTarget;
+
+  private renderRequested = false;
 
   animationManager: AnimationManager;
   cameraManager: CameraManager;
@@ -76,6 +76,9 @@ export class SceneManager {
     this.rs.camera.position.z = -917.4632500987678;
 
     this.cameraManager = new CameraManager(this.rs.camera, canvas);
+    this.cameraManager.onMove = () => {
+      this.requestRender();
+    };
 
     this.rs.scene = new Scene();
     this.rs.scene.background = new Color('#AAAAAA');
@@ -91,6 +94,7 @@ export class SceneManager {
 
     const backgroundTexture = await textureLoader.load('assets/Nebula_02.jpg');
     this.processBackground(backgroundTexture);
+    this.requestRender();
   }
 
   private addLights() {
@@ -185,6 +189,7 @@ export class SceneManager {
     this.update();
     this.cameraManager.update(this.currentAnimationTime, this.rs);
     this.updateNameplates();
+    this.requestRender();
   }
 
   private update(isUserInput = false) {
@@ -202,6 +207,11 @@ export class SceneManager {
     }
   }
 
+  requestRender() {
+    if (!this.renderRequested) {
+      this.renderRequested = true;
+    }
+  }
 
   render(time: number) {
 
@@ -244,12 +254,13 @@ export class SceneManager {
     }
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
-    this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
-    this.currentAnimationTime = time;
 
-    // if (this.debug) {
-    //   Debug.renderInfo(this.rs.particleSystem, 3);
-    // }
+    if (this.renderRequested || this.isPlaying) {
+      this.renderRequested = false;
+      this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
+    }
+
+    this.currentAnimationTime = time;
   }
 
   play() {

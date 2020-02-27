@@ -15,9 +15,14 @@ export class CameraManager {
   private lastTime: number;
   private orbitControls: OrbitControls;
 
+  onMove: () => void;
+
   constructor(private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
     this.orbitControls = new OrbitControls(this.camera, canvasDiv);
     this.orbitControls.enabled = false;
+    this.orbitControls.addEventListener('change', () => {
+      this.onMove();
+    });
   }
 
   setCamera(type: CameraType, target?: PlayerActor) {
@@ -37,6 +42,8 @@ export class CameraManager {
         this.orbitControls.enabled = true;
         break;
     }
+
+    this.onMove();
   }
 
   getCamera(): Camera {
