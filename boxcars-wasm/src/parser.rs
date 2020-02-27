@@ -41,10 +41,27 @@ impl<'a> FrameParser<'a> {
             state.frame = i;
             frame_data.real_times.push(state.real_time);
 
+            let mut goal_reset = false;
+
             for deleted in &frame.deleted_actors {
                 actors_handlers.remove(&deleted.0);
                 state.actors.remove(&deleted.0);
+
+                // TODO there must be a better way to detect goal reset frames
+                match state.actor_objects.get(&deleted.0) {
+                    None => {}
+                    Some(object_name) => {
+                        if object_name.starts_with("Archetypes.Ball.") && i > 0 {
+                            goal_reset = true;
+                        }
+                    }
+                };
+
                 state.actor_objects.remove(&deleted.0);
+            }
+
+            if goal_reset {
+                frame_data.reset(state.real_time);
             }
 
             for new_actor in &frame.new_actors {

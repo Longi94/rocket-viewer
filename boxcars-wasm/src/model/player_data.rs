@@ -35,4 +35,11 @@ impl PlayerData {
             team_paint_orange: None,
         }
     }
+
+    pub fn reset(&mut self, time: f32) {
+        if self.boost_data.active.last().unwrap().clone() {
+            self.boost_data.active.push(false);
+            self.boost_data.times.push(time);
+        }
+    }
 }

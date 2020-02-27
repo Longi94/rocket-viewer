@@ -13,4 +13,11 @@ impl BoostPadData {
             times: vec![0.0],
         }
     }
+
+    pub fn reset(&mut self, time: f32) {
+        let last = self.times.len() - 1;
+        if self.available[last] && self.times[last] > time {
+            self.times[last] = time;
+        }
+    }
 }

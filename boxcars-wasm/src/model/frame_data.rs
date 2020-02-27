@@ -25,4 +25,13 @@ impl FrameData {
             boost_pads: HashMap::new(),
         }
     }
+
+    pub fn reset(&mut self, time: f32) {
+        for (_, player_data) in &mut self.players {
+            player_data.reset(time);
+        }
+        for (_, pad) in &mut self.boost_pads {
+            pad.reset(time);
+        }
+    }
 }
