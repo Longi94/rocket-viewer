@@ -272,7 +272,7 @@ export class SceneManager {
   }
 
   scrollToTime(time: number) {
-
+    console.log(time);
     if (time > this.currentTime) {
       while (this.currentFrame < this.frameCount - 1 &&
       time > this.rs.replay.frame_data.real_times[this.currentFrame + 1]) {
@@ -292,17 +292,17 @@ export class SceneManager {
       }
 
     } else if (time < this.currentTime) {
-      while (this.currentFrame > 0 && time < this.rs.replay.frame_data.real_times[this.currentFrame - 1]) {
+      while (this.currentFrame > 0 && time < this.rs.replay.frame_data.real_times[this.currentFrame]) {
         this.currentFrame--;
       }
 
       if (this.debug) {
-        while (time < this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame - 1]) {
+        while (time < this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame]) {
           this.ballFrame--;
         }
 
         for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-          while (time < this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId] - 1]) {
+          while (time < this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId]]) {
             this.playerFrames[playerId]--;
           }
         }

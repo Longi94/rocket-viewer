@@ -51,7 +51,7 @@ export class BoostEmitter {
         this.currentFrame++;
       }
     } else {
-      while (this.times[this.currentFrame - 1] > time) {
+      while (this.times[this.currentFrame] > time) {
         this.currentFrame--;
       }
     }
