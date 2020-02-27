@@ -61,14 +61,12 @@ export class PlaybackControlComponent implements OnInit {
     this.isPlaying = !this.isPlaying;
   }
 
-  slideStart($event: ChangeContext) {
+  slideStart() {
     this.isSliding = true;
-    this.playbackService.scrollToTime($event.value);
   }
 
-  slideEnd($event: ChangeContext) {
+  slideEnd() {
     this.isSliding = false;
-    this.playbackService.scrollToTime($event.value);
   }
 
   slideChange($event: ChangeContext) {
