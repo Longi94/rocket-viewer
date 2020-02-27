@@ -313,6 +313,7 @@ export class SceneManager {
     this.update(true);
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
+    this.requestRender();
   }
 
   setSpeed(speed: number) {
