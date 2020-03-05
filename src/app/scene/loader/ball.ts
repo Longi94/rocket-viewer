@@ -15,5 +15,5 @@ export async function loadBall(type: BallType, rs: ReplayScene) {
   if (url == undefined) {
     url = DEFAULT;
   }
-  rs.ballActor = new BallActor(type, (await modelLoader.load(url)).scene.children[0]);
+  rs.ballActor = new BallActor(type, (await modelLoader.load(url)).scene.children[0], rs.scene);
 }

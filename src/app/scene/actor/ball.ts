@@ -1,6 +1,7 @@
 import { BallType } from '../../model/replay/ball-data';
-import { Color, Mesh, MeshStandardMaterial, Object3D } from 'three';
+import { Color, Mesh, MeshStandardMaterial, Object3D, Scene, ShaderMaterial, Vector3 } from 'three';
 import { RigidBodyActor } from './rigid-body';
+import { Trail } from '../../three/trail-renderer';
 
 const EMISSIVE_ORANGE = new Color('#ffae00');
 const EMISSIVE_BLUE = new Color('#00bfff');
@@ -8,13 +9,39 @@ const EMISSIVE_BLUE = new Color('#00bfff');
 export class BallActor extends RigidBodyActor {
 
   private readonly material: MeshStandardMaterial;
+  private readonly trail: Trail;
+  private readonly trailMaterial: ShaderMaterial;
 
-  constructor(public readonly type: BallType, ball: Object3D) {
+  constructor(public readonly type: BallType, ball: Object3D, scene: Scene) {
     super(ball);
     this.material = (ball as Mesh).material as MeshStandardMaterial;
+
+    const trailHeadGeometry: Vector3[] = [];
+    const scale = 30.0;
+    const inc = Math.PI * 2 / 16.0;
+
+    for (let i = 0; i < 17; i++) {
+      trailHeadGeometry.push(new Vector3(Math.cos(i * inc) * scale, Math.sin(i * inc) * scale, 0));
+    }
+
+    this.trail = new Trail(scene);
+
+    this.trailMaterial = this.trail.createMaterial();
+
+    this.trailMaterial.uniforms.headColor.value.set(1.0, 0.0, 0.0, 0.5);
+    this.trailMaterial.uniforms.tailColor.value.set(1.0, 0.0, 0.0, 0.5);
+
+    this.trail.initialize(this.trailMaterial, 100, 0, trailHeadGeometry, ball);
+    this.trail.activate();
+
+    ball.visible = false;
   }
 
-  update(time: number) {
+  update(time: number, isUserInput: boolean = false) {
+    if (isUserInput) {
+      this.trail.reset();
+    }
+    this.trail.advance();
     switch (this.type) {
       case BallType.PUCK:
       case BallType.UNKNOWN:

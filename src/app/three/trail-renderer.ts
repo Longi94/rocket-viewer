@@ -1,0 +1,607 @@
+import {
+  AddEquation,
+  BufferAttribute,
+  BufferGeometry,
+  CustomBlending,
+  DoubleSide,
+  DynamicDrawUsage,
+  Matrix3,
+  Matrix4,
+  Mesh,
+  Object3D,
+  OneMinusSrcAlphaFactor,
+  Quaternion,
+  Scene,
+  ShaderMaterial,
+  SrcAlphaFactor,
+  Vector3,
+  Vector4
+} from 'three';
+
+const MaxHeadVertices = 128;
+const LocalOrientationTangent = new Vector3(1, 0, 0);
+const LocalHeadOrigin = new Vector3(0, 0, 0);
+const PositionComponentCount = 3;
+const UVComponentCount = 2;
+const IndicesPerFace = 3;
+const FacesPerQuad = 2;
+
+// language=GLSL
+const BaseVertexShader = `
+  attribute float nodeID;
+  attribute float nodeVertexID;
+  attribute vec3 nodeCenter;
+
+  uniform float minID;
+  uniform float maxID;
+  uniform float trailLength;
+  uniform float maxTrailLength;
+  uniform float verticesPerNode;
+
+  uniform vec4 headColor;
+  uniform vec4 tailColor;
+
+  varying vec4 vColor;
+
+  void main() {
+    float fraction = (maxID - nodeID) / (maxID - minID);
+    vColor = (1.0 - fraction) * headColor + fraction * tailColor;
+    vec4 realPosition = vec4((1.0 - fraction) * position.xyz + fraction * nodeCenter.xyz, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * realPosition;
+  }
+`;
+
+// language=GLSL
+const BaseFragmentShader = `
+  varying vec4 vColor;
+  uniform sampler2D texture;
+  void main() {
+    gl_FragColor = vColor;
+  }
+`;
+
+/**
+ * Based on https://github.com/mkkellogg/TrailRendererJS .
+ */
+export class Trail {
+
+  active = false;
+
+  targetObject: Object3D;
+
+  geometry: BufferGeometry = null;
+  mesh: Mesh = null;
+  material: ShaderMaterial;
+  nodeCenters: Vector3[] = null;
+
+  lastNodeCenter: Vector3 = null;
+  currentNodeCenter: Vector3 = null;
+  lastOrientationDir: Vector3 = null;
+  nodeIDs: number[] = null;
+  currentLength = 0;
+  currentEnd = 0;
+  currentNodeID = 0;
+
+  length = 0;
+  vertexCount = 0;
+  faceCount = 0;
+  VerticesPerNode = 0;
+  FacesPerNode = 0;
+  FaceIndicesPerNode = 0;
+
+  localHeadGeometry: Vector3[];
+
+  previousPos: Vector3 = new Vector3();
+  tangent: Vector3 = new Vector3();
+
+  constructor(public readonly scene: Scene, public orientToMovement = false) {
+    for (let i = 0; i < MaxHeadVertices; i++) {
+      const vertex = new Vector3();
+      this.tempLocalHeadGeometry.push(vertex);
+    }
+  }
+
+  createMaterial(customUniforms: any = {}): ShaderMaterial {
+    customUniforms.trailLength = {type: 'f', value: null};
+    customUniforms.verticesPerNode = {type: 'f', value: null};
+    customUniforms.minID = {type: 'f', value: null};
+    customUniforms.maxID = {type: 'f', value: null};
+    customUniforms.maxTrailLength = {type: 'f', value: null};
+
+    customUniforms.headColor = {type: 'v4', value: new Vector4()};
+    customUniforms.tailColor = {type: 'v4', value: new Vector4()};
+
+    return new ShaderMaterial({
+      uniforms: customUniforms,
+      vertexShader: BaseVertexShader,
+      fragmentShader: BaseFragmentShader,
+
+      transparent: true,
+      alphaTest: 0.5,
+
+      blending: CustomBlending,
+      blendSrc: SrcAlphaFactor,
+      blendDst: OneMinusSrcAlphaFactor,
+      blendEquation: AddEquation,
+
+      depthTest: true,
+      depthWrite: false,
+
+      side: DoubleSide
+    });
+  }
+
+  initialize(material: ShaderMaterial, length: number, localHeadWidth: number,
+             localHeadGeometry: Vector3[], targetObject: Object3D) {
+    this.deactivate();
+    this.destroyMesh();
+
+    this.length = (length > 0) ? length + 1 : 0;
+    this.targetObject = targetObject;
+    this.previousPos.copy(this.targetObject.position);
+
+    this.initializeLocalHeadGeometry(localHeadWidth, localHeadGeometry);
+
+    this.nodeIDs = [];
+    this.nodeCenters = [];
+
+    for (let i = 0; i < this.length; i++) {
+      this.nodeIDs[i] = -1;
+      this.nodeCenters[i] = new Vector3();
+    }
+
+    this.material = material;
+
+    this.initializeGeometry();
+    this.initializeMesh();
+
+    this.material.uniforms.trailLength.value = 0;
+    this.material.uniforms.minID.value = 0;
+    this.material.uniforms.maxID.value = 0;
+    this.material.uniforms.maxTrailLength.value = this.length;
+    this.material.uniforms.verticesPerNode.value = this.VerticesPerNode;
+
+    this.reset();
+  }
+
+  private initializeLocalHeadGeometry(localHeadWidth: number = 1.0, localHeadGeometry: Vector3[]) {
+    this.localHeadGeometry = [];
+
+    if (!localHeadGeometry) {
+      const halfWidth = localHeadWidth / 2.0;
+
+      this.localHeadGeometry.push(new Vector3(-halfWidth, 0, 0));
+      this.localHeadGeometry.push(new Vector3(halfWidth, 0, 0));
+
+      this.VerticesPerNode = 2;
+    } else {
+      this.VerticesPerNode = 0;
+      for (let i = 0; i < localHeadGeometry.length && i < MaxHeadVertices; i++) {
+        const vertex = localHeadGeometry[i];
+
+        if (vertex && vertex instanceof Vector3) {
+          const vertexCopy = new Vector3();
+
+          vertexCopy.copy(vertex);
+
+          this.localHeadGeometry.push(vertexCopy);
+          this.VerticesPerNode++;
+        }
+      }
+    }
+
+    this.FacesPerNode = (this.VerticesPerNode - 1) * 2;
+    this.FaceIndicesPerNode = this.FacesPerNode * 3;
+  }
+
+  private initializeGeometry() {
+    this.vertexCount = this.length * this.VerticesPerNode;
+    this.faceCount = this.length * this.FacesPerNode;
+
+    const geometry = new BufferGeometry();
+
+    const nodeIDs = new Float32Array(this.vertexCount);
+    const nodeVertexIDs = new Float32Array(this.vertexCount * this.VerticesPerNode);
+    const positions = new Float32Array(this.vertexCount * PositionComponentCount);
+    const nodeCenters = new Float32Array(this.vertexCount * PositionComponentCount);
+    const uvs = new Float32Array(this.vertexCount * UVComponentCount);
+    const indices = new Uint32Array(this.faceCount * IndicesPerFace);
+
+    const nodeIDAttribute = new BufferAttribute(nodeIDs, 1);
+    nodeIDAttribute.setUsage(DynamicDrawUsage);
+    geometry.setAttribute('nodeID', nodeIDAttribute);
+
+    const nodeVertexIDAttribute = new BufferAttribute(nodeVertexIDs, 1);
+    nodeVertexIDAttribute.setUsage(DynamicDrawUsage);
+    geometry.setAttribute('nodeVertexID', nodeVertexIDAttribute);
+
+    const nodeCenterAttribute = new BufferAttribute(nodeCenters, PositionComponentCount);
+    nodeCenterAttribute.setUsage(DynamicDrawUsage);
+    geometry.setAttribute('nodeCenter', nodeCenterAttribute);
+
+    const positionAttribute = new BufferAttribute(positions, PositionComponentCount);
+    positionAttribute.setUsage(DynamicDrawUsage);
+    geometry.setAttribute('position', positionAttribute);
+
+    const uvAttribute = new BufferAttribute(uvs, UVComponentCount);
+    uvAttribute.setUsage(DynamicDrawUsage);
+    geometry.setAttribute('uv', uvAttribute);
+
+    const indexAttribute = new BufferAttribute(indices, 1);
+    indexAttribute.setUsage(DynamicDrawUsage);
+    geometry.setIndex(indexAttribute);
+
+    this.geometry = geometry;
+  }
+
+  zeroVertices() {
+    const positions = this.geometry.getAttribute('position') as BufferAttribute;
+
+    for (let i = 0; i < this.vertexCount; i++) {
+      const index = i * 3;
+      const array = positions.array as Float32Array;
+
+      array[index] = 0;
+      array[index + 1] = 0;
+      array[index + 2] = 0;
+    }
+
+    positions.needsUpdate = true;
+    positions.updateRange.count = -1;
+  }
+
+  zeroIndices() {
+    const indices = this.geometry.getIndex();
+
+    for (let i = 0; i < this.faceCount; i++) {
+      const index = i * 3;
+      const array = indices.array as Uint32Array;
+
+      array[index] = 0;
+      array[index + 1] = 0;
+      array[index + 2] = 0;
+    }
+
+    indices.needsUpdate = true;
+    indices.updateRange.count = -1;
+  }
+
+  formInitialFaces() {
+    this.zeroIndices();
+
+    const indices = this.geometry.getIndex();
+
+    for (let i = 0; i < this.length - 1; i++) {
+      this.connectNodes(i, i + 1);
+    }
+
+    indices.needsUpdate = true;
+    indices.updateRange.count = -1;
+  }
+
+  initializeMesh() {
+    this.mesh = new Mesh(this.geometry, this.material);
+    this.mesh.matrixAutoUpdate = false;
+  }
+
+  destroyMesh() {
+    if (this.mesh) {
+      this.scene.remove(this.mesh);
+      this.mesh = null;
+    }
+  }
+
+  reset() {
+    this.currentLength = 0;
+    this.currentEnd = -1;
+
+    this.lastNodeCenter = null;
+    this.currentNodeCenter = null;
+    this.lastOrientationDir = null;
+
+    this.currentNodeID = 0;
+
+    this.formInitialFaces();
+    this.zeroVertices();
+
+    this.geometry.setDrawRange(0, 0);
+  }
+
+  updateUniforms() {
+    if (this.currentLength < this.length) {
+      this.material.uniforms.minID.value = 0;
+    } else {
+      this.material.uniforms.minID.value = this.currentNodeID - this.length;
+    }
+    this.material.uniforms.maxID.value = this.currentNodeID;
+    this.material.uniforms.trailLength.value = this.currentLength;
+    this.material.uniforms.maxTrailLength.value = this.length;
+    this.material.uniforms.verticesPerNode.value = this.VerticesPerNode;
+  }
+
+  tempMatrix4 = new Matrix4();
+
+  advance() {
+    this.targetObject.updateMatrixWorld();
+
+    this.tangent.subVectors(this.targetObject.position, this.previousPos);
+    this.tangent.normalize();
+    this.advanceWithPositionAndOrientation(this.targetObject.position, this.tangent);
+
+    this.updateUniforms();
+    this.previousPos.copy(this.targetObject.position);
+  };
+
+  advanceWithPositionAndOrientation(nextPosition: Vector3, orientationTangent: Vector3) {
+    this.advanceGeometry({position: nextPosition, tangent: orientationTangent}, null);
+  }
+
+  advanceWithTransform(transformMatrix) {
+    this.advanceGeometry(null, transformMatrix);
+  }
+
+  tempPosition = new Vector3();
+
+  advanceGeometry(positionAndOrientation, transformMatrix: Matrix4) {
+    const nextIndex = this.currentEnd + 1 >= this.length ? 0 : this.currentEnd + 1;
+
+    if (transformMatrix) {
+      this.updateNodePositionsFromTransformMatrix(nextIndex, transformMatrix);
+    } else {
+      this.updateNodePositionsFromOrientationTangent(nextIndex, positionAndOrientation.position, positionAndOrientation.tangent);
+    }
+
+    if (this.currentLength >= 1) {
+      this.connectNodes(this.currentEnd, nextIndex);
+
+      if (this.currentLength >= this.length) {
+        const disconnectIndex = this.currentEnd + 1 >= this.length ? 0 : this.currentEnd + 1;
+        this.disconnectNodes(disconnectIndex);
+      }
+    }
+
+    if (this.currentLength < this.length) {
+      this.currentLength++;
+    }
+
+    this.currentEnd++;
+    if (this.currentEnd >= this.length) {
+      this.currentEnd = 0;
+    }
+
+    if (this.currentLength >= 1) {
+      if (this.currentLength < this.length) {
+        this.geometry.setDrawRange(0, (this.currentLength - 1) * this.FaceIndicesPerNode);
+      } else {
+        this.geometry.setDrawRange(0, this.currentLength * this.FaceIndicesPerNode);
+      }
+    }
+
+    this.updateNodeID(this.currentEnd, this.currentNodeID);
+    this.currentNodeID++;
+  }
+
+  updateHead() {
+    if (this.currentEnd < 0) {
+      return;
+    }
+
+    this.targetObject.updateMatrixWorld();
+    this.tempMatrix4.copy(this.targetObject.matrixWorld);
+
+    this.updateNodePositionsFromTransformMatrix(this.currentEnd, this.tempMatrix4);
+  }
+
+  updateNodeID(nodeIndex, id) {
+    this.nodeIDs[nodeIndex] = id;
+
+    const nodeIDs = this.geometry.getAttribute('nodeID') as BufferAttribute;
+    const nodeVertexIDs = this.geometry.getAttribute('nodeVertexID') as BufferAttribute;
+
+    for (let i = 0; i < this.VerticesPerNode; i++) {
+      const baseIndex = nodeIndex * this.VerticesPerNode + i;
+      (nodeIDs.array as Float32Array)[baseIndex] = id;
+      (nodeVertexIDs.array as Float32Array)[baseIndex] = i;
+    }
+
+    nodeIDs.needsUpdate = true;
+    nodeVertexIDs.needsUpdate = true;
+
+    nodeIDs.updateRange.offset = nodeIndex * this.VerticesPerNode;
+    nodeIDs.updateRange.count = this.VerticesPerNode;
+
+    nodeVertexIDs.updateRange.offset = nodeIndex * this.VerticesPerNode;
+    nodeVertexIDs.updateRange.count = this.VerticesPerNode;
+  }
+
+  updateNodeCenter(nodeIndex: number, nodeCenter: Vector3) {
+    this.lastNodeCenter = this.currentNodeCenter;
+
+    this.currentNodeCenter = this.nodeCenters[nodeIndex];
+    this.currentNodeCenter.copy(nodeCenter);
+
+    const nodeCenters = this.geometry.getAttribute('nodeCenter') as BufferAttribute;
+
+    for (let i = 0; i < this.VerticesPerNode; i++) {
+      const baseIndex = (nodeIndex * this.VerticesPerNode + i) * 3;
+      const array = nodeCenters.array as Float32Array;
+
+      array[baseIndex] = nodeCenter.x;
+      array[baseIndex + 1] = nodeCenter.y;
+      array[baseIndex + 2] = nodeCenter.z;
+    }
+
+    nodeCenters.needsUpdate = true;
+
+    nodeCenters.updateRange.offset = nodeIndex * this.VerticesPerNode * PositionComponentCount;
+    nodeCenters.updateRange.count = this.VerticesPerNode * PositionComponentCount;
+  }
+
+  updateNodePositionsFromOrientationTangent(nodeIndex: number, nodeCenter: Vector3, orientationTangent: Vector3) {
+    const positions = this.geometry.getAttribute('position') as BufferAttribute;
+
+    this.updateNodeCenter(nodeIndex, nodeCenter);
+
+    this.tempOffset.copy(nodeCenter);
+    this.tempOffset.sub(LocalHeadOrigin);
+    this.tempQuaternion.setFromUnitVectors(LocalOrientationTangent, orientationTangent);
+
+    for (let i = 0; i < this.localHeadGeometry.length; i++) {
+      const vertex = this.tempLocalHeadGeometry[i];
+      vertex.copy(this.localHeadGeometry[i]);
+      vertex.applyQuaternion(this.tempQuaternion);
+      vertex.add(this.tempOffset);
+    }
+
+    for (let i = 0; i < this.localHeadGeometry.length; i++) {
+      const positionIndex = ((this.VerticesPerNode * nodeIndex) + i) * PositionComponentCount;
+      const transformedHeadVertex = this.tempLocalHeadGeometry[i];
+      const array = positions.array as Float32Array;
+
+      array[positionIndex] = transformedHeadVertex.x;
+      array[positionIndex + 1] = transformedHeadVertex.y;
+      array[positionIndex + 2] = transformedHeadVertex.z;
+    }
+
+    positions.needsUpdate = true;
+  }
+
+  tempMatrix3 = new Matrix3();
+  tempQuaternion = new Quaternion();
+  tempOffset = new Vector3();
+  worldOrientation = new Vector3();
+  tempDirection = new Vector3();
+  tempLocalHeadGeometry: Vector3[] = [];
+
+  updateNodePositionsFromTransformMatrix(nodeIndex: number, transformMatrix: Matrix4) {
+    const positions = this.geometry.getAttribute('position') as BufferAttribute;
+
+    this.tempPosition.set(0, 0, 0);
+    this.tempPosition.applyMatrix4(transformMatrix);
+    this.updateNodeCenter(nodeIndex, this.tempPosition);
+
+    for (let i = 0; i < this.localHeadGeometry.length; i++) {
+      const vertex = this.tempLocalHeadGeometry[i];
+      vertex.copy(this.localHeadGeometry[i]);
+    }
+
+    for (let i = 0; i < this.localHeadGeometry.length; i++) {
+      const vertex = this.tempLocalHeadGeometry[i];
+      vertex.applyMatrix4(transformMatrix);
+    }
+
+    if (this.lastNodeCenter && this.orientToMovement) {
+      getMatrix3FromMatrix4(this.tempMatrix3, transformMatrix);
+      this.worldOrientation.set(0, 0, -1);
+      this.worldOrientation.applyMatrix3(this.tempMatrix3);
+
+      this.tempDirection.copy(this.currentNodeCenter);
+      this.tempDirection.sub(this.lastNodeCenter);
+      this.tempDirection.normalize();
+
+      if (this.tempDirection.lengthSq() <= .0001 && this.lastOrientationDir) {
+        this.tempDirection.copy(this.lastOrientationDir);
+      }
+
+      if (this.tempDirection.lengthSq() > .0001) {
+
+        if (!this.lastOrientationDir) {
+          this.lastOrientationDir = new Vector3();
+        }
+
+        this.tempQuaternion.setFromUnitVectors(this.worldOrientation, this.tempDirection);
+
+        this.tempOffset.copy(this.currentNodeCenter);
+
+        for (let i = 0; i < this.localHeadGeometry.length; i++) {
+          const vertex = this.tempLocalHeadGeometry[i];
+          vertex.sub(this.tempOffset);
+          vertex.applyQuaternion(this.tempQuaternion);
+          vertex.add(this.tempOffset);
+        }
+      }
+    }
+
+    for (let i = 0; i < this.localHeadGeometry.length; i++) {
+      const positionIndex = ((this.VerticesPerNode * nodeIndex) + i) * PositionComponentCount;
+      const transformedHeadVertex = this.tempLocalHeadGeometry[i];
+      const array = positions.array as Float32Array;
+
+      array[positionIndex] = transformedHeadVertex.x;
+      array[positionIndex + 1] = transformedHeadVertex.y;
+      array[positionIndex + 2] = transformedHeadVertex.z;
+
+    }
+
+    positions.needsUpdate = true;
+
+    positions.updateRange.offset = nodeIndex * this.VerticesPerNode * PositionComponentCount;
+    positions.updateRange.count = this.VerticesPerNode * PositionComponentCount;
+  }
+
+  connectNodes(srcNodeIndex: number, destNodeIndex: number) {
+    const indices = this.geometry.getIndex();
+
+    for (let i = 0; i < this.localHeadGeometry.length - 1; i++) {
+      const srcVertexIndex = (this.VerticesPerNode * srcNodeIndex) + i;
+      const destVertexIndex = (this.VerticesPerNode * destNodeIndex) + i;
+
+      const faceIndex = ((srcNodeIndex * this.FacesPerNode) + (i * FacesPerQuad)) * IndicesPerFace;
+
+      const array = indices.array as Uint32Array;
+
+      array[faceIndex] = srcVertexIndex;
+      array[faceIndex + 1] = destVertexIndex;
+      array[faceIndex + 2] = srcVertexIndex + 1;
+
+      array[faceIndex + 3] = destVertexIndex;
+      array[faceIndex + 4] = destVertexIndex + 1;
+      array[faceIndex + 5] = srcVertexIndex + 1;
+    }
+
+    indices.needsUpdate = true;
+    indices.updateRange.count = -1;
+  }
+
+  disconnectNodes(srcNodeIndex: number) {
+    const indices = this.geometry.getIndex();
+
+    for (let i = 0; i < this.localHeadGeometry.length - 1; i++) {
+      const faceIndex = ((srcNodeIndex * this.FacesPerNode) + (i * FacesPerQuad)) * IndicesPerFace;
+
+      const array = indices.array as Uint32Array;
+
+      array[faceIndex] = 0;
+      array[faceIndex + 1] = 0;
+      array[faceIndex + 2] = 0;
+
+      array[faceIndex + 3] = 0;
+      array[faceIndex + 4] = 0;
+      array[faceIndex + 5] = 0;
+    }
+
+    indices.needsUpdate = true;
+    indices.updateRange.count = -1;
+  }
+
+  deactivate() {
+    if (this.active) {
+      this.scene.remove(this.mesh);
+      this.active = false;
+    }
+  }
+
+  activate() {
+    if (!this.active) {
+      this.scene.add(this.mesh);
+      this.active = true;
+    }
+  }
+}
+
+function getMatrix3FromMatrix4(matrix3: Matrix3, matrix4: Matrix4) {
+  const e = matrix4.elements;
+  matrix3.set(e[0], e[1], e[2],
+    e[4], e[5], e[6],
+    e[8], e[9], e[10]);
+}
