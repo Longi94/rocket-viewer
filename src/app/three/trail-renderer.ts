@@ -280,6 +280,7 @@ export class Trail {
   initializeMesh() {
     this.mesh = new Mesh(this.geometry, this.material);
     this.mesh.matrixAutoUpdate = false;
+    this.mesh.frustumCulled = false;
   }
 
   destroyMesh() {
