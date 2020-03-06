@@ -21,7 +21,7 @@ export class BallActor extends RigidBodyActor {
     const inc = Math.PI * 2 / 16.0;
 
     for (let i = 0; i < 17; i++) {
-      trailHeadGeometry.push(new Vector3(Math.cos(i * inc) * scale, Math.sin(i * inc) * scale, 0));
+      trailHeadGeometry.push(new Vector3(0, Math.cos(i * inc) * scale, Math.sin(i * inc) * scale));
     }
 
     this.trail = new Trail(scene);
@@ -33,8 +33,6 @@ export class BallActor extends RigidBodyActor {
 
     this.trail.initialize(this.trailMaterial, 100, 0, trailHeadGeometry, ball);
     this.trail.activate();
-
-    ball.visible = false;
   }
 
   update(time: number, isUserInput: boolean = false) {

@@ -5,8 +5,6 @@ import {
   CustomBlending,
   DoubleSide,
   DynamicDrawUsage,
-  Matrix3,
-  Matrix4,
   Mesh,
   Object3D,
   OneMinusSrcAlphaFactor,
@@ -94,7 +92,7 @@ export class Trail {
   previousPos: Vector3 = new Vector3();
   tangent: Vector3 = new Vector3();
 
-  constructor(public readonly scene: Scene, public orientToMovement = false) {
+  constructor(public readonly scene: Scene) {
     for (let i = 0; i < MaxHeadVertices; i++) {
       const vertex = new Vector3();
       this.tempLocalHeadGeometry.push(vertex);
@@ -319,37 +317,20 @@ export class Trail {
     this.material.uniforms.verticesPerNode.value = this.VerticesPerNode;
   }
 
-  tempMatrix4 = new Matrix4();
-
   advance() {
     this.targetObject.updateMatrixWorld();
 
-    this.tangent.subVectors(this.targetObject.position, this.previousPos);
-    this.tangent.normalize();
-    this.advanceWithPositionAndOrientation(this.targetObject.position, this.tangent);
+    this.tangent.subVectors(this.targetObject.position, this.previousPos).normalize();
+    this.advanceGeometry(this.targetObject.position, this.tangent);
 
     this.updateUniforms();
     this.previousPos.copy(this.targetObject.position);
   };
 
-  advanceWithPositionAndOrientation(nextPosition: Vector3, orientationTangent: Vector3) {
-    this.advanceGeometry({position: nextPosition, tangent: orientationTangent}, null);
-  }
-
-  advanceWithTransform(transformMatrix) {
-    this.advanceGeometry(null, transformMatrix);
-  }
-
-  tempPosition = new Vector3();
-
-  advanceGeometry(positionAndOrientation, transformMatrix: Matrix4) {
+  advanceGeometry(position: Vector3, tangent: Vector3) {
     const nextIndex = this.currentEnd + 1 >= this.length ? 0 : this.currentEnd + 1;
 
-    if (transformMatrix) {
-      this.updateNodePositionsFromTransformMatrix(nextIndex, transformMatrix);
-    } else {
-      this.updateNodePositionsFromOrientationTangent(nextIndex, positionAndOrientation.position, positionAndOrientation.tangent);
-    }
+    this.updateNodePositionsFromOrientationTangent(nextIndex, position, tangent);
 
     if (this.currentLength >= 1) {
       this.connectNodes(this.currentEnd, nextIndex);
@@ -379,17 +360,6 @@ export class Trail {
 
     this.updateNodeID(this.currentEnd, this.currentNodeID);
     this.currentNodeID++;
-  }
-
-  updateHead() {
-    if (this.currentEnd < 0) {
-      return;
-    }
-
-    this.targetObject.updateMatrixWorld();
-    this.tempMatrix4.copy(this.targetObject.matrixWorld);
-
-    this.updateNodePositionsFromTransformMatrix(this.currentEnd, this.tempMatrix4);
   }
 
   updateNodeID(nodeIndex, id) {
@@ -466,78 +436,9 @@ export class Trail {
     positions.needsUpdate = true;
   }
 
-  tempMatrix3 = new Matrix3();
   tempQuaternion = new Quaternion();
   tempOffset = new Vector3();
-  worldOrientation = new Vector3();
-  tempDirection = new Vector3();
   tempLocalHeadGeometry: Vector3[] = [];
-
-  updateNodePositionsFromTransformMatrix(nodeIndex: number, transformMatrix: Matrix4) {
-    const positions = this.geometry.getAttribute('position') as BufferAttribute;
-
-    this.tempPosition.set(0, 0, 0);
-    this.tempPosition.applyMatrix4(transformMatrix);
-    this.updateNodeCenter(nodeIndex, this.tempPosition);
-
-    for (let i = 0; i < this.localHeadGeometry.length; i++) {
-      const vertex = this.tempLocalHeadGeometry[i];
-      vertex.copy(this.localHeadGeometry[i]);
-    }
-
-    for (let i = 0; i < this.localHeadGeometry.length; i++) {
-      const vertex = this.tempLocalHeadGeometry[i];
-      vertex.applyMatrix4(transformMatrix);
-    }
-
-    if (this.lastNodeCenter && this.orientToMovement) {
-      getMatrix3FromMatrix4(this.tempMatrix3, transformMatrix);
-      this.worldOrientation.set(0, 0, -1);
-      this.worldOrientation.applyMatrix3(this.tempMatrix3);
-
-      this.tempDirection.copy(this.currentNodeCenter);
-      this.tempDirection.sub(this.lastNodeCenter);
-      this.tempDirection.normalize();
-
-      if (this.tempDirection.lengthSq() <= .0001 && this.lastOrientationDir) {
-        this.tempDirection.copy(this.lastOrientationDir);
-      }
-
-      if (this.tempDirection.lengthSq() > .0001) {
-
-        if (!this.lastOrientationDir) {
-          this.lastOrientationDir = new Vector3();
-        }
-
-        this.tempQuaternion.setFromUnitVectors(this.worldOrientation, this.tempDirection);
-
-        this.tempOffset.copy(this.currentNodeCenter);
-
-        for (let i = 0; i < this.localHeadGeometry.length; i++) {
-          const vertex = this.tempLocalHeadGeometry[i];
-          vertex.sub(this.tempOffset);
-          vertex.applyQuaternion(this.tempQuaternion);
-          vertex.add(this.tempOffset);
-        }
-      }
-    }
-
-    for (let i = 0; i < this.localHeadGeometry.length; i++) {
-      const positionIndex = ((this.VerticesPerNode * nodeIndex) + i) * PositionComponentCount;
-      const transformedHeadVertex = this.tempLocalHeadGeometry[i];
-      const array = positions.array as Float32Array;
-
-      array[positionIndex] = transformedHeadVertex.x;
-      array[positionIndex + 1] = transformedHeadVertex.y;
-      array[positionIndex + 2] = transformedHeadVertex.z;
-
-    }
-
-    positions.needsUpdate = true;
-
-    positions.updateRange.offset = nodeIndex * this.VerticesPerNode * PositionComponentCount;
-    positions.updateRange.count = this.VerticesPerNode * PositionComponentCount;
-  }
 
   connectNodes(srcNodeIndex: number, destNodeIndex: number) {
     const indices = this.geometry.getIndex();
@@ -597,11 +498,4 @@ export class Trail {
       this.active = true;
     }
   }
-}
-
-function getMatrix3FromMatrix4(matrix3: Matrix3, matrix4: Matrix4) {
-  const e = matrix4.elements;
-  matrix3.set(e[0], e[1], e[2],
-    e[4], e[5], e[6],
-    e[8], e[9], e[10]);
 }
