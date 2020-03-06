@@ -6,6 +6,7 @@ import { Camera, Group, Object3D, PerspectiveCamera, Sprite, SpriteMaterial, Vec
 import { BoostEmitter } from '../object/boost-emitter';
 import { Emitter } from 'three-nebula';
 import { BoostData } from '../../model/replay/boost-data';
+import { RenderOrder } from '../../three/render-order';
 
 export class PlayerActor extends RigidBodyActor {
 
@@ -34,6 +35,7 @@ export class PlayerActor extends RigidBodyActor {
     this.jumpSprite.scale.setScalar(80);
     this.jumpSprite.position.y = -10;
     this.jumpSprite.visible = false;
+    this.jumpSprite.renderOrder = RenderOrder.JUMP_EFFECT;
     this.car.add(this.jumpSprite);
   }
 

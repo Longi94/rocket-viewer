@@ -5,6 +5,7 @@ import { Body, createPaintConfig, Wheel } from 'rl-loadout-lib';
 import { PlayerActor } from '../actor/player';
 import { setEncoding } from '../../util/three';
 import { LinearEncoding } from 'three';
+import { RenderOrder } from '../../three/render-order';
 
 
 export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
@@ -34,6 +35,9 @@ export async function loadCar(playerData: PlayerData, rs: ReplayScene) {
   setEncoding(wheels.scene, LinearEncoding);
 
   body.addWheelsModel(wheels);
+
+  body.scene.traverse(object => object.renderOrder = RenderOrder.OPAQUE);
+  wheels.scene.traverse(object => object.renderOrder = RenderOrder.OPAQUE);
 
   rs.players[playerData.id] = new PlayerActor(playerData, body);
 }

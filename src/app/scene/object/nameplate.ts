@@ -1,6 +1,7 @@
 import { createOffscreenCanvas } from 'rl-loadout-lib/dist/utils/offscreen-canvas';
 import { DataTexture, LinearFilter, PerspectiveCamera, Sprite, SpriteMaterial, Vector3 } from 'three';
 import { roundRect } from '../../util/canvas';
+import { RenderOrder } from '../../three/render-order';
 
 const WIDTH = 2048;
 const HEIGHT = 2048;
@@ -49,6 +50,7 @@ export class Nameplate {
     this.sprite = new Sprite(spriteMaterial);
     this.sprite.scale.setScalar(1000);
     this.sprite.position.y = 100;
+    this.sprite.renderOrder = RenderOrder.NAMEPLATE;
   }
 
   update(camera: PerspectiveCamera) {

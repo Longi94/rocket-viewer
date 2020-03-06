@@ -123,7 +123,7 @@ export class Trail {
       blendEquation: AddEquation,
 
       depthTest: true,
-      depthWrite: false,
+      depthWrite: true,
 
       side: DoubleSide
     });

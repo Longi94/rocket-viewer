@@ -3,6 +3,7 @@ import { applyEnvMap } from '../../util/three';
 import { modelLoader } from './loader-config';
 import { BallActor } from '../actor/ball';
 import { BallType } from '../../model/replay/ball-data';
+import { RenderOrder } from '../../three/render-order';
 
 const DEFAULT = '/assets/models/balls/ball_default.draco.glb';
 
@@ -15,5 +16,7 @@ export async function loadBall(type: BallType, rs: ReplayScene) {
   if (url == undefined) {
     url = DEFAULT;
   }
-  rs.ballActor = new BallActor(type, (await modelLoader.load(url)).scene.children[0], rs.scene);
+  const model = (await modelLoader.load(url)).scene.children[0];
+  model.renderOrder = RenderOrder.OPAQUE;
+  rs.ballActor = new BallActor(type, model, rs.scene);
 }

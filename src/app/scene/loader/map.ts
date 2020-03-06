@@ -1,8 +1,8 @@
 import { ReplayScene } from '../replay-scene';
-import { applyEnvMap } from '../../util/three';
 import { modelLoader } from './loader-config';
 import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
-import { MeshStandardMaterial } from 'three';
+import { Mesh, MeshStandardMaterial } from 'three';
+import { RenderOrder } from '../../three/render-order';
 
 const MAPPING: { [name: string]: string } = {
   HoopsStadium_P: '/assets/models/maps/HoopsStadium_P.draco.glb'
@@ -24,11 +24,16 @@ export async function loadMap(name: string, rs: ReplayScene) {
     transparentMats = new Set<string>(['goal_glass', 'wall_grate', 'center_grate_material']);
   }
 
-  traverseMaterials(rs.models.map, mat => {
-    const material = mat as MeshStandardMaterial;
-
-    if (transparentMats.has(material.name)) {
-      material.depthWrite = false;
+  rs.models.map.traverse(object => {
+    // @ts-ignore
+    if (object.isMesh) {
+      const material = (object as Mesh).material as MeshStandardMaterial;
+      if (transparentMats.has(material.name)) {
+        material.depthWrite = false;
+        object.renderOrder = RenderOrder.MAP_TRANSPARENT;
+      } else {
+        object.renderOrder = RenderOrder.OPAQUE;
+      }
     }
   });
 }

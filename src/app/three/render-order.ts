@@ -1,0 +1,7 @@
+export enum RenderOrder {
+  OPAQUE,
+  MAP_TRANSPARENT,
+  NAMEPLATE,
+  BALL_TRAIL,
+  JUMP_EFFECT
+}

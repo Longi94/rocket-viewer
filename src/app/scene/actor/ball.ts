@@ -2,6 +2,7 @@ import { BallType } from '../../model/replay/ball-data';
 import { Color, Mesh, MeshStandardMaterial, Object3D, Scene, ShaderMaterial, Vector3 } from 'three';
 import { RigidBodyActor } from './rigid-body';
 import { Trail } from '../../three/trail-renderer';
+import { RenderOrder } from '../../three/render-order';
 
 const EMISSIVE_ORANGE = new Color('#ffae00');
 const EMISSIVE_BLUE = new Color('#00bfff');
@@ -32,6 +33,7 @@ export class BallActor extends RigidBodyActor {
     this.trailMaterial.uniforms.tailColor.value.set(1.0, 0.0, 0.0, 0.5);
 
     this.trail.initialize(this.trailMaterial, 100, 0, trailHeadGeometry, ball);
+    this.trail.mesh.renderOrder = RenderOrder.BALL_TRAIL;
     this.trail.activate();
   }
 
