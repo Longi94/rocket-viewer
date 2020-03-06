@@ -10,6 +10,7 @@ import {
   OneMinusSrcAlphaFactor,
   Quaternion,
   Scene,
+  ShaderChunk,
   ShaderMaterial,
   SrcAlphaFactor,
   Vector3,
@@ -25,7 +26,7 @@ const IndicesPerFace = 3;
 const FacesPerQuad = 2;
 
 // language=GLSL
-const BaseVertexShader = `
+const BaseVertexShader = ShaderChunk.common + '\n' + ShaderChunk.logdepthbuf_pars_vertex + `
   attribute float nodeID;
   attribute float nodeVertexID;
   attribute vec3 nodeCenter;
@@ -46,15 +47,17 @@ const BaseVertexShader = `
     vColor = (1.0 - fraction) * headColor + fraction * tailColor;
     vec4 realPosition = vec4((1.0 - fraction) * position.xyz + fraction * nodeCenter.xyz, 1.0);
     gl_Position = projectionMatrix * viewMatrix * realPosition;
+    ` + ShaderChunk.logdepthbuf_vertex + `
   }
 `;
 
 // language=GLSL
-const BaseFragmentShader = `
+const BaseFragmentShader = ShaderChunk.logdepthbuf_pars_fragment + `
   varying vec4 vColor;
   uniform sampler2D texture;
   void main() {
     gl_FragColor = vColor;
+    ` + ShaderChunk.logdepthbuf_fragment + `
   }
 `;
 
