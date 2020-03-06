@@ -9,7 +9,8 @@ export async function loadBoostTexture(rs: ReplayScene) {
     map: texture,
     color: 0xff0000,
     blending: AdditiveBlending,
-    fog: true
+    fog: true,
+    depthWrite: false
   });
 
   rs.boostSprite = new Sprite(material);
