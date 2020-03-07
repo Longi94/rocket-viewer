@@ -32,6 +32,7 @@ import { BoostPadActor } from './actor/boost-pad';
 import { modelLoader } from './loader/loader-config';
 import { loadDemoSprite } from './loader/demo';
 import { advanceFrame } from '../util/util';
+import { HudData } from '../model/hud-data';
 
 export class SceneManager {
 
@@ -64,7 +65,7 @@ export class SceneManager {
   playerFrames: { [id: number]: number } = {};
 
   // callbacks
-  onTimeUpdate(time: number) {
+  onTimeUpdate(time: number, hudData: HudData) {
   }
 
   constructor(private readonly debug = false) {
@@ -253,7 +254,7 @@ export class SceneManager {
         }
       }
 
-      this.onTimeUpdate(this.currentTime);
+      this.onTimeUpdate(this.currentTime, this.rs.hudData);
       this.update();
     }
     this.cameraManager.update(time, this.rs);
@@ -283,6 +284,7 @@ export class SceneManager {
     this.update(true);
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
+    this.onTimeUpdate(this.currentTime, this.rs.hudData);
     this.requestRender();
   }
 

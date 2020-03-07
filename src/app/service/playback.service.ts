@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { PlaybackCameraChange, PlaybackInfo } from '../model/playback-info';
 import { CameraType } from '../scene/camera/camera-type';
+import { Tick } from '../model/tick';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class PlaybackService {
   private playbackInfoSubject = new Subject<PlaybackInfo>();
   onPlaybackInfo = this.playbackInfoSubject.asObservable();
 
-  private timeUpdateSubject = new Subject<number>();
+  private timeUpdateSubject = new Subject<Tick>();
   onTimeUpdate = this.timeUpdateSubject.asObservable();
 
   private timeScrollSubject = new Subject<number>();
@@ -44,8 +45,8 @@ export class PlaybackService {
     this.playbackInfoSubject.next(playbackInfo);
   }
 
-  updateTime(time: number) {
-    this.timeUpdateSubject.next(time);
+  updateTime(tick: Tick) {
+    this.timeUpdateSubject.next(tick);
   }
 
   scrollToTime(time: number) {

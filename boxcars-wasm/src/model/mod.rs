@@ -7,6 +7,7 @@ pub mod car_data;
 pub mod cleaned_replay;
 pub mod frame_data;
 pub mod frame_state;
+pub mod game_data;
 pub mod jump;
 pub mod player_data;
 pub mod player_loadout;

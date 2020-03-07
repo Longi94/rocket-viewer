@@ -5,6 +5,7 @@ import { createBallAnimationMixer } from './ball';
 import { createCarAnimationMixer } from './car';
 import { createBoostPadAnimations } from './boost-pad';
 import { BoostPad } from '../../model/boost-pad';
+import { createHudMixers } from './hud';
 
 export class AnimationManager {
   ballMixer: AnimationMixer;
@@ -16,11 +17,16 @@ export class AnimationManager {
     this.boostPadMixers = createBoostPadAnimations(boostPads, frameData.boost_pads, replayScene);
 
     for (const playerData of Object.values(frameData.players)) {
-      const mixers = createCarAnimationMixer(playerData, replayScene, debug);
-      for (const mixer of mixers) {
-        if (mixer != undefined) {
-          this.playerMixers.push(mixer);
-        }
+      this.addMixers(createCarAnimationMixer(playerData, replayScene, debug));
+    }
+
+    this.addMixers(createHudMixers(replayScene));
+  }
+
+  private addMixers(mixers: AnimationMixer[]) {
+    for (const mixer of mixers) {
+      if (mixer != undefined) {
+        this.playerMixers.push(mixer);
       }
     }
   }

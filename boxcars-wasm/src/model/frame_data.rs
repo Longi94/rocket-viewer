@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::model::player_data::PlayerData;
 use serde::Serialize;
 use crate::model::boost_pad_data::BoostPadData;
+use crate::model::game_data::GameData;
 
 #[derive(Serialize, Debug)]
 pub struct FrameData {
@@ -12,6 +13,7 @@ pub struct FrameData {
     pub deltas: Vec<f32>,
     pub players: HashMap<i32, PlayerData>,
     pub boost_pads: HashMap<i8, BoostPadData>,
+    pub game_data: GameData,
 }
 
 impl FrameData {
@@ -23,6 +25,7 @@ impl FrameData {
             deltas: Vec::with_capacity(c),
             players: HashMap::new(),
             boost_pads: HashMap::new(),
+            game_data: GameData::new(),
         }
     }
 

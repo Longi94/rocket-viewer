@@ -47,7 +47,7 @@ export class CanvasComponent implements OnInit {
     this.playbackService.onSpeed.subscribe(t => this.sceneManager.setSpeed(t));
     this.playbackService.onCameraChange.subscribe(e => this.sceneManager.changeCamera(e.type, e.targetPlayer));
 
-    this.sceneManager.onTimeUpdate = time => this.playbackService.updateTime(time);
+    this.sceneManager.onTimeUpdate = (time, hudData) => this.playbackService.updateTime({time, hudData});
 
     Cache.enabled = true;
   }

@@ -28,10 +28,10 @@ export class PlaybackControlComponent implements OnInit {
     });
     this.playbackService.onTimeUpdate.subscribe(t => {
       if (!this.isSliding) {
-        this.currentTime = t;
+        this.currentTime = t.time;
       }
 
-      if (t >= this.sliderOptions.ceil) {
+      if (t.time >= this.sliderOptions.ceil) {
         this.isPlaying = false;
       }
     });

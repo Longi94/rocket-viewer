@@ -15,13 +15,15 @@ import { FormsModule } from '@angular/forms';
 import { Ng5SliderModule } from 'ng5-slider';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { HudComponent } from './home/components/hud/hud.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CanvasComponent,
     HomeComponent,
-    PlaybackControlComponent
+    PlaybackControlComponent,
+    HudComponent
   ],
   imports: [
     BrowserModule,
