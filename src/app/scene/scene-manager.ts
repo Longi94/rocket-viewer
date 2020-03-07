@@ -31,6 +31,7 @@ import { getBoosts } from '../model/boost-pad';
 import { BoostPadActor } from './actor/boost-pad';
 import { modelLoader } from './loader/loader-config';
 import { loadDemoSprite } from './loader/demo';
+import { advanceFrame } from '../util/util';
 
 export class SceneManager {
 
@@ -275,47 +276,23 @@ export class SceneManager {
   }
 
   scrollToTime(time: number) {
-    if (time > this.currentTime) {
-      while (this.currentFrame < this.frameCount - 1 &&
-      time > this.rs.replay.frame_data.real_times[this.currentFrame + 1]) {
-        this.currentFrame++;
-      }
-
-      if (this.debug) {
-        while (time > this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame + 1]) {
-          this.ballFrame++;
-        }
-
-        for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-          while (time > this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId] + 1]) {
-            this.playerFrames[playerId]++;
-          }
-        }
-      }
-
-    } else if (time < this.currentTime) {
-      while (this.currentFrame > 0 && time < this.rs.replay.frame_data.real_times[this.currentFrame]) {
-        this.currentFrame--;
-      }
-
-      if (this.debug) {
-        while (time < this.rs.replay.frame_data.ball_data.body_states.times[this.ballFrame]) {
-          this.ballFrame--;
-        }
-
-        for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-          while (time < this.rs.replay.frame_data.players[playerId].body_states.times[this.playerFrames[playerId]]) {
-            this.playerFrames[playerId]--;
-          }
-        }
-      }
-    }
+    this.currentFrame = advanceFrame(this.currentFrame, this.currentTime, time, this.rs.replay.frame_data.real_times);
+    this.updateDebugFrames(time);
 
     this.currentTime = time;
     this.update(true);
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
     this.requestRender();
+  }
+
+  updateDebugFrames(time: number) {
+    if (this.debug) {
+      this.ballFrame = advanceFrame(this.ballFrame, this.currentTime, time, this.rs.replay.frame_data.ball_data.body_states.times);
+      for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
+        this.playerFrames[playerId] = advanceFrame(this.playerFrames[playerId], this.currentTime, time, this.rs.replay.frame_data.players[playerId].body_states.times);
+      }
+    }
   }
 
   setSpeed(speed: number) {

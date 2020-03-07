@@ -2,6 +2,7 @@ import { Trail } from '../../three/trail-renderer';
 import { Color, Object3D, Scene, ShaderMaterial, Vector3 } from 'three';
 import { RenderOrder } from '../../three/render-order';
 import { BallData } from '../../model/replay/ball-data';
+import { advanceFrame } from '../../util/util';
 
 const COLOR_NEUTRAL = new Color('#ffffff');
 const COLOR_ORANGE_HEAD = new Color('#f7a16a');
@@ -54,15 +55,7 @@ export class BallTrail extends Trail {
   }
 
   update(time: number, isUserInput: boolean) {
-    if (time > this.currentTime) {
-      while (this.ballData.hit_team_times[this.currentFrame + 1] < time) {
-        this.currentFrame++;
-      }
-    } else {
-      while (this.ballData.hit_team_times[this.currentFrame] > time) {
-        this.currentFrame--;
-      }
-    }
+    this.currentFrame = advanceFrame(this.currentFrame, this.currentTime, time, this.ballData.hit_team_times);
 
     if (isUserInput) {
       this.reset();

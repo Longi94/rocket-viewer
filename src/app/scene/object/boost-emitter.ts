@@ -14,6 +14,7 @@ import {
   Rate
 } from 'three-nebula';
 import { Camera, Sprite, Vector3, WebGLRenderer } from 'three';
+import { advanceFrame } from '../../util/util';
 
 export class BoostEmitter {
 
@@ -49,15 +50,7 @@ export class BoostEmitter {
   update(time: number, position: Vector3, isUserInput: boolean) {
     this.emitter.setPosition(position);
 
-    if (time > this.currentTime) {
-      while (this.times[this.currentFrame + 1] < time) {
-        this.currentFrame++;
-      }
-    } else {
-      while (this.times[this.currentFrame] > time) {
-        this.currentFrame--;
-      }
-    }
+    this.currentFrame = advanceFrame(this.currentFrame, this.currentTime, time, this.times);
 
     if (isUserInput) {
       this.emitter.removeAllParticles();
