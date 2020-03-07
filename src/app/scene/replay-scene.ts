@@ -3,6 +3,7 @@ import { Replay } from '../model/replay/replay';
 import { BallActor } from './actor/ball';
 import { PlayerActor } from './actor/player';
 import { BoostPadActor } from './actor/boost-pad';
+import { SpriteSheetTexture } from '../three/sprite-sheet-texture';
 
 export class ModelStore {
   map: Object3D;
@@ -27,4 +28,5 @@ export class ReplayScene {
   jumpMaterial: SpriteMaterial;
 
   boostPads: BoostPadActor[] = [];
+  demoTexture: SpriteSheetTexture;
 }

@@ -20,4 +20,7 @@ export interface PlayerData {
   boost_data: BoostData;
   jump_data: JumpData;
   car_data: CarData;
+  demolished: boolean[];
+  demolished_times: number[];
+  demo_pos: number[];
 }

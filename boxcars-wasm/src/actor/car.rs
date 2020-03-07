@@ -104,8 +104,12 @@ impl ActorHandler for CarHandler {
                         match frame_data.players.get_mut(&victim_id) {
                             None => return,
                             Some(player_data) => {
-                                player_data.body_states.visible.push(false);
-                                player_data.body_states.visible_times.push(state.real_time);
+                                match attributes.get("TAGame.RBActor_TA:ReplicatedRBState") {
+                                    Some(Attribute::RigidBody(rigid_body)) => {
+                                        player_data.push_demo(state.real_time, &rigid_body);
+                                    }
+                                    _ => return
+                                }
                             }
                         }
                     }

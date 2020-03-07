@@ -2,11 +2,12 @@ import { RigidBodyActor } from './rigid-body';
 import { PlayerData } from '../../model/replay/player-data';
 import { Nameplate } from '../object/nameplate';
 import { BodyModel } from 'rl-loadout-lib';
-import { Camera, Group, Object3D, PerspectiveCamera, Sprite, SpriteMaterial, Vector3, WebGLRenderer } from 'three';
+import { AdditiveBlending, Camera, Group, Object3D, PerspectiveCamera, Scene, Sprite, SpriteMaterial, Vector3, WebGLRenderer } from 'three';
 import { BoostEmitter } from '../object/boost-emitter';
 import { Emitter } from 'three-nebula';
 import { BoostData } from '../../model/replay/boost-data';
 import { RenderOrder } from '../../three/render-order';
+import { SpriteSheetTexture } from '../../three/sprite-sheet-texture';
 
 export class PlayerActor extends RigidBodyActor {
 
@@ -19,6 +20,9 @@ export class PlayerActor extends RigidBodyActor {
 
   private readonly boostPos = new Vector3();
   private readonly boostData: BoostData;
+
+  readonly demoSprite: Sprite;
+  demoTexture: SpriteSheetTexture;
 
   constructor(playerData: PlayerData, public readonly bodyModel: BodyModel) {
     super(new Group());
@@ -37,6 +41,16 @@ export class PlayerActor extends RigidBodyActor {
     this.jumpSprite.visible = false;
     this.jumpSprite.renderOrder = RenderOrder.JUMP_EFFECT;
     this.car.add(this.jumpSprite);
+
+    this.demoSprite = new Sprite(new SpriteMaterial({blending: AdditiveBlending, depthWrite: false, transparent: true}));
+    this.demoSprite.scale.setScalar(750);
+    this.demoSprite.visible = false;
+    this.demoSprite.renderOrder = RenderOrder.DEMOLITION;
+  }
+
+  addToScene(scene: Scene) {
+    super.addToScene(scene);
+    scene.add(this.demoSprite);
   }
 
   update(time: number, isUserInput: boolean) {
@@ -49,6 +63,9 @@ export class PlayerActor extends RigidBodyActor {
         this.car.localToWorld(this.boostPos);
       }
       this.boost.update(time, this.boostPos, isUserInput);
+    }
+    if (this.demoSprite.visible && this.demoTexture != undefined) {
+      this.demoTexture.update();
     }
   }
 
@@ -71,5 +88,11 @@ export class PlayerActor extends RigidBodyActor {
   setJumpSprite(material: SpriteMaterial) {
     this.jumpSprite.material = material;
     this.jumpSprite.material.needsUpdate = true;
+  }
+
+  setDemoSprite(demoTexture: SpriteSheetTexture) {
+    this.demoTexture = demoTexture.clone();
+    this.demoSprite.material.map = this.demoTexture.texture;
+    this.demoSprite.material.needsUpdate = true;
   }
 }

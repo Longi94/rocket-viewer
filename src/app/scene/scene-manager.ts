@@ -30,6 +30,7 @@ import { loadBoostPadModels } from './loader/boost-pad';
 import { getBoosts } from '../model/boost-pad';
 import { BoostPadActor } from './actor/boost-pad';
 import { modelLoader } from './loader/loader-config';
+import { loadDemoSprite } from './loader/demo';
 
 export class SceneManager {
 
@@ -151,6 +152,7 @@ export class SceneManager {
     await loadBoostTexture(this.rs);
     await loadJumpSprite(this.rs);
     await loadBoostPadModels(this.rs);
+    await loadDemoSprite(this.rs);
     await mapPromise;
     await ballPromise;
     await Promise.all(playerPromises);
@@ -181,6 +183,7 @@ export class SceneManager {
       player.createBoost(this.particleSystemManager.createEmitter(),
         this.rs.boostSprite, this.rs.camera, this.renderer, replay.frame_data.players[playerId].team);
       player.setJumpSprite(this.rs.jumpMaterial);
+      player.setDemoSprite(this.rs.demoTexture);
       player.addToScene(this.rs.scene);
     }
 

@@ -2,7 +2,7 @@ import { PlayerData } from '../../model/replay/player-data';
 import {
   AnimationClip,
   AnimationMixer, AnimationObjectGroup,
-  BooleanKeyframeTrack,
+  BooleanKeyframeTrack, NumberKeyframeTrack,
   QuaternionKeyframeTrack,
   VectorKeyframeTrack
 } from 'three';
@@ -21,7 +21,9 @@ export function createCarAnimationMixer(playerData: PlayerData, rs: ReplayScene,
     createPositionMixer(playerData, player),
     createRotationMixer(playerData, player),
     createJumpMixer(playerData, player),
-    createWheelTurnMixer(playerData, player)
+    createWheelTurnMixer(playerData, player),
+    createDemoSpriteMixer(playerData, player),
+    createDemoSpriteTimeMixer(playerData, player)
   ];
 }
 
@@ -69,5 +71,30 @@ function createWheelTurnMixer(playerData: PlayerData, player: PlayerActor): Anim
   const clip = new AnimationClip(`car_wheel_turn_${playerData.id}_clip`, data.steer_times[data.steer_times.length - 1], [track]);
   mixer.clipAction(clip).play();
 
+  return mixer;
+}
+
+function createDemoSpriteMixer(playerData: PlayerData, player: PlayerActor): AnimationMixer {
+  if (playerData.demolished.length <= 1) {
+    return undefined;
+  }
+  const mixer = new AnimationMixer(player.demoSprite);
+  const positionTrack = new VectorKeyframeTrack('.position', playerData.demolished_times, playerData.demo_pos);
+  const visibleTrack = new BooleanKeyframeTrack('.visible', playerData.demolished_times, playerData.demolished);
+  const clip = new AnimationClip(`car_demo_${playerData.id}_clip`, playerData.demolished_times[playerData.demolished_times.length - 1],
+    [positionTrack, visibleTrack]);
+  mixer.clipAction(clip).play();
+  return mixer;
+}
+
+function createDemoSpriteTimeMixer(playerData: PlayerData, player: PlayerActor): AnimationMixer {
+  if (playerData.demolished.length <= 1) {
+    return undefined;
+  }
+  const mixer = new AnimationMixer(player.demoTexture);
+  const track = new NumberKeyframeTrack('.time', playerData.demolished_times, playerData.demolished.map(v => v ? 0 : 1));
+  const clip = new AnimationClip(`car_demo_time_${playerData.id}_clip`, playerData.demolished_times[playerData.demolished_times.length - 1],
+    [track]);
+  mixer.clipAction(clip).play();
   return mixer;
 }

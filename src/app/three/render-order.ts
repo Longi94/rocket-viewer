@@ -3,5 +3,6 @@ export enum RenderOrder {
   MAP_TRANSPARENT,
   NAMEPLATE,
   BALL_TRAIL,
-  JUMP_EFFECT
+  JUMP_EFFECT,
+  DEMOLITION,
 }

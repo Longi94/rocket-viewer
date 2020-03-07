@@ -6,6 +6,7 @@ use crate::model::team_paint::TeamPaint;
 use crate::model::jump::JumpData;
 use crate::model::boost::BoostData;
 use crate::model::car_data::CarData;
+use boxcars::attributes::RigidBody;
 
 #[derive(Serialize, Debug)]
 pub struct PlayerData {
@@ -20,6 +21,9 @@ pub struct PlayerData {
     pub jump_data: JumpData,
     pub boost_data: BoostData,
     pub car_data: CarData,
+    pub demo_pos: Vec<f32>,
+    pub demolished: Vec<bool>,
+    pub demolished_times: Vec<f32>,
 }
 
 impl PlayerData {
@@ -36,7 +40,25 @@ impl PlayerData {
             car_data: CarData::new(),
             team_paint_blue: None,
             team_paint_orange: None,
+            demo_pos: vec![0.0, 0.0, 0.0],
+            demolished: vec![false],
+            demolished_times: vec![0.0],
         }
+    }
+
+    pub fn push_demo(&mut self, time: f32, rigid_body: &RigidBody) {
+        self.body_states.visible.push(false);
+        self.body_states.visible_times.push(time);
+        self.demo_pos.push(rigid_body.location.x);
+        self.demo_pos.push(rigid_body.location.z);
+        self.demo_pos.push(rigid_body.location.y);
+        self.demo_pos.push(rigid_body.location.x);
+        self.demo_pos.push(rigid_body.location.z);
+        self.demo_pos.push(rigid_body.location.y);
+        self.demolished.push(true);
+        self.demolished.push(false);
+        self.demolished_times.push(time);
+        self.demolished_times.push(time + 1.0);
     }
 
     pub fn reset(&mut self, time: f32) {
