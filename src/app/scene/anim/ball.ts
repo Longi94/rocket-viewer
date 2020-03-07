@@ -14,7 +14,7 @@ export function createBallAnimationMixer(frameData: FrameData, rs: ReplayScene, 
     states.times[states.times.length - 1],
     [ballPositionTrack, ballRotationTrack]
   );
-  mixer.clipAction(ballAnimationClip).play();
+  mixer.clipAction(ballAnimationClip).play().loop = LoopOnce;
 
   // if (debug) {
   //   addAnimPathHelper(frameData.ball_data.positions, '#ffffff', rs.scene);
