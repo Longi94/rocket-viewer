@@ -14,4 +14,6 @@ export enum BallType {
 export interface BallData {
   ball_type: BallType;
   body_states: BodyStates;
+  hit_team: number[];
+  hit_team_times: number[];
 }

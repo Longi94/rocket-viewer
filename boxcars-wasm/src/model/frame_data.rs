@@ -27,6 +27,7 @@ impl FrameData {
     }
 
     pub fn reset(&mut self, time: f32) {
+        self.ball_data.reset(time);
         for (_, player_data) in &mut self.players {
             player_data.reset(time);
         }

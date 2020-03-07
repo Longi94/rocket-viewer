@@ -1,4 +1,4 @@
-import { BallType } from '../../model/replay/ball-data';
+import { BallData, BallType } from '../../model/replay/ball-data';
 import { Color, Mesh, MeshStandardMaterial, Object3D, Scene } from 'three';
 import { RigidBodyActor } from './rigid-body';
 import { BallTrail } from '../object/ball-trail';
@@ -11,17 +11,14 @@ export class BallActor extends RigidBodyActor {
   private readonly material: MeshStandardMaterial;
   private readonly trail: BallTrail;
 
-  constructor(public readonly type: BallType, ball: Object3D, scene: Scene) {
+  constructor(ballData: BallData, public readonly type: BallType, ball: Object3D, scene: Scene) {
     super(ball);
     this.material = (ball as Mesh).material as MeshStandardMaterial;
-    this.trail = new BallTrail(scene, ball);
+    this.trail = new BallTrail(scene, ball, ballData);
   }
 
   update(time: number, isUserInput: boolean = false) {
-    if (isUserInput) {
-      this.trail.reset();
-    }
-    this.trail.advance();
+    this.trail.update(time, isUserInput);
     switch (this.type) {
       case BallType.PUCK:
       case BallType.UNKNOWN:

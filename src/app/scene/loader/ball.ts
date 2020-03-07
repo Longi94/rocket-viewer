@@ -18,5 +18,5 @@ export async function loadBall(type: BallType, rs: ReplayScene) {
   }
   const model = (await modelLoader.load(url)).scene.children[0];
   model.renderOrder = RenderOrder.OPAQUE;
-  rs.ballActor = new BallActor(type, model, rs.scene);
+  rs.ballActor = new BallActor(rs.replay.frame_data.ball_data, type, model, rs.scene);
 }

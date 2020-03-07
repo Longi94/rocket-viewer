@@ -1,18 +1,15 @@
 import {
-  AddEquation,
+  AdditiveBlending,
   BufferAttribute,
   BufferGeometry,
-  CustomBlending,
   DoubleSide,
   DynamicDrawUsage,
   Mesh,
   Object3D,
-  OneMinusSrcAlphaFactor,
   Quaternion,
   Scene,
   ShaderChunk,
   ShaderMaterial,
-  SrcAlphaFactor,
   Vector3,
   Vector4
 } from 'three';
@@ -73,27 +70,26 @@ export class Trail {
   geometry: BufferGeometry = null;
   mesh: Mesh = null;
   material: ShaderMaterial;
-  nodeCenters: Vector3[] = null;
+  private nodeCenters: Vector3[] = null;
 
-  lastNodeCenter: Vector3 = null;
-  currentNodeCenter: Vector3 = null;
-  lastOrientationDir: Vector3 = null;
-  nodeIDs: number[] = null;
-  currentLength = 0;
-  currentEnd = 0;
-  currentNodeID = 0;
+  private lastNodeCenter: Vector3 = null;
+  private currentNodeCenter: Vector3 = null;
+  private lastOrientationDir: Vector3 = null;
+  private currentLength = 0;
+  private currentEnd = 0;
+  private currentNodeID = 0;
 
-  length = 0;
-  vertexCount = 0;
-  faceCount = 0;
-  VerticesPerNode = 0;
-  FacesPerNode = 0;
-  FaceIndicesPerNode = 0;
+  private length = 0;
+  private vertexCount = 0;
+  private faceCount = 0;
+  private VerticesPerNode = 0;
+  private FacesPerNode = 0;
+  private FaceIndicesPerNode = 0;
 
-  localHeadGeometry: Vector3[];
+  private localHeadGeometry: Vector3[];
 
-  previousPos: Vector3 = new Vector3();
-  tangent: Vector3 = new Vector3();
+  private previousPos: Vector3 = new Vector3();
+  private tangent: Vector3 = new Vector3();
 
   constructor(public readonly scene: Scene) {
     for (let i = 0; i < MaxHeadVertices; i++) {
@@ -120,10 +116,7 @@ export class Trail {
       transparent: true,
       alphaTest: 0.5,
 
-      blending: CustomBlending,
-      blendSrc: SrcAlphaFactor,
-      blendDst: OneMinusSrcAlphaFactor,
-      blendEquation: AddEquation,
+      blending: AdditiveBlending,
 
       depthTest: true,
       depthWrite: false,
@@ -143,11 +136,9 @@ export class Trail {
 
     this.initializeLocalHeadGeometry(localHeadWidth, localHeadGeometry);
 
-    this.nodeIDs = [];
     this.nodeCenters = [];
 
     for (let i = 0; i < this.length; i++) {
-      this.nodeIDs[i] = -1;
       this.nodeCenters[i] = new Vector3();
     }
 
@@ -235,7 +226,7 @@ export class Trail {
     this.geometry = geometry;
   }
 
-  zeroVertices() {
+  private zeroVertices() {
     const positions = this.geometry.getAttribute('position') as BufferAttribute;
 
     for (let i = 0; i < this.vertexCount; i++) {
@@ -251,7 +242,7 @@ export class Trail {
     positions.updateRange.count = -1;
   }
 
-  zeroIndices() {
+  private zeroIndices() {
     const indices = this.geometry.getIndex();
 
     for (let i = 0; i < this.faceCount; i++) {
@@ -267,7 +258,7 @@ export class Trail {
     indices.updateRange.count = -1;
   }
 
-  formInitialFaces() {
+  private formInitialFaces() {
     this.zeroIndices();
 
     const indices = this.geometry.getIndex();
@@ -280,13 +271,13 @@ export class Trail {
     indices.updateRange.count = -1;
   }
 
-  initializeMesh() {
+  private initializeMesh() {
     this.mesh = new Mesh(this.geometry, this.material);
     this.mesh.matrixAutoUpdate = false;
     this.mesh.frustumCulled = false;
   }
 
-  destroyMesh() {
+  private destroyMesh() {
     if (this.mesh) {
       this.scene.remove(this.mesh);
       this.mesh = null;
@@ -309,7 +300,7 @@ export class Trail {
     this.geometry.setDrawRange(0, 0);
   }
 
-  updateUniforms() {
+  private updateUniforms() {
     if (this.currentLength < this.length) {
       this.material.uniforms.minID.value = 0;
     } else {
@@ -322,8 +313,6 @@ export class Trail {
   }
 
   advance() {
-    this.targetObject.updateMatrixWorld();
-
     this.tangent.subVectors(this.targetObject.position, this.previousPos).normalize();
     this.advanceGeometry(this.targetObject.position, this.tangent);
 
@@ -331,7 +320,7 @@ export class Trail {
     this.previousPos.copy(this.targetObject.position);
   };
 
-  advanceGeometry(position: Vector3, tangent: Vector3) {
+  private advanceGeometry(position: Vector3, tangent: Vector3) {
     const nextIndex = this.currentEnd + 1 >= this.length ? 0 : this.currentEnd + 1;
 
     this.updateNodePositionsFromOrientationTangent(nextIndex, position, tangent);
@@ -366,9 +355,7 @@ export class Trail {
     this.currentNodeID++;
   }
 
-  updateNodeID(nodeIndex, id) {
-    this.nodeIDs[nodeIndex] = id;
-
+  private updateNodeID(nodeIndex, id) {
     const nodeIDs = this.geometry.getAttribute('nodeID') as BufferAttribute;
     const nodeVertexIDs = this.geometry.getAttribute('nodeVertexID') as BufferAttribute;
 
@@ -388,7 +375,7 @@ export class Trail {
     nodeVertexIDs.updateRange.count = this.VerticesPerNode;
   }
 
-  updateNodeCenter(nodeIndex: number, nodeCenter: Vector3) {
+  private updateNodeCenter(nodeIndex: number, nodeCenter: Vector3) {
     this.lastNodeCenter = this.currentNodeCenter;
 
     this.currentNodeCenter = this.nodeCenters[nodeIndex];
@@ -411,7 +398,7 @@ export class Trail {
     nodeCenters.updateRange.count = this.VerticesPerNode * PositionComponentCount;
   }
 
-  updateNodePositionsFromOrientationTangent(nodeIndex: number, nodeCenter: Vector3, orientationTangent: Vector3) {
+  private updateNodePositionsFromOrientationTangent(nodeIndex: number, nodeCenter: Vector3, orientationTangent: Vector3) {
     const positions = this.geometry.getAttribute('position') as BufferAttribute;
 
     this.updateNodeCenter(nodeIndex, nodeCenter);
@@ -444,7 +431,7 @@ export class Trail {
   tempOffset = new Vector3();
   tempLocalHeadGeometry: Vector3[] = [];
 
-  connectNodes(srcNodeIndex: number, destNodeIndex: number) {
+  private connectNodes(srcNodeIndex: number, destNodeIndex: number) {
     const indices = this.geometry.getIndex();
 
     for (let i = 0; i < this.localHeadGeometry.length - 1; i++) {
@@ -468,7 +455,7 @@ export class Trail {
     indices.updateRange.count = -1;
   }
 
-  disconnectNodes(srcNodeIndex: number) {
+  private disconnectNodes(srcNodeIndex: number) {
     const indices = this.geometry.getIndex();
 
     for (let i = 0; i < this.localHeadGeometry.length - 1; i++) {

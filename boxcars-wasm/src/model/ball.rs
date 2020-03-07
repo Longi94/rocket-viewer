@@ -15,6 +15,8 @@ pub enum BallType {
 pub struct BallData {
     pub ball_type: BallType,
     pub body_states: BodyStates,
+    pub hit_team: Vec<u8>,
+    pub hit_team_times: Vec<f32>,
 }
 
 impl BallData {
@@ -22,6 +24,13 @@ impl BallData {
         BallData {
             ball_type: BallType::Unknown,
             body_states: BodyStates::new(),
+            hit_team: vec![2],
+            hit_team_times: vec![0.0],
         }
+    }
+
+    pub fn reset(&mut self, time: f32) {
+        self.hit_team.push(2);
+        self.hit_team_times.push(time);
     }
 }
