@@ -5,22 +5,25 @@ import { createBallAnimationMixer } from './ball';
 import { createCarAnimationMixer } from './car';
 import { createBoostPadAnimations } from './boost-pad';
 import { BoostPad } from '../../model/boost-pad';
-import { createHudMixers } from './hud';
+import { createHudMixer } from './hud';
 
 export class AnimationManager {
   ballMixer: AnimationMixer;
   playerMixers: AnimationMixer[] = [];
   boostPadMixers: AnimationMixer[];
+  hudMixer: AnimationMixer;
 
   constructor(frameData: FrameData, replayScene: ReplayScene, boostPads: BoostPad[], debug = false) {
-    this.ballMixer = createBallAnimationMixer(frameData, replayScene, debug);
-    this.boostPadMixers = createBoostPadAnimations(boostPads, frameData.boost_pads, replayScene);
+    const maxTime = frameData.real_times[frameData.real_times.length - 1];
+
+    this.ballMixer = createBallAnimationMixer(frameData, replayScene, maxTime, debug);
+    this.boostPadMixers = createBoostPadAnimations(boostPads, frameData.boost_pads, replayScene, maxTime);
 
     for (const playerData of Object.values(frameData.players)) {
-      this.addMixers(createCarAnimationMixer(playerData, replayScene, debug));
+      this.addMixers(createCarAnimationMixer(playerData, replayScene, maxTime, debug));
     }
 
-    this.addMixers(createHudMixers(replayScene));
+    this.hudMixer = createHudMixer(replayScene, maxTime);
   }
 
   private addMixers(mixers: AnimationMixer[]) {
@@ -33,6 +36,7 @@ export class AnimationManager {
 
   update(time: number) {
     this.ballMixer.setTime(time);
+    this.hudMixer.setTime(time);
     for (const mixer of this.playerMixers) {
       mixer.setTime(time);
     }

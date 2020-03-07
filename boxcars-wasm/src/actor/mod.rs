@@ -4,6 +4,7 @@ mod car;
 mod game_event;
 mod jump;
 mod player;
+mod team;
 
 use std::collections::HashMap;
 use boxcars::Attribute;
@@ -16,6 +17,7 @@ use crate::actor::jump::{JumpHandler, DoubleJumpHandler, DodgeHandler};
 use crate::model::frame_state::FrameState;
 use crate::actor::boost::BoostHandler;
 use crate::actor::game_event::GameEventHandler;
+use crate::actor::team::TeamHandler;
 
 fn get_actor_attribute(actor_id: &i32, attr_name: &str,
                        all_actors: &HashMap<i32, HashMap<String, Attribute>>) -> Option<Attribute> {
@@ -51,6 +53,8 @@ pub fn get_handler(object_name: &String) -> Option<Box<dyn ActorHandler>> {
         "Archetypes.CarComponents.CarComponent_DoubleJump" => Some(Box::new(DoubleJumpHandler {})),
         "Archetypes.CarComponents.CarComponent_Dodge" => Some(Box::new(DodgeHandler {})),
         "Archetypes.CarComponents.CarComponent_Boost" => Some(Box::new(BoostHandler {})),
+        "Archetypes.Teams.Team0" => Some(Box::new(TeamHandler {team: 0})),
+        "Archetypes.Teams.Team1" => Some(Box::new(TeamHandler {team: 1})),
         _ => None
     }
 }
