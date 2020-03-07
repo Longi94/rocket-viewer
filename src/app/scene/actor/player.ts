@@ -64,8 +64,8 @@ export class PlayerActor extends RigidBodyActor {
     this.car.quaternion.set(q[i], q[i + 1], q[i + 2], q[i + 3]);
   }
 
-  createBoost(emitter: Emitter, sprite: Sprite, camera: Camera, renderer: WebGLRenderer) {
-    this.boost = new BoostEmitter(emitter, sprite, camera, renderer, this.boostData.active, this.boostData.times);
+  createBoost(emitter: Emitter, sprite: Sprite, camera: Camera, renderer: WebGLRenderer, team: number) {
+    this.boost = new BoostEmitter(emitter, sprite, camera, renderer, this.boostData.active, this.boostData.times, team);
   }
 
   setJumpSprite(material: SpriteMaterial) {

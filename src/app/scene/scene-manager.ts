@@ -179,7 +179,7 @@ export class SceneManager {
       player.setPositionFromArray(replay.frame_data.players[playerId].body_states.positions, 0);
       player.setQuaternionFromArray(replay.frame_data.players[playerId].body_states.rotations, 0);
       player.createBoost(this.particleSystemManager.createEmitter(),
-        this.rs.boostSprite, this.rs.camera, this.renderer);
+        this.rs.boostSprite, this.rs.camera, this.renderer, replay.frame_data.players[playerId].team);
       player.setJumpSprite(this.rs.jumpMaterial);
       player.addToScene(this.rs.scene);
     }
