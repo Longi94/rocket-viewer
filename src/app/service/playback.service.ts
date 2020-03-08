@@ -9,10 +9,10 @@ import { Tick } from '../model/tick';
 })
 export class PlaybackService {
 
-  private playSubject = new Subject<any>();
+  private playSubject = new Subject<void>();
   onPlay = this.playSubject.asObservable();
 
-  private pauseSubject = new Subject<any>();
+  private pauseSubject = new Subject<void>();
   onPause = this.pauseSubject.asObservable();
 
   private playbackInfoSubject = new Subject<PlaybackInfo>();

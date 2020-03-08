@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BoxcarsService } from '../../../service/boxcars.service';
+import { PlaybackService } from '../../../service/playback.service';
 
 @Component({
   selector: 'app-home',
@@ -9,16 +10,21 @@ import { BoxcarsService } from '../../../service/boxcars.service';
 export class HomeComponent implements OnInit {
 
   replayLoaded = false;
+  replayReady = false;
   dragging = false;
   errorMessage: string;
 
-  constructor(private readonly boxcarsService: BoxcarsService) {
+  constructor(private readonly boxcarsService: BoxcarsService,
+              private readonly playbackService: PlaybackService) {
     this.boxcarsService.onResult.subscribe(result => {
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.replayLoaded = true;
       }
+    });
+    this.playbackService.onPlaybackInfo.subscribe(() => {
+      this.replayReady = true;
     });
   }
 

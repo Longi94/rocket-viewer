@@ -11,7 +11,7 @@ export function createBallAnimationMixer(frameData: FrameData, rs: ReplayScene, 
   const ballRotationTrack = new QuaternionKeyframeTrack('.quaternion', states.times, states.rotations);
   const ballVisibleTrack = new BooleanKeyframeTrack('.visible', states.visible_times, states.visible);
   const ballAnimationClip = new AnimationClip('ball_clip', maxTime, [ballPositionTrack, ballRotationTrack, ballVisibleTrack]);
-  mixer.clipAction(ballAnimationClip).play().loop = LoopOnce;
+  mixer.clipAction(ballAnimationClip).play();
 
   // if (debug) {
   //   addAnimPathHelper(frameData.ball_data.positions, '#ffffff', rs.scene);

@@ -8,7 +8,7 @@ export function createHudMixer(rs: ReplayScene, maxTime): AnimationMixer {
     createTeamScoreTrack(rs, 0),
     createTeamScoreTrack(rs, 1)
   ]);
-  mixer.clipAction(clip).play().loop = LoopOnce;
+  mixer.clipAction(clip).play();
   return mixer;
 }
 

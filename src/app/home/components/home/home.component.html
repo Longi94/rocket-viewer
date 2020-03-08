@@ -1,5 +1,6 @@
 <div class="main-container">
-  <div class="upload-div" (drop)="onFileDrop($event)" (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)"
+  <div class="upload-div" (drop)="onFileDrop($event)" (dragenter)="onDragEnter($event)"
+       (dragleave)="onDragLeave($event)"
        (dragover)="onDragOver($event)" *ngIf="!replayLoaded">
     <span>Drop a replay file into the page...</span>
     <span>or</span>
@@ -10,10 +11,10 @@
       <span>{{errorMessage}}</span>
     </div>
   </div>
-  <div class="playback-control-div" *ngIf="replayLoaded">
+  <div class="playback-control-div" [ngStyle]="{'display': replayReady ? undefined : 'none'}">
     <app-playback-control></app-playback-control>
   </div>
-  <div class="hud-div" *ngIf="replayLoaded">
+  <div class="hud-div" *ngIf="replayReady">
     <app-hud></app-hud>
   </div>
   <app-canvas></app-canvas>
