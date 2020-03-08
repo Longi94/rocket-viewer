@@ -4,6 +4,7 @@
   display: flex;
   justify-content: center;
   font-family: 'Rajdhani', sans-serif;
+  pointer-events: none;
 }
 
 .clock-board {
@@ -11,6 +12,7 @@
   display: flex;
   flex-flow: row;
   height: 60px;
+  user-select: none;
 
   div {
     box-sizing: border-box;
