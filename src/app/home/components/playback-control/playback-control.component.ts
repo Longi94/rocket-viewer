@@ -14,6 +14,7 @@ export class PlaybackControlComponent implements OnInit {
   isPlaying = false;
 
   currentTime: number;
+  maxTime: number;
   sliderOptions: Options = this.createSliderOption(0, 100);
   isSliding = false;
 
@@ -39,6 +40,7 @@ export class PlaybackControlComponent implements OnInit {
 
   createSliderOption(min: number, max: number): Options {
     this.currentTime = min;
+    this.maxTime = max;
     return {
       animate: false,
       floor: min,
@@ -70,7 +72,7 @@ export class PlaybackControlComponent implements OnInit {
   }
 
   slideChange($event: ChangeContext) {
-    this.playbackService.scrollToTime($event.value);
+    this.playbackService.scrollToTime(Math.min($event.value, this.maxTime));
   }
 
   setSpeed(speed: number) {
