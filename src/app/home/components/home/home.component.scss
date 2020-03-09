@@ -1,3 +1,5 @@
+@import "../../../../theme";
+
 .main-container {
   height: 100%;
   width: 100%;
@@ -30,6 +32,11 @@
   position: absolute;
   bottom: 0;
   width: 100%;
+
+  @include tablet-down {
+    height: 100%;
+    pointer-events: none;
+  }
 }
 
 .hud-div {

@@ -1,3 +1,13 @@
+@import "../../../../theme";
+
+.playback-container {
+  width: 100%;
+
+  @include tablet-down {
+    height: 100%;
+  }
+}
+
 .playback-control-div {
   width: 100%;
   display: flex;
@@ -7,9 +17,27 @@
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
 
+  @include tablet-down {
+    pointer-events: all;
+    position: absolute;
+    bottom: 0;
+    padding: 8px 16px 8px 8px;
+  }
+
   .time-slider {
     margin-left: 16px;
     flex-grow: 1;
     margin-top: 15px;
+
+    @include tablet-down {
+      margin-left: 8px;
+    }
   }
+}
+
+.mobile-more-div {
+  position: absolute;
+  right: 0;
+  padding: 8px;
+  pointer-events: all;
 }

@@ -13,3 +13,16 @@ body {
   background-color: $background;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+.no-mobile {
+  @include tablet-down {
+    display: none !important;
+  }
+}
+
+.mobile-only {
+  display: none;
+  @include tablet-down {
+    display: inherit;
+  }
+}

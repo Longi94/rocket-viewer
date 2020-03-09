@@ -74,8 +74,6 @@ export class CanvasComponent implements OnInit {
 
     if (this.isDebug) {
       this.stats = new Stats();
-      this.stats.dom.style.removeProperty('left');
-      this.stats.dom.style.right = 0;
       this.statsDiv.nativeElement.appendChild(this.stats.dom);
     }
 

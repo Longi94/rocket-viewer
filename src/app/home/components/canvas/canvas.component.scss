@@ -1,3 +1,5 @@
+@import "../../../../theme";
+
 .canvas-container {
   height: 100%;
   overflow: hidden;
@@ -55,7 +57,7 @@ canvas {
 }
 
 .debug-overlay {
-  top: 0;
+  top: 48px;
   left: 0;
   position: absolute;
   display: flex;
@@ -71,8 +73,3 @@ canvas {
   }
 }
 
-.stats-container {
-  top: 0;
-  right: 0;
-  position: absolute;
-}

@@ -1,1 +1,7 @@
 $background: #303030;
+
+@mixin tablet-down {
+  @media only screen and (max-width: 768px) {
+    @content;
+  }
+}
