@@ -87,6 +87,7 @@ export class SceneManager {
 
     this.renderer = new WebGLRenderer({canvas, antialias: true, logarithmicDepthBuffer: true});
     this.renderer.setSize(width, height);
+    this.renderer.xr.enabled = true;
 
     this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
 
@@ -226,7 +227,7 @@ export class SceneManager {
     }
 
     if (this.isPlaying) {
-      const d = (time - this.currentAnimationTime) / 1000.0;
+      const d = time - this.currentAnimationTime;
       this.currentTime += d * this.playbackSpeed;
 
       if (this.currentTime >= this.playbackInfo.maxTime) {

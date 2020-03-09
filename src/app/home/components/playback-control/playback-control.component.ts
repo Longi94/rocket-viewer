@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PlaybackService } from '../../../service/playback.service';
 import { ChangeContext, Options } from 'ng5-slider';
 import { PlayerPlaybackInfo } from '../../../model/playback-info';
 import { CameraType } from '../../../scene/camera/camera-type';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton';
+import { ThreeService } from '../../../service/three.service';
 
 @Component({
   selector: 'app-playback-control',
@@ -10,6 +12,9 @@ import { CameraType } from '../../../scene/camera/camera-type';
   styleUrls: ['./playback-control.component.scss']
 })
 export class PlaybackControlComponent implements OnInit {
+
+  @ViewChild('vrButtonDiv', {static: true})
+  vrButtonDiv: ElementRef<HTMLDivElement>;
 
   isPlaying = false;
 
@@ -22,7 +27,8 @@ export class PlaybackControlComponent implements OnInit {
   selectedSpeed = 1;
   players: PlayerPlaybackInfo[];
 
-  constructor(private readonly playbackService: PlaybackService) {
+  constructor(private readonly playbackService: PlaybackService,
+              private readonly threeService: ThreeService) {
     this.playbackService.onPlaybackInfo.subscribe(info => {
       this.players = info.players;
       this.sliderOptions = this.createSliderOption(info.minTime, info.maxTime);
@@ -36,6 +42,9 @@ export class PlaybackControlComponent implements OnInit {
         this.isPlaying = false;
       }
     });
+    this.threeService.onRendererReady.subscribe(renderer => {
+      this.vrButtonDiv.nativeElement.appendChild(VRButton.createButton(renderer));
+    })
   }
 
   createSliderOption(min: number, max: number): Options {

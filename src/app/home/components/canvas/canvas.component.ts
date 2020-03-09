@@ -1,11 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Cache, DefaultLoadingManager } from 'three';
+import { Cache, Clock, DefaultLoadingManager } from 'three';
 import { BoxcarsService } from '../../../service/boxcars.service';
 import { Replay } from '../../../model/replay/replay';
 import { SceneManager } from '../../../scene/scene-manager';
 import { PlaybackService } from '../../../service/playback.service';
 import { environment } from '../../../../environments/environment';
 import * as Stats from 'stats.js';
+import { ThreeService } from '../../../service/three.service';
 
 @Component({
   selector: 'app-canvas',
@@ -37,9 +38,11 @@ export class CanvasComponent implements OnInit {
   sceneManager = new SceneManager(this.isDebug);
 
   stats: Stats;
+  clock = new Clock();
 
   constructor(private readonly boxcarsService: BoxcarsService,
-              private readonly playbackService: PlaybackService) {
+              private readonly playbackService: PlaybackService,
+              private readonly threeService: ThreeService) {
     this.boxcarsService.onResult.subscribe(replay => this.onReplayLoaded(replay));
     this.playbackService.onPlay.subscribe(() => this.sceneManager.play());
     this.playbackService.onPause.subscribe(() => this.sceneManager.pause());
@@ -82,17 +85,18 @@ export class CanvasComponent implements OnInit {
 
     this.sceneManager.init(this.canvas.nativeElement, width, height).then(() => {
       this.isLoading = false;
-      requestAnimationFrame(t => this.animate(t));
+      this.threeService.rendererReady(this.sceneManager.renderer);
+      this.clock.start();
+      this.sceneManager.renderer.setAnimationLoop(() => this.animate());
     }).catch(console.log);
   }
 
-  private animate(time: number) {
+  private animate() {
+    const time = this.clock.getElapsedTime();
     this.stats?.begin();
     this.resizeCanvas();
     this.sceneManager.render(time);
     this.stats?.end();
-
-    requestAnimationFrame(t => this.animate(t));
   }
 
   resizeCanvas() {

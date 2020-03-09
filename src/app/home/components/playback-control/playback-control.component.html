@@ -41,8 +41,13 @@
 <mat-menu #cameraMenu="matMenu">
   <button mat-menu-item [matMenuTriggerFor]="playerCameraMenu">Player</button>
   <button mat-menu-item (click)="setCameraOrbital()">Orbital</button>
+  <button mat-menu-item [matMenuTriggerFor]="vrMenu">VR</button>
 </mat-menu>
 
 <mat-menu #playerCameraMenu="matMenu">
   <button *ngFor="let player of players" mat-menu-item (click)="setPlayerCamera(player.id)">{{player.name}}</button>
+</mat-menu>
+
+<mat-menu #vrMenu>
+  <div #vrButtonDiv class="vr-button-container"></div>
 </mat-menu>
