@@ -126,6 +126,7 @@ export class SceneManager {
   resize(width: number, height: number) {
     this.renderer.setSize(width, height, false);
     this.cameraManager.resize(width, height);
+    this.requestRender();
   }
 
   async prepareReplay(replay: Replay) {
