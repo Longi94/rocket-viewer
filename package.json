@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "npm run wasm-pack && ng serve",
+    "start:connect": "npm run wasm-pack && ng serve --host 0.0.0.0",
     "build": "npm run wasm-pack && ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -26,7 +27,7 @@
     "@angular/router": "~9.0.0",
     "color-hash": "^1.0.3",
     "ng5-slider": "^1.2.4",
-    "rl-loadout-lib": "^0.5.1",
+    "rl-loadout-lib": "^0.5.2",
     "rxjs": "~6.5.4",
     "stats.js": "^0.17.0",
     "three": "^0.110.0",
