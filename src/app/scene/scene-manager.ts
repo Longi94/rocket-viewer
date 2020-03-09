@@ -3,11 +3,13 @@ import {
   AmbientLight,
   Color,
   DefaultLoadingManager,
-  PerspectiveCamera, PMREMGenerator,
+  PerspectiveCamera,
+  PMREMGenerator,
   Scene,
   Texture,
   TextureLoader,
-  Vector3, WebGLCubeRenderTarget,
+  Vector3,
+  WebGLCubeRenderTarget,
   WebGLRenderer,
   WebGLRenderTarget
 } from 'three';
@@ -62,7 +64,7 @@ export class SceneManager {
   playerFrames: { [id: number]: number } = {};
 
   // callbacks
-  onTimeUpdate(time: number, hudData: HudData) {
+  onTimeUpdate(_time: number, _hudData: HudData) {
   }
 
   constructor(private readonly debug = false) {
@@ -103,14 +105,13 @@ export class SceneManager {
   }
 
   private processBackground(backgroundTexture: Texture) {
-    const cubeTarget = new WebGLCubeRenderTarget(1024).fromEquirectangularTexture(this.renderer, backgroundTexture);
-
     // @ts-ignore
-    this.rs.scene.background = cubeTarget;
+    this.rs.scene.background = new WebGLCubeRenderTarget(1024).fromEquirectangularTexture(this.renderer, backgroundTexture);
 
     // @ts-ignore
     const pmremGenerator = new PMREMGenerator(this.renderer);
-    this.cubeRenderTarget = pmremGenerator.fromEquirectangular(cubeTarget.texture);
+    pmremGenerator.compileEquirectangularShader();
+    this.cubeRenderTarget = pmremGenerator.fromEquirectangular(backgroundTexture);
     this.rs.envMap = this.cubeRenderTarget.texture;
     modelLoader.envMap = this.cubeRenderTarget.texture;
 
