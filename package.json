@@ -30,7 +30,7 @@
     "rl-loadout-lib": "^0.5.2",
     "rxjs": "~6.5.4",
     "stats.js": "^0.17.0",
-    "three": "^0.110.0",
+    "three": "^0.114.0",
     "three-nebula": "^5.1.1",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

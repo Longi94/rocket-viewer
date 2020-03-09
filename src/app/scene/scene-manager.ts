@@ -3,18 +3,15 @@ import {
   AmbientLight,
   Color,
   DefaultLoadingManager,
-  PerspectiveCamera,
+  PerspectiveCamera, PMREMGenerator,
   Scene,
   Texture,
   TextureLoader,
-  Vector3,
+  Vector3, WebGLCubeRenderTarget,
   WebGLRenderer,
-  WebGLRenderTarget,
-  WebGLRenderTargetCube
+  WebGLRenderTarget
 } from 'three';
 import { GlobalWebGLContext, PromiseLoader } from 'rl-loadout-lib';
-import { PMREMGenerator } from 'three/examples/jsm/pmrem/PMREMGenerator';
-import { PMREMCubeUVPacker } from 'three/examples/jsm/pmrem/PMREMCubeUVPacker';
 import { loadMap } from './loader/map';
 import { ReplayScene } from './replay-scene';
 import { loadBall } from './loader/ball';
@@ -38,7 +35,7 @@ export class SceneManager {
 
   rs: ReplayScene = new ReplayScene();
 
-  private renderer: WebGLRenderer;
+  renderer: WebGLRenderer;
   private cubeRenderTarget: WebGLRenderTarget;
 
   private renderRequested = false;
@@ -106,21 +103,19 @@ export class SceneManager {
   }
 
   private processBackground(backgroundTexture: Texture) {
-    // @ts-ignore
-    this.rs.scene.background = new WebGLRenderTargetCube(1024, 1024).fromEquirectangularTexture(this.renderer, backgroundTexture);
+    const cubeTarget = new WebGLCubeRenderTarget(1024).fromEquirectangularTexture(this.renderer, backgroundTexture);
 
     // @ts-ignore
-    const pmremGenerator = new PMREMGenerator(this.rs.scene.background.texture);
-    pmremGenerator.update(this.renderer);
-    const pmremCubeUVPacker = new PMREMCubeUVPacker(pmremGenerator.cubeLods);
-    pmremCubeUVPacker.update(this.renderer);
-    this.cubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
+    this.rs.scene.background = cubeTarget;
+
+    // @ts-ignore
+    const pmremGenerator = new PMREMGenerator(this.renderer);
+    this.cubeRenderTarget = pmremGenerator.fromEquirectangular(cubeTarget.texture);
     this.rs.envMap = this.cubeRenderTarget.texture;
     modelLoader.envMap = this.cubeRenderTarget.texture;
 
     backgroundTexture.dispose();
     pmremGenerator.dispose();
-    pmremCubeUVPacker.dispose();
   }
 
   resize(width: number, height: number) {

@@ -63,6 +63,7 @@ function createWheelTurnMixer(playerData: PlayerData, player: PlayerActor, maxTi
     group.add(bone);
   }
 
+  // @ts-ignore
   const mixer = new AnimationMixer(group);
   const track = new QuaternionKeyframeTrack('.quaternion', data.steer_times, data.steer_values);
   const clip = new AnimationClip(`car_wheel_turn_${playerData.id}_clip`, maxTime, [track]);
@@ -87,6 +88,7 @@ function createDemoSpriteTimeMixer(playerData: PlayerData, player: PlayerActor, 
   if (playerData.demolished.length <= 1) {
     return undefined;
   }
+  // @ts-ignore
   const mixer = new AnimationMixer(player.demoTexture);
   const track = new NumberKeyframeTrack('.time', playerData.demolished_times, playerData.demolished.map(v => v ? 0 : 1));
   const clip = new AnimationClip(`car_demo_time_${playerData.id}_clip`, maxTime, [track]);

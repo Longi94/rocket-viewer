@@ -2,6 +2,7 @@ import { ReplayScene } from '../replay-scene';
 import { AnimationClip, AnimationMixer, InterpolateDiscrete, KeyframeTrack, LoopOnce, NumberKeyframeTrack } from 'three';
 
 export function createHudMixer(rs: ReplayScene, maxTime): AnimationMixer {
+  // @ts-ignore
   const mixer = new AnimationMixer(rs.hudData);
   const clip = new AnimationClip('hud_clip', maxTime, [
     createClockTrack(rs),
