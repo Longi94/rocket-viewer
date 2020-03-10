@@ -4,6 +4,7 @@ import { ChangeContext, Options } from 'ng5-slider';
 import { PlayerPlaybackInfo } from '../../../model/playback-info';
 import { CameraType } from '../../../scene/camera/camera-type';
 import { VRSupport, VRUtils } from '../../../util/vr';
+import { ThreeService } from '../../../service/three.service';
 
 @Component({
   selector: 'app-playback-control',
@@ -24,10 +25,12 @@ export class PlaybackControlComponent implements OnInit {
   players: PlayerPlaybackInfo[];
 
   // VR
+  inVr = false;
   vrSupported = false;
   vrButtonText = 'VR not supported';
 
-  constructor(private readonly playbackService: PlaybackService) {
+  constructor(private readonly playbackService: PlaybackService,
+              private readonly threeService: ThreeService) {
     this.playbackService.onPlaybackInfo.subscribe(info => {
       this.players = info.players;
       this.sliderOptions = this.createSliderOption(info.minTime, info.maxTime);
@@ -40,6 +43,14 @@ export class PlaybackControlComponent implements OnInit {
       if (t.time >= this.sliderOptions.ceil) {
         this.isPlaying = false;
       }
+    });
+    this.threeService.onVrEnter.subscribe(() => {
+      this.vrButtonText = 'Leave VR';
+      this.inVr = true;
+    });
+    this.threeService.onVrLeave.subscribe(() => {
+      this.vrButtonText = 'Enter VR';
+      this.inVr = false;
     });
   }
 
@@ -111,6 +122,10 @@ export class PlaybackControlComponent implements OnInit {
   }
 
   enterVR() {
-    this.playbackService.enterVR();
+    if (this.inVr) {
+      this.playbackService.leaveVr();
+    } else {
+      this.playbackService.enterVr();
+    }
   }
 }

@@ -70,11 +70,17 @@ export class SceneManager {
     this.inVR = false;
     this.vrSession.removeEventListener('end', this.vrEndListener);
     this.vrSession = undefined;
+    if (this.onVrLeave) {
+      this.onVrLeave();
+    }
   };
 
   // callbacks
   onTimeUpdate(_time: number, _hudData: HudData) {
   }
+
+  onVrEnter: () => void;
+  onVrLeave: () => void;
 
   constructor(private readonly debug = false) {
   }
@@ -343,7 +349,7 @@ export class SceneManager {
     return ds / dt;
   }
 
-  enterVR() {
+  enterVr() {
     if (this.vrSession == undefined) {
       const sessionInit = {optionalFeatures: ['local-floor', 'bounded-floor']};
       navigator.xr.requestSession('immersive-vr', sessionInit).then(session => {
@@ -351,7 +357,16 @@ export class SceneManager {
         this.renderer.xr.setSession(session);
         this.vrSession = session;
         session.addEventListener('end', this.vrEndListener);
+        if (this.onVrEnter) {
+          this.onVrEnter();
+        }
       });
+    }
+  }
+
+  leaveVr() {
+    if (this.vrSession != undefined) {
+      this.vrSession.end();
     }
   }
 }

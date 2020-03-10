@@ -6,6 +6,7 @@ import { SceneManager } from '../../../scene/scene-manager';
 import { PlaybackService } from '../../../service/playback.service';
 import { environment } from '../../../../environments/environment';
 import * as Stats from 'stats.js';
+import { ThreeService } from '../../../service/three.service';
 
 @Component({
   selector: 'app-canvas',
@@ -40,16 +41,20 @@ export class CanvasComponent implements OnInit {
   clock = new Clock();
 
   constructor(private readonly boxcarsService: BoxcarsService,
-              private readonly playbackService: PlaybackService) {
+              private readonly playbackService: PlaybackService,
+              private readonly threeService: ThreeService) {
     this.boxcarsService.onResult.subscribe(replay => this.onReplayLoaded(replay));
     this.playbackService.onPlay.subscribe(() => this.sceneManager.play());
     this.playbackService.onPause.subscribe(() => this.sceneManager.pause());
     this.playbackService.onTimeScroll.subscribe(t => this.sceneManager.scrollToTime(t));
     this.playbackService.onSpeed.subscribe(t => this.sceneManager.setSpeed(t));
     this.playbackService.onCameraChange.subscribe(e => this.sceneManager.changeCamera(e.type, e.targetPlayer));
-    this.playbackService.onEnterVR.subscribe(() => this.sceneManager.enterVR());
+    this.playbackService.onEnterVr.subscribe(() => this.sceneManager.enterVr());
+    this.playbackService.onLeaveVr.subscribe(() => this.sceneManager.leaveVr());
 
     this.sceneManager.onTimeUpdate = (time, hudData) => this.playbackService.updateTime({time, hudData});
+    this.sceneManager.onVrEnter = () => this.threeService.vrEntered();
+    this.sceneManager.onVrLeave = () => this.threeService.vrLeft();
 
     Cache.enabled = true;
   }
