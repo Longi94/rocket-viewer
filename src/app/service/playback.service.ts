@@ -30,6 +30,9 @@ export class PlaybackService {
   private cameraChangeSubject = new Subject<PlaybackCameraChange>();
   onCameraChange = this.cameraChangeSubject.asObservable();
 
+  private enterVRSubject = new Subject<void>();
+  onEnterVR = this.enterVRSubject.asObservable();
+
   constructor() {
   }
 
@@ -62,5 +65,9 @@ export class PlaybackService {
       type,
       targetPlayer: playerId
     });
+  }
+
+  enterVR() {
+    this.enterVRSubject.next();
   }
 }

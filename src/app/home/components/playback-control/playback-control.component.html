@@ -49,5 +49,5 @@
 </mat-menu>
 
 <mat-menu #vrMenu>
-  <div #vrButtonDiv class="vr-button-container"></div>
+  <button mat-menu-item [disabled]="!vrSupported" (click)="enterVR()">{{vrButtonText}}</button>
 </mat-menu>

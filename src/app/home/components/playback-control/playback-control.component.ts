@@ -1,10 +1,9 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PlaybackService } from '../../../service/playback.service';
 import { ChangeContext, Options } from 'ng5-slider';
 import { PlayerPlaybackInfo } from '../../../model/playback-info';
 import { CameraType } from '../../../scene/camera/camera-type';
-import { VRButton } from 'three/examples/jsm/webxr/VRButton';
-import { ThreeService } from '../../../service/three.service';
+import { VRSupport, VRUtils } from '../../../util/vr';
 
 @Component({
   selector: 'app-playback-control',
@@ -12,9 +11,6 @@ import { ThreeService } from '../../../service/three.service';
   styleUrls: ['./playback-control.component.scss']
 })
 export class PlaybackControlComponent implements OnInit {
-
-  @ViewChild('vrButtonDiv', {static: true})
-  vrButtonDiv: ElementRef<HTMLDivElement>;
 
   isPlaying = false;
 
@@ -27,8 +23,11 @@ export class PlaybackControlComponent implements OnInit {
   selectedSpeed = 1;
   players: PlayerPlaybackInfo[];
 
-  constructor(private readonly playbackService: PlaybackService,
-              private readonly threeService: ThreeService) {
+  // VR
+  vrSupported = false;
+  vrButtonText = 'VR not supported';
+
+  constructor(private readonly playbackService: PlaybackService) {
     this.playbackService.onPlaybackInfo.subscribe(info => {
       this.players = info.players;
       this.sliderOptions = this.createSliderOption(info.minTime, info.maxTime);
@@ -42,9 +41,6 @@ export class PlaybackControlComponent implements OnInit {
         this.isPlaying = false;
       }
     });
-    this.threeService.onRendererReady.subscribe(renderer => {
-      this.vrButtonDiv.nativeElement.appendChild(VRButton.createButton(renderer));
-    })
   }
 
   createSliderOption(min: number, max: number): Options {
@@ -61,6 +57,23 @@ export class PlaybackControlComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    VRUtils.detect().then(result => {
+      switch (result) {
+        case VRSupport.SUPPORTED:
+          this.vrSupported = true;
+          this.vrButtonText = 'Enter VR';
+          break;
+        case VRSupport.VR_NOT_SUPPORTED:
+          this.vrButtonText = 'VR not supported';
+          break;
+        case VRSupport.WEBXR_NOT_AVAILABLE:
+          this.vrButtonText = 'WEBXR not available';
+          break;
+        case VRSupport.NEEDS_HTTPS:
+          this.vrButtonText = 'WEBXR needs HTTPS';
+          break;
+      }
+    });
   }
 
   playClick() {
@@ -95,5 +108,9 @@ export class PlaybackControlComponent implements OnInit {
 
   setPlayerCamera(playerId: number) {
     this.playbackService.setCamera(CameraType.PLAYER_VIEW, playerId);
+  }
+
+  enterVR() {
+    this.playbackService.enterVR();
   }
 }

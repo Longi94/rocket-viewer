@@ -63,6 +63,15 @@ export class SceneManager {
 
   playerFrames: { [id: number]: number } = {};
 
+  // VR stuff
+  inVR = false;
+  vrSession: any;
+  vrEndListener = () => {
+    this.inVR = false;
+    this.vrSession.removeEventListener('end', this.vrEndListener);
+    this.vrSession = undefined;
+  };
+
   // callbacks
   onTimeUpdate(_time: number, _hudData: HudData) {
   }
@@ -88,6 +97,7 @@ export class SceneManager {
     this.renderer = new WebGLRenderer({canvas, antialias: true, logarithmicDepthBuffer: true});
     this.renderer.setSize(width, height);
     this.renderer.xr.enabled = true;
+    this.renderer.xr.setReferenceSpaceType('local');
 
     this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
 
@@ -258,7 +268,7 @@ export class SceneManager {
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
 
-    if (this.renderRequested || this.isPlaying) {
+    if (this.inVR || this.renderRequested || this.isPlaying) {
       this.renderRequested = false;
       this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     }
@@ -331,5 +341,17 @@ export class SceneManager {
     this.v2.z = playerData.positions[(this.playerFrames[id] + 1) * 3 + 2];
     const ds = this.v1.distanceTo(this.v2);
     return ds / dt;
+  }
+
+  enterVR() {
+    if (this.vrSession == undefined) {
+      const sessionInit = {optionalFeatures: ['local-floor', 'bounded-floor']};
+      navigator.xr.requestSession('immersive-vr', sessionInit).then(session => {
+        this.inVR = true;
+        this.renderer.xr.setSession(session);
+        this.vrSession = session;
+        session.addEventListener('end', this.vrEndListener);
+      });
+    }
   }
 }
