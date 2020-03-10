@@ -32,6 +32,7 @@ import { modelLoader } from './loader/loader-config';
 import { loadDemoSprite } from './loader/demo';
 import { advanceFrame } from '../util/util';
 import { HudData } from '../model/hud-data';
+import { WORLD_SCALE } from './constant';
 
 export class SceneManager {
 
@@ -90,6 +91,7 @@ export class SceneManager {
     this.rs.camera = new PerspectiveCamera(80, width / height, 0.01, 100000);
 
     this.rs.scene = new Scene();
+    this.rs.scene.scale.setScalar(WORLD_SCALE);
     this.rs.scene.background = new Color('#AAAAAA');
 
     this.cameraManager = new CameraManager(this.rs.scene, this.rs.camera, canvas);

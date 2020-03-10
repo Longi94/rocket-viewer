@@ -3,6 +3,7 @@ import { CameraType } from './camera-type';
 import { ReplayScene } from '../replay-scene';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PlayerActor } from '../actor/player';
+import { WORLD_SCALE } from '../constant';
 
 export class CameraManager {
 
@@ -11,6 +12,7 @@ export class CameraManager {
 
   private pointingVector = new Vector3();
   private tempVector = new Vector3();
+  private tempVector2 = new Vector3();
 
   private lastTime: number;
   private orbitControls: OrbitControls;
@@ -67,7 +69,7 @@ export class CameraManager {
           return;
         }
 
-        this.pointingVector.subVectors(rs.ballActor.getPosition(), this.camera.position)
+        this.pointingVector.subVectors(rs.ballActor.getPosition(), this.target.body.position)
           .normalize()
           .multiplyScalar(-280);
 
@@ -75,9 +77,13 @@ export class CameraManager {
         this.tempVector.y += 100;
         this.tempVector.add(this.pointingVector);
         this.tempVector.y = Math.max(this.tempVector.y, 10);
+        this.tempVector.multiplyScalar(WORLD_SCALE);
+
+        this.tempVector2.copy(rs.ballActor.getPosition());
+        this.tempVector2.multiplyScalar(WORLD_SCALE);
 
         this.camera.position.copy(this.tempVector);
-        this.camera.lookAt(rs.ballActor.getPosition());
+        this.camera.lookAt(this.tempVector2);
         break;
       case CameraType.ORBITAL:
         this.orbitControls.update();

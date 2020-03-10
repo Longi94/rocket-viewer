@@ -3,6 +3,7 @@ import { Color, Object3D, Scene, ShaderMaterial, Vector3 } from 'three';
 import { RenderOrder } from '../../three/render-order';
 import { BallData } from '../../model/replay/ball-data';
 import { advanceFrame } from '../../util/util';
+import { WORLD_SCALE } from '../constant';
 
 const COLOR_NEUTRAL = new Color('#ffffff');
 const COLOR_ORANGE_HEAD = new Color('#f7a16a');
@@ -20,7 +21,7 @@ export class BallTrail extends Trail {
     super(scene);
 
     const trailHeadGeometry: Vector3[] = [];
-    const scale = 30.0;
+    const scale = 30.0 * WORLD_SCALE;
     const inc = Math.PI * 2 / 16.0;
 
     for (let i = 0; i < 17; i++) {

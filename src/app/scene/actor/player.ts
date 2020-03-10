@@ -8,6 +8,7 @@ import { Emitter } from 'three-nebula';
 import { BoostData } from '../../model/replay/boost-data';
 import { RenderOrder } from '../../three/render-order';
 import { SpriteSheetTexture } from '../../three/sprite-sheet-texture';
+import { WORLD_SCALE } from '../constant';
 
 export class PlayerActor extends RigidBodyActor {
 
@@ -62,6 +63,7 @@ export class PlayerActor extends RigidBodyActor {
         this.boostPos.set(-48.505, 9, 0); // octane boost pos
         this.car.localToWorld(this.boostPos);
       }
+      this.boostPos.multiplyScalar(1 / WORLD_SCALE);
       this.boost.update(time, this.boostPos, isUserInput);
     }
     if (this.demoSprite.visible && this.demoTexture != undefined) {

@@ -132,7 +132,8 @@ export class Trail {
 
     this.length = (length > 0) ? length + 1 : 0;
     this.targetObject = targetObject;
-    this.previousPos.copy(this.targetObject.position);
+    this.previousPos.set(0, 0, 0);
+    this.targetObject.localToWorld(this.previousPos);
 
     this.initializeLocalHeadGeometry(localHeadWidth, localHeadGeometry);
 
@@ -313,11 +314,13 @@ export class Trail {
   }
 
   advance() {
-    this.tangent.subVectors(this.targetObject.position, this.previousPos).normalize();
-    this.advanceGeometry(this.targetObject.position, this.tangent);
+    this.tempVector.set(0, 0, 0);
+    this.targetObject.localToWorld(this.tempVector);
+    this.tangent.subVectors(this.tempVector, this.previousPos).normalize();
+    this.advanceGeometry(this.tempVector, this.tangent);
 
     this.updateUniforms();
-    this.previousPos.copy(this.targetObject.position);
+    this.previousPos.copy(this.tempVector);
   };
 
   private advanceGeometry(position: Vector3, tangent: Vector3) {
@@ -427,6 +430,7 @@ export class Trail {
     positions.needsUpdate = true;
   }
 
+  tempVector = new Vector3();
   tempQuaternion = new Quaternion();
   tempOffset = new Vector3();
   tempLocalHeadGeometry: Vector3[] = [];
