@@ -1,4 +1,4 @@
-import { Camera, PerspectiveCamera, Vector3 } from 'three';
+import { Camera, Object3D, PerspectiveCamera, Scene, Vector3 } from 'three';
 import { CameraType } from './camera-type';
 import { ReplayScene } from '../replay-scene';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -15,14 +15,20 @@ export class CameraManager {
   private lastTime: number;
   private orbitControls: OrbitControls;
 
+  private vrCameraContainer = new Object3D();
+  private carCameraPos = new Object3D();
+
   onMove: () => void;
 
-  constructor(private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
+  constructor(scene: Scene, private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
     this.orbitControls = new OrbitControls(this.camera, canvasDiv);
     this.orbitControls.enabled = false;
     this.orbitControls.addEventListener('change', () => {
       this.onMove();
     });
+    scene.add(this.vrCameraContainer);
+    this.carCameraPos.position.set(40, 30, 0);
+    this.vrCameraContainer.add(this.carCameraPos);
   }
 
   setCamera(type: CameraType, target?: PlayerActor) {
@@ -37,9 +43,13 @@ export class CameraManager {
     this.target = target;
 
     this.orbitControls.enabled = false;
+    this.carCameraPos.remove(this.camera);
     switch (type) {
       case CameraType.ORBITAL:
         this.orbitControls.enabled = true;
+        break;
+      case CameraType.VR_PLAYER_VIEW:
+        this.carCameraPos.add(this.camera);
         break;
     }
 
@@ -71,6 +81,11 @@ export class CameraManager {
         break;
       case CameraType.ORBITAL:
         this.orbitControls.update();
+        break;
+      case CameraType.VR_PLAYER_VIEW:
+        this.tempVector.copy(this.target.body.position);
+        this.vrCameraContainer.position.copy(this.target.body.position);
+        this.vrCameraContainer.quaternion.copy(this.target.car.quaternion);
         break;
     }
 

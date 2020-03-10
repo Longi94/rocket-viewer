@@ -88,17 +88,14 @@ export class SceneManager {
   async init(canvas: HTMLCanvasElement, width: number, height: number) {
 
     this.rs.camera = new PerspectiveCamera(80, width / height, 0.01, 100000);
-    this.rs.camera.position.x = 1679.7478335547376;
-    this.rs.camera.position.y = 580.2658014964849;
-    this.rs.camera.position.z = -917.4632500987678;
-
-    this.cameraManager = new CameraManager(this.rs.camera, canvas);
-    this.cameraManager.onMove = () => {
-      this.requestRender();
-    };
 
     this.rs.scene = new Scene();
     this.rs.scene.background = new Color('#AAAAAA');
+
+    this.cameraManager = new CameraManager(this.rs.scene, this.rs.camera, canvas);
+    this.cameraManager.onMove = () => {
+      this.requestRender();
+    };
 
     this.renderer = new WebGLRenderer({canvas, antialias: true, logarithmicDepthBuffer: true});
     this.renderer.setSize(width, height);
@@ -353,6 +350,7 @@ export class SceneManager {
     if (this.vrSession == undefined) {
       const sessionInit = {optionalFeatures: ['local-floor', 'bounded-floor']};
       navigator.xr.requestSession('immersive-vr', sessionInit).then(session => {
+        this.cameraManager.setCamera(CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
         this.inVR = true;
         this.renderer.xr.setSession(session);
         this.vrSession = session;
