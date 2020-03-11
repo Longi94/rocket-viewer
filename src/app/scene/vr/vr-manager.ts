@@ -1,8 +1,9 @@
 import { WebGLRenderer } from 'three';
+import { XRReferenceSpaceType, XRSession, XRSessionInit, XRSessionMode } from '../../util/vr';
 
 export class VrManager {
 
-  vrSession: any;
+  vrSession: XRSession;
   inVr = false;
 
   onVrEnter: () => void;
@@ -24,8 +25,8 @@ export class VrManager {
 
   async enterVr() {
     if (this.vrSession == undefined) {
-      const sessionInit = {optionalFeatures: ['local-floor', 'bounded-floor']};
-      const session = await navigator.xr.requestSession('immersive-vr', sessionInit);
+      const sessionInit: XRSessionInit = {optionalFeatures: [XRReferenceSpaceType.LOCAL_FLOOR, XRReferenceSpaceType.BOUNDED_FLOOR]};
+      const session = await navigator.xr.requestSession(XRSessionMode.IMMERSIVE_VR, sessionInit);
       this.inVr = true;
       this.renderer.xr.setSession(session);
       this.vrSession = session;
