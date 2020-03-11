@@ -29,6 +29,7 @@ export class CameraManager {
       this.onMove();
     });
     rootScene.add(this.vrTarget);
+    this.vrTarget.add(this.vrUser);
   }
 
   setCamera(rs: ReplayScene, type: CameraType, target?: PlayerActor) {
@@ -45,7 +46,6 @@ export class CameraManager {
       this.vrUser.position.set(0, 0, 0);
       this.vrTarget.position.set(0, 0, 0);
       this.vrUser.remove(this.camera);
-      this.vrTarget.add(this.vrUser);
       this.rootScene.add(this.vrTarget);
 
       switch (type) {
@@ -60,6 +60,10 @@ export class CameraManager {
         case CameraType.VR_BALL:
           this.vrUser.add(this.camera);
           rs.ballActor.hide();
+          break;
+        case CameraType.VR_FLY:
+          this.vrUser.add(this.camera);
+          this.vrTarget.position.set(0, 1000, 0);
           break;
       }
 

@@ -23,7 +23,7 @@ export class VrManager extends EventDispatcher {
   private controllerGrips: Group[] = [undefined, undefined];
   private controllerFactory = new XRControllerModelFactory();
 
-  private cameraControl = new RingControl(['ball', 'player', 'fly']);
+  private cameraControl = new RingControl(['ball', 'player', 'fly', 'exit vr']);
   private playerControl = new RingControl([]);
 
   private playerIds: number[] = [];
@@ -66,6 +66,9 @@ export class VrManager extends EventDispatcher {
         case 2:
           cameraType = CameraType.VR_FLY;
           break;
+        case 3:
+          this.leaveVr();
+          return;
       }
       this.dispatchEvent({type: VrManagerEvent.CAMERA_SELECT, cameraType});
     });
