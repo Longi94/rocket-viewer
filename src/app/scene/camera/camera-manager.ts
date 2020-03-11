@@ -1,11 +1,11 @@
-import { Camera, Object3D, PerspectiveCamera, Scene, Vector3 } from 'three';
+import { Camera, EventDispatcher, Object3D, PerspectiveCamera, Scene, Vector3 } from 'three';
 import { CameraType } from './camera-type';
 import { ReplayScene } from '../replay-scene';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PlayerActor } from '../actor/player';
 import { WORLD_SCALE } from '../constant';
 
-export class CameraManager {
+export class CameraManager extends EventDispatcher {
 
   type = CameraType.PLAYER_VIEW;
   private target: PlayerActor;
@@ -20,25 +20,31 @@ export class CameraManager {
   private vrTarget = new Object3D();
   vrUser = new Object3D();
 
-  onMove: () => void;
-
   constructor(private readonly rootScene: Scene, private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
+    super();
     this.orbitControls = new OrbitControls(this.camera, canvasDiv);
     this.orbitControls.enabled = false;
-    this.orbitControls.addEventListener('change', () => {
-      this.onMove();
-    });
+    this.orbitControls.addEventListener('change', () => this.dispatchEvent({type: 'move'}));
     rootScene.add(this.vrTarget);
     this.vrTarget.add(this.vrUser);
   }
 
-  setCamera(rs: ReplayScene, type: CameraType, target?: PlayerActor) {
-    if (this.type !== type) {
-      this.type = type;
-
+  setTarget(target: PlayerActor) {
+    if (this.target !== target) {
       this.target?.nameplateVisible(true);
       target?.nameplateVisible(false);
       this.target = target;
+
+      if (this.type == CameraType.VR_PLAYER_VIEW) {
+        this.target.car.add(this.vrTarget);
+      }
+      this.dispatchEvent({type: 'move'});
+    }
+  }
+
+  setCamera(rs: ReplayScene, type: CameraType) {
+    if (this.type !== type) {
+      this.type = type;
 
       // reset stuff
       rs.ballActor.show();
@@ -67,15 +73,7 @@ export class CameraManager {
           break;
       }
 
-      this.onMove();
-    } else if (this.target !== target) {
-      this.target?.nameplateVisible(true);
-      target?.nameplateVisible(false);
-      this.target = target;
-
-      if (type == CameraType.VR_PLAYER_VIEW) {
-        this.target.car.add(this.vrTarget);
-      }
+      this.dispatchEvent({type: 'move'});
     }
   }
 

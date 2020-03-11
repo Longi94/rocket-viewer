@@ -89,9 +89,7 @@ export class SceneManager extends EventDispatcher {
     this.rootScene.add(this.rs.scene);
 
     this.cameraManager = new CameraManager(this.rootScene, this.rs.camera, canvas);
-    this.cameraManager.onMove = () => {
-      this.requestRender();
-    };
+    this.cameraManager.addEventListener('move', () => this.requestRender());
 
     this.renderer = new WebGLRenderer({canvas, antialias: true, logarithmicDepthBuffer: true});
     this.renderer.setSize(width, height);
@@ -105,17 +103,11 @@ export class SceneManager extends EventDispatcher {
     if (vrSupport === VRSupport.SUPPORTED) {
       this.vrManager = new VrManager(this.renderer, this.cameraManager.vrUser);
       this.vrManager.addEventListener(VrManagerEvent.PLAYBACK_TOGGLE, () => this.isPlaying ? this.pause() : this.play());
-      this.vrManager.addEventListener(VrManagerEvent.CAMERA_SELECT, event => {
-        if (event.cameraType == CameraType.VR_PLAYER_VIEW) {
-          this.changeCamera(event.cameraType, parseInt(Object.keys(this.rs.players)[0]));
-        } else {
-          this.changeCamera(event.cameraType);
-        }
-      });
-      this.vrManager.addEventListener(VrManagerEvent.PLAYER_SELECT, event => this.changeCamera(this.cameraManager.type, event.id));
+      this.vrManager.addEventListener(VrManagerEvent.CAMERA_SELECT, event => this.changeCamera(event.cameraType));
+      this.vrManager.addEventListener(VrManagerEvent.PLAYER_SELECT, event => this.cameraManager.setTarget(this.rs.players[event.id]));
       this.vrManager.addEventListener(VrManagerEvent.VR_ENTER, () => this.dispatchEvent({type: SceneEvent.VR_ENTER}));
       this.vrManager.addEventListener(VrManagerEvent.VR_LEAVE, () => {
-        this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
+        this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW);
         this.dispatchEvent({type: SceneEvent.VR_LEAVE});
       });
     }
@@ -218,7 +210,8 @@ export class SceneManager extends EventDispatcher {
       player.addToScene(this.rs.scene);
     }
 
-    this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
+    this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW, );
+    this.cameraManager.setTarget(Object.values(this.rs.players)[0]);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, boostPads, this.debug);
     this.update();
     this.cameraManager.update(this.currentAnimationTime, this.rs);
@@ -333,10 +326,9 @@ export class SceneManager extends EventDispatcher {
   }
 
   changeCamera(type: CameraType, targetPlayer?: number) {
-    if (targetPlayer == undefined && type !== CameraType.PLAYER_VIEW && type !== CameraType.VR_PLAYER_VIEW) {
-      this.cameraManager.setCamera(this.rs, type);
-    } else {
-      this.cameraManager.setCamera(this.rs, type, this.rs.players[targetPlayer]);
+    this.cameraManager.setCamera(this.rs, type);
+    if (targetPlayer != undefined) {
+      this.cameraManager.setTarget(this.rs.players[targetPlayer]);
     }
   }
 
@@ -367,9 +359,7 @@ export class SceneManager extends EventDispatcher {
   }
 
   enterVr() {
-    this.vrManager?.enterVr().then(() => {
-      this.cameraManager.setCamera(this.rs, CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
-    });
+    this.vrManager?.enterVr().then(() => this.cameraManager.setCamera(this.rs, CameraType.VR_PLAYER_VIEW));
   }
 
   leaveVr() {
