@@ -9,9 +9,9 @@ export class BoostPadActor extends RigidBodyActor {
   constructor(body: Object3D, big: boolean) {
     super(body);
     if (big) {
-      this.glow = body.getObjectByName("BoostPad_Large_Glow");
+      this.glow = body.getObjectByName('BoostPad_Large_Glow');
     } else {
-      this.glow = body.getObjectByName("BoostPad_Small_Glow");
+      this.glow = body.getObjectByName('BoostPad_Small_Glow');
     }
   }
 

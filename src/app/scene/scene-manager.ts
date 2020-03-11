@@ -69,7 +69,8 @@ export class SceneManager {
   // callbacks
   onVrEnter: () => void;
   onVrLeave: () => void;
-  onTimeUpdate(_time: number, _hudData: HudData) {
+  // noinspection JSUnusedLocalSymbols
+  onTimeUpdate(time: number, hudData: HudData) {
   }
 
   constructor(private readonly debug = false) {
@@ -308,7 +309,8 @@ export class SceneManager {
     if (this.debug) {
       this.ballFrame = advanceFrame(this.ballFrame, this.currentTime, time, this.rs.replay.frame_data.ball_data.body_states.times);
       for (const playerId of Object.keys(this.rs.replay.frame_data.players)) {
-        this.playerFrames[playerId] = advanceFrame(this.playerFrames[playerId], this.currentTime, time, this.rs.replay.frame_data.players[playerId].body_states.times);
+        this.playerFrames[playerId] = advanceFrame(this.playerFrames[playerId], this.currentTime, time,
+          this.rs.replay.frame_data.players[playerId].body_states.times);
       }
     }
   }

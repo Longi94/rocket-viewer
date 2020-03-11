@@ -1,6 +1,6 @@
 declare global {
   interface Navigator {
-    xr: any
+    xr: any;
   }
 }
 

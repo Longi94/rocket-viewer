@@ -8,6 +8,7 @@ export class VrManager {
   onVrEnter: () => void;
   onVrLeave: () => void;
 
+  // noinspection UnterminatedStatementJS
   vrEndListener = () => {
     this.inVr = false;
     this.vrSession.removeEventListener('end', this.vrEndListener);
@@ -15,7 +16,7 @@ export class VrManager {
     if (this.onVrLeave) {
       this.onVrLeave();
     }
-  };
+  }
 
   constructor(private readonly renderer: WebGLRenderer) {
 

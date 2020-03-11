@@ -91,6 +91,11 @@ export class Trail {
   private previousPos: Vector3 = new Vector3();
   private tangent: Vector3 = new Vector3();
 
+  private tempVector = new Vector3();
+  private tempQuaternion = new Quaternion();
+  private tempOffset = new Vector3();
+  private tempLocalHeadGeometry: Vector3[] = [];
+
   constructor(public readonly scene: Scene) {
     for (let i = 0; i < MaxHeadVertices; i++) {
       const vertex = new Vector3();
@@ -321,7 +326,7 @@ export class Trail {
 
     this.updateUniforms();
     this.previousPos.copy(this.tempVector);
-  };
+  }
 
   private advanceGeometry(position: Vector3, tangent: Vector3) {
     const nextIndex = this.currentEnd + 1 >= this.length ? 0 : this.currentEnd + 1;
@@ -429,11 +434,6 @@ export class Trail {
 
     positions.needsUpdate = true;
   }
-
-  tempVector = new Vector3();
-  tempQuaternion = new Quaternion();
-  tempOffset = new Vector3();
-  tempLocalHeadGeometry: Vector3[] = [];
 
   private connectNodes(srcNodeIndex: number, destNodeIndex: number) {
     const indices = this.geometry.getIndex();

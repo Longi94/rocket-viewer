@@ -1,7 +1,6 @@
 import { ReplayScene } from '../replay-scene';
 import { modelLoader, textureLoader } from './loader-config';
-import { applyEnvMap } from '../../util/three';
-import { Material, MeshStandardMaterial, Sprite, SpriteMaterial } from 'three';
+import { MeshStandardMaterial, Sprite, SpriteMaterial } from 'three';
 import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 import { RenderOrder } from '../../three/render-order';
 
@@ -22,7 +21,7 @@ export async function loadBoostPadModels(rs: ReplayScene) {
   rs.models.bigBoostPad.renderOrder = RenderOrder.OPAQUE;
   rs.models.smallBoostPad.renderOrder = RenderOrder.OPAQUE;
 
-  rs.models.bigBoostPad.getObjectByName("BoostPad_Large_Glow").add(boostSprite);
+  rs.models.bigBoostPad.getObjectByName('BoostPad_Large_Glow').add(boostSprite);
 
   traverseMaterials(rs.models.bigBoostPad, setDepthWrite);
 }

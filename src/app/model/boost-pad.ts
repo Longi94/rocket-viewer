@@ -72,7 +72,7 @@ const MAPPING: { [name: string]: BoostPad[] } = {
 };
 
 export function getBoosts(mapName: string): BoostPad[] {
-  let boosts = MAPPING[mapName];
+  const boosts = MAPPING[mapName];
   if (boosts == undefined) {
     return BOOSTS_STANDARD;
   }

@@ -36,12 +36,8 @@ export class CameraManager {
   setCamera(type: CameraType, target?: PlayerActor) {
     this.type = type;
 
-    if (this.target != undefined) {
-      this.target.nameplateVisible(true);
-    }
-    if (target != undefined) {
-      target.nameplateVisible(false);
-    }
+    this.target?.nameplateVisible(true);
+    target?.nameplateVisible(false);
     this.target = target;
 
     this.orbitControls.enabled = false;
