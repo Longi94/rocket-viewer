@@ -2,6 +2,7 @@ import { createOffscreenCanvas } from 'rl-loadout-lib/dist/utils/offscreen-canva
 import { DataTexture, LinearFilter, PerspectiveCamera, Sprite, SpriteMaterial, Vector3 } from 'three';
 import { roundRect } from '../../util/canvas';
 import { RenderOrder } from '../../three/render-order';
+import { WORLD_SCALE } from '../constant';
 
 const WIDTH = 2048;
 const HEIGHT = 2048;
@@ -48,7 +49,7 @@ export class Nameplate {
     const spriteMaterial = new SpriteMaterial({map: texture});
     spriteMaterial.depthWrite = false; // Do not hide stuff behind transparent parts of the sprite
     this.sprite = new Sprite(spriteMaterial);
-    this.sprite.scale.setScalar(1000);
+    this.sprite.scale.setScalar(1000 / WORLD_SCALE);
     this.sprite.position.y = 100;
     this.sprite.renderOrder = RenderOrder.NAMEPLATE;
   }
@@ -59,6 +60,6 @@ export class Nameplate {
     const spritePos = this.sprite.localToWorld(this.dummy);
     const camPos = camera.localToWorld(this.dummy2);
     const scale = spritePos.distanceTo(camPos) * SCALE_TO_CAMERA;
-    this.sprite.scale.setScalar(scale);
+    this.sprite.scale.setScalar(scale / WORLD_SCALE);
   }
 }

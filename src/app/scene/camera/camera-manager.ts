@@ -46,7 +46,7 @@ export class CameraManager {
         this.orbitControls.enabled = true;
         break;
       case CameraType.VR_PLAYER_VIEW:
-        this.vrUser.position.set(40, 30, 0);
+        this.vrUser.position.set(40, 35, 0);
         this.vrUser.add(this.camera);
         this.target.car.add(this.vrTarget);
         break;

@@ -1,1 +1,1 @@
-export const WORLD_SCALE = 0.5;
+export const WORLD_SCALE = 0.1;

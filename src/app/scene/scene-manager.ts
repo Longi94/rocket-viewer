@@ -1,7 +1,6 @@
 import { Replay } from '../model/replay/replay';
 import {
   AmbientLight,
-  Color,
   DefaultLoadingManager,
   PerspectiveCamera,
   PMREMGenerator,
@@ -40,6 +39,7 @@ export class SceneManager {
   rs: ReplayScene = new ReplayScene();
 
   renderer: WebGLRenderer;
+  rootScene: Scene;
   private cubeRenderTarget: WebGLRenderTarget;
 
   private renderRequested = false;
@@ -80,11 +80,14 @@ export class SceneManager {
 
     this.rs.camera = new PerspectiveCamera(80, width / height, 0.01, 100000);
 
+    this.rootScene = new Scene();
+
     this.rs.scene = new Scene();
     this.rs.scene.scale.setScalar(WORLD_SCALE);
-    this.rs.scene.background = new Color('#AAAAAA');
 
-    this.cameraManager = new CameraManager(this.rs.scene, this.rs.camera, canvas);
+    this.rootScene.add(this.rs.scene);
+
+    this.cameraManager = new CameraManager(this.rootScene, this.rs.camera, canvas);
     this.cameraManager.onMove = () => {
       this.requestRender();
     };
@@ -126,7 +129,7 @@ export class SceneManager {
 
   private processBackground(backgroundTexture: Texture) {
     // @ts-ignore
-    this.rs.scene.background = new WebGLCubeRenderTarget(1024).fromEquirectangularTexture(this.renderer, backgroundTexture);
+    this.rootScene.background = new WebGLCubeRenderTarget(1024).fromEquirectangularTexture(this.renderer, backgroundTexture);
 
     // @ts-ignore
     const pmremGenerator = new PMREMGenerator(this.renderer);
@@ -241,7 +244,7 @@ export class SceneManager {
       this.currentAnimationTime = time;
       this.cameraManager.update(time, this.rs);
       this.updateNameplates();
-      this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
+      this.renderer.render(this.rootScene, this.cameraManager.getCamera());
       return;
     }
 
@@ -279,7 +282,7 @@ export class SceneManager {
 
     if (this.vrManager.inVr || this.renderRequested || this.isPlaying) {
       this.renderRequested = false;
-      this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
+      this.renderer.render(this.rootScene, this.cameraManager.getCamera());
     }
 
     this.currentAnimationTime = time;
