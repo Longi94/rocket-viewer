@@ -17,8 +17,8 @@ export class CameraManager {
   private lastTime: number;
   private orbitControls: OrbitControls;
 
-  private vrCameraContainer = new Object3D();
-  private carCameraPos = new Object3D();
+  private vrTarget = new Object3D();
+  private vrUser = new Object3D();
 
   onMove: () => void;
 
@@ -28,9 +28,8 @@ export class CameraManager {
     this.orbitControls.addEventListener('change', () => {
       this.onMove();
     });
-    scene.add(this.vrCameraContainer);
-    this.carCameraPos.position.set(40, 30, 0);
-    this.vrCameraContainer.add(this.carCameraPos);
+    this.vrTarget.add(this.vrUser);
+    scene.add(this.vrTarget);
   }
 
   setCamera(type: CameraType, target?: PlayerActor) {
@@ -41,13 +40,15 @@ export class CameraManager {
     this.target = target;
 
     this.orbitControls.enabled = false;
-    this.carCameraPos.remove(this.camera);
+    this.vrUser.remove(this.camera);
     switch (type) {
       case CameraType.ORBITAL:
         this.orbitControls.enabled = true;
         break;
       case CameraType.VR_PLAYER_VIEW:
-        this.carCameraPos.add(this.camera);
+        this.vrUser.position.set(40, 30, 0);
+        this.vrUser.add(this.camera);
+        this.target.car.add(this.vrTarget);
         break;
     }
 
@@ -85,9 +86,11 @@ export class CameraManager {
         this.orbitControls.update();
         break;
       case CameraType.VR_PLAYER_VIEW:
-        this.tempVector.copy(this.target.body.position);
-        this.vrCameraContainer.position.copy(this.target.body.position);
-        this.vrCameraContainer.quaternion.copy(this.target.car.quaternion);
+        // this.tempVector.set(0, 0, 0);
+        // this.target.car.localToWorld(this.tempVector);
+        // this.tempVector.multiplyScalar(1 / WORLD_SCALE);
+        // this.vrTarget.position.copy(this.tempVector);
+        // this.vrTarget.quaternion.copy(this.target.car.quaternion);
         break;
     }
 
