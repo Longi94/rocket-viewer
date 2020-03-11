@@ -8,16 +8,15 @@ import { CameraType } from '../camera/camera-type';
 export enum VrManagerEvent {
   PLAYBACK_TOGGLE = 'playback-toggle',
   CAMERA_SELECT = 'camera-select',
-  PLAYER_SELECT = 'player-select'
+  PLAYER_SELECT = 'player-select',
+  VR_ENTER = 'vr-enter',
+  VR_LEAVE = 'vr-leave',
 }
 
 export class VrManager extends EventDispatcher {
 
   private vrSession: XRSession;
   inVr = false;
-
-  onVrEnter: () => void;
-  onVrLeave: () => void;
 
   private controllers: Group[] = [undefined, undefined];
   private controllerGrips: Group[] = [undefined, undefined];
@@ -35,9 +34,7 @@ export class VrManager extends EventDispatcher {
     this.vrSession = undefined;
     this.vrUser.remove(...this.controllers);
     this.vrUser.remove(...this.controllerGrips);
-    if (this.onVrLeave) {
-      this.onVrLeave();
-    }
+    this.dispatchEvent({type: VrManagerEvent.VR_LEAVE});
   };
 
   // noinspection UnterminatedStatementJS
@@ -90,9 +87,7 @@ export class VrManager extends EventDispatcher {
       this.vrUser.add(...this.controllerGrips);
 
       session.addEventListener('end', this.vrEndListener);
-      if (this.onVrEnter) {
-        this.onVrEnter();
-      }
+      this.dispatchEvent({type: VrManagerEvent.VR_ENTER});
     }
   }
 

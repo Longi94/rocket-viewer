@@ -2,6 +2,7 @@ import { Replay } from '../model/replay/replay';
 import {
   AmbientLight,
   DefaultLoadingManager,
+  EventDispatcher,
   PerspectiveCamera,
   PMREMGenerator,
   Scene,
@@ -30,12 +31,17 @@ import { BoostPadActor } from './actor/boost-pad';
 import { modelLoader } from './loader/loader-config';
 import { loadDemoSprite } from './loader/demo';
 import { advanceFrame } from '../util/util';
-import { HudData } from '../model/hud-data';
 import { WORLD_SCALE } from './constant';
 import { VrManager, VrManagerEvent } from './vr/vr-manager';
 import { VRSupport, VRUtils } from '../util/vr';
 
-export class SceneManager {
+export enum SceneEvent {
+  TICK = 'tick',
+  VR_ENTER = 'vr-enter',
+  VR_LEAVE = 'vr-leave',
+}
+
+export class SceneManager extends EventDispatcher {
 
   rs: ReplayScene = new ReplayScene();
 
@@ -67,14 +73,8 @@ export class SceneManager {
 
   playerFrames: { [id: number]: number } = {};
 
-  // callbacks
-  onVrEnter: () => void;
-  onVrLeave: () => void;
-  // noinspection JSUnusedLocalSymbols
-  onTimeUpdate(time: number, hudData: HudData) {
-  }
-
   constructor(private readonly debug = false) {
+    super();
   }
 
   async init(canvas: HTMLCanvasElement, width: number, height: number) {
@@ -113,17 +113,11 @@ export class SceneManager {
         }
       });
       this.vrManager.addEventListener(VrManagerEvent.PLAYER_SELECT, event => this.changeCamera(this.cameraManager.type, event.id));
-      this.vrManager.onVrEnter = () => {
-        if (this.onVrEnter) {
-          this.onVrEnter();
-        }
-      };
-      this.vrManager.onVrLeave = () => {
+      this.vrManager.addEventListener(VrManagerEvent.VR_ENTER, () => this.dispatchEvent({type: SceneEvent.VR_ENTER}));
+      this.vrManager.addEventListener(VrManagerEvent.VR_LEAVE, () => {
         this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
-        if (this.onVrLeave) {
-          this.onVrLeave();
-        }
-      };
+        this.dispatchEvent({type: SceneEvent.VR_LEAVE});
+      });
     }
 
     this.addLights();
@@ -289,7 +283,7 @@ export class SceneManager {
         }
       }
 
-      this.onTimeUpdate(this.currentTime, this.rs.hudData);
+      this.dispatchEvent({type: SceneEvent.TICK, time: this.currentTime, hudData: this.rs.hudData});
       this.update();
     }
     this.cameraManager.update(time, this.rs);
@@ -320,7 +314,7 @@ export class SceneManager {
     this.update(true);
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
-    this.onTimeUpdate(this.currentTime, this.rs.hudData);
+    this.dispatchEvent({type: SceneEvent.TICK, time: this.currentTime, hudData: this.rs.hudData});
     this.requestRender();
   }
 

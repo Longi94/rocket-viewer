@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Cache, Clock, DefaultLoadingManager } from 'three';
 import { BoxcarsService } from '../../../service/boxcars.service';
 import { Replay } from '../../../model/replay/replay';
-import { SceneManager } from '../../../scene/scene-manager';
+import { SceneEvent, SceneManager } from '../../../scene/scene-manager';
 import { PlaybackService } from '../../../service/playback.service';
 import { environment } from '../../../../environments/environment';
 import * as Stats from 'stats.js';
@@ -52,9 +52,11 @@ export class CanvasComponent implements OnInit {
     this.playbackService.onEnterVr.subscribe(() => this.sceneManager.enterVr());
     this.playbackService.onLeaveVr.subscribe(() => this.sceneManager.leaveVr());
 
-    this.sceneManager.onTimeUpdate = (time, hudData) => this.playbackService.updateTime({time, hudData});
-    this.sceneManager.onVrEnter = () => this.threeService.vrEntered();
-    this.sceneManager.onVrLeave = () => this.threeService.vrLeft();
+    this.sceneManager.addEventListener(SceneEvent.TICK, event => {
+      this.playbackService.updateTime({time: event.time, hudData: event.hudData});
+    });
+    this.sceneManager.addEventListener(SceneEvent.VR_ENTER, () => this.threeService.vrEntered());
+    this.sceneManager.addEventListener(SceneEvent.VR_LEAVE, () => this.threeService.vrLeft());
 
     Cache.enabled = true;
   }
