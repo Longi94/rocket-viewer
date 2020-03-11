@@ -33,6 +33,7 @@ import { loadDemoSprite } from './loader/demo';
 import { advanceFrame } from '../util/util';
 import { HudData } from '../model/hud-data';
 import { WORLD_SCALE } from './constant';
+import { VrManager } from './vr/vr-manager';
 
 export class SceneManager {
 
@@ -46,6 +47,7 @@ export class SceneManager {
   animationManager: AnimationManager;
   cameraManager: CameraManager;
   particleSystemManager: ParticleSystemManager;
+  vrManager: VrManager;
 
   currentAnimationTime: number;
   currentTime: number;
@@ -64,24 +66,11 @@ export class SceneManager {
 
   playerFrames: { [id: number]: number } = {};
 
-  // VR stuff
-  inVR = false;
-  vrSession: any;
-  vrEndListener = () => {
-    this.inVR = false;
-    this.vrSession.removeEventListener('end', this.vrEndListener);
-    this.vrSession = undefined;
-    if (this.onVrLeave) {
-      this.onVrLeave();
-    }
-  };
-
   // callbacks
-  onTimeUpdate(_time: number, _hudData: HudData) {
-  }
-
   onVrEnter: () => void;
   onVrLeave: () => void;
+  onTimeUpdate(_time: number, _hudData: HudData) {
+  }
 
   constructor(private readonly debug = false) {
   }
@@ -105,6 +94,20 @@ export class SceneManager {
     this.renderer.xr.setReferenceSpaceType('local');
 
     this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
+
+    // Init VR
+    this.vrManager = new VrManager(this.renderer);
+    this.vrManager.onVrEnter = () => {
+      if (this.onVrEnter) {
+        this.onVrEnter();
+      }
+    };
+    this.vrManager.onVrLeave = () => {
+      this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
+      if (this.onVrLeave) {
+        this.onVrLeave();
+      }
+    };
 
     this.addLights();
 
@@ -273,7 +276,7 @@ export class SceneManager {
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
 
-    if (this.inVR || this.renderRequested || this.isPlaying) {
+    if (this.vrManager.inVr || this.renderRequested || this.isPlaying) {
       this.renderRequested = false;
       this.renderer.render(this.rs.scene, this.cameraManager.getCamera());
     }
@@ -349,24 +352,12 @@ export class SceneManager {
   }
 
   enterVr() {
-    if (this.vrSession == undefined) {
-      const sessionInit = {optionalFeatures: ['local-floor', 'bounded-floor']};
-      navigator.xr.requestSession('immersive-vr', sessionInit).then(session => {
-        this.cameraManager.setCamera(CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
-        this.inVR = true;
-        this.renderer.xr.setSession(session);
-        this.vrSession = session;
-        session.addEventListener('end', this.vrEndListener);
-        if (this.onVrEnter) {
-          this.onVrEnter();
-        }
-      });
-    }
+    this.vrManager.enterVr().then(() => {
+      this.cameraManager.setCamera(CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
+    });
   }
 
   leaveVr() {
-    if (this.vrSession != undefined) {
-      this.vrSession.end();
-    }
+    this.vrManager.leaveVr();
   }
 }
