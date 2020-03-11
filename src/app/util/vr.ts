@@ -50,3 +50,15 @@ export const VRUtils = {
     }
   }
 };
+
+export interface VrControllerButtonMapping {
+  trigger: number;
+  touchpad: number;
+  squeeze: number;
+}
+
+export const HtcViveMapping: VrControllerButtonMapping = {
+  trigger: 0,
+  squeeze: 1,
+  touchpad: 2
+};

@@ -5,4 +5,5 @@ export enum RenderOrder {
   BALL_TRAIL,
   JUMP_EFFECT,
   DEMOLITION,
+  VR_RING_CONTROL,
 }

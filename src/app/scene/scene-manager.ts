@@ -33,6 +33,7 @@ import { advanceFrame } from '../util/util';
 import { HudData } from '../model/hud-data';
 import { WORLD_SCALE } from './constant';
 import { VrManager, VrManagerEvent } from './vr/vr-manager';
+import { VRSupport, VRUtils } from '../util/vr';
 
 export class SceneManager {
 
@@ -47,7 +48,7 @@ export class SceneManager {
   animationManager: AnimationManager;
   cameraManager: CameraManager;
   particleSystemManager: ParticleSystemManager;
-  vrManager: VrManager;
+  vrManager?: VrManager;
 
   currentAnimationTime: number;
   currentTime: number;
@@ -100,19 +101,22 @@ export class SceneManager {
     this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
 
     // Init VR
-    this.vrManager = new VrManager(this.renderer, this.cameraManager.vrUser);
-    this.vrManager.addEventListener(VrManagerEvent.PLAYBACK_TOGGLE, () => this.isPlaying ? this.pause() : this.play());
-    this.vrManager.onVrEnter = () => {
-      if (this.onVrEnter) {
-        this.onVrEnter();
-      }
-    };
-    this.vrManager.onVrLeave = () => {
-      this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
-      if (this.onVrLeave) {
-        this.onVrLeave();
-      }
-    };
+    const vrSupport = await VRUtils.detect();
+    if (vrSupport === VRSupport.SUPPORTED) {
+      this.vrManager = new VrManager(this.renderer, this.cameraManager.vrUser);
+      this.vrManager.addEventListener(VrManagerEvent.PLAYBACK_TOGGLE, () => this.isPlaying ? this.pause() : this.play());
+      this.vrManager.onVrEnter = () => {
+        if (this.onVrEnter) {
+          this.onVrEnter();
+        }
+      };
+      this.vrManager.onVrLeave = () => {
+        this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
+        if (this.onVrLeave) {
+          this.onVrLeave();
+        }
+      };
+    }
 
     this.addLights();
 
@@ -151,6 +155,8 @@ export class SceneManager {
 
   async prepareReplay(replay: Replay) {
     this.rs.replay = replay;
+
+    this.vrManager?.setPlayers(Object.values(replay.frame_data.players));
 
     this.playbackInfo.players = Object.values(this.rs.replay.frame_data.players).map(PlayerPlaybackInfo.from);
     this.playbackInfo.minTime = 0;
@@ -280,8 +286,9 @@ export class SceneManager {
     }
     this.cameraManager.update(time, this.rs);
     this.updateNameplates();
+    this.vrManager?.update();
 
-    if (this.vrManager.inVr || this.renderRequested || this.isPlaying) {
+    if ((this.vrManager && this.vrManager.inVr) || this.renderRequested || this.isPlaying) {
       this.renderRequested = false;
       this.renderer.render(this.rootScene, this.cameraManager.getCamera());
     }
@@ -358,12 +365,12 @@ export class SceneManager {
   }
 
   enterVr() {
-    this.vrManager.enterVr().then(() => {
+    this.vrManager?.enterVr().then(() => {
       this.cameraManager.setCamera(CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
     });
   }
 
   leaveVr() {
-    this.vrManager.leaveVr();
+    this.vrManager?.leaveVr();
   }
 }

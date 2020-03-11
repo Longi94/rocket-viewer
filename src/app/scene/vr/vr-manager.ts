@@ -1,6 +1,8 @@
 import { EventDispatcher, Group, Object3D, WebGLRenderer } from 'three';
 import { XRReferenceSpaceType, XRSession, XRSessionInit, XRSessionMode } from '../../util/vr';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
+import { RingControl } from './ring-control';
+import { PlayerData } from '../../model/replay/player-data';
 
 export enum VrManagerEvent {
   PLAYBACK_TOGGLE = 'playback-toggle'
@@ -17,6 +19,11 @@ export class VrManager extends EventDispatcher {
   private controllers: Group[] = [undefined, undefined];
   private controllerGrips: Group[] = [undefined, undefined];
   private controllerFactory = new XRControllerModelFactory();
+
+  private cameraControl = new RingControl(['ball', 'player', 'fly']);
+  private playerControl = new RingControl([]);
+
+  private playerIds: number[] = [];
 
   // noinspection UnterminatedStatementJS
   vrEndListener = () => {
@@ -40,6 +47,9 @@ export class VrManager extends EventDispatcher {
 
     this.getController(0);
     this.getController(1);
+
+    this.cameraControl.addToController(this.controllerGrips[0]);
+    this.playerControl.addToController(this.controllerGrips[1]);
   }
 
   async enterVr() {
@@ -64,6 +74,15 @@ export class VrManager extends EventDispatcher {
     this.vrSession?.end().then();
   }
 
+  update() {
+    if (!this.inVr) {
+      return;
+    }
+
+    this.cameraControl.update();
+    this.playerControl.update();
+  }
+
   private getController(id: number) {
     const controller = this.renderer.xr.getController(id);
 
@@ -74,5 +93,10 @@ export class VrManager extends EventDispatcher {
 
     this.controllers[id] = controller;
     this.controllerGrips[id] = controllerGrip;
+  }
+
+  setPlayers(players: PlayerData[]) {
+    this.playerIds = players.map(p => p.id);
+    this.playerControl.setOptions(players.map(p => p.name));
   }
 }
