@@ -125,13 +125,13 @@ export class RingControl extends EventDispatcher {
     const button = gamepad.buttons[this.buttonMapping.touchpad];
 
     let redraw = false;
-    let dispatch = false;
+    let dispatch = -1;
 
     if (button.pressed && !this.plane.visible) {
       redraw = true;
     }
     if (!button.pressed && this.plane.visible) {
-      dispatch = true;
+      dispatch = this.selectedOption;
     }
     this.plane.visible = button.pressed;
 
@@ -157,8 +157,8 @@ export class RingControl extends EventDispatcher {
       this.draw();
     }
 
-    if (dispatch && this.selectedOption >= 0) {
-      this.dispatchEvent({type: 'select', option: this.selectedOption});
+    if (dispatch >= 0) {
+      this.dispatchEvent({type: 'select', option: dispatch});
     }
   }
 }

@@ -3,9 +3,12 @@ import { XRReferenceSpaceType, XRSession, XRSessionInit, XRSessionMode } from '.
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
 import { RingControl } from './ring-control';
 import { PlayerData } from '../../model/replay/player-data';
+import { CameraType } from '../camera/camera-type';
 
 export enum VrManagerEvent {
-  PLAYBACK_TOGGLE = 'playback-toggle'
+  PLAYBACK_TOGGLE = 'playback-toggle',
+  CAMERA_SELECT = 'camera-select',
+  PLAYER_SELECT = 'player-select'
 }
 
 export class VrManager extends EventDispatcher {
@@ -50,6 +53,26 @@ export class VrManager extends EventDispatcher {
 
     this.cameraControl.addToController(this.controllerGrips[0]);
     this.playerControl.addToController(this.controllerGrips[1]);
+
+    this.cameraControl.addEventListener('select', event => {
+      let cameraType = CameraType.VR_PLAYER_VIEW;
+      switch (event.option) {
+        case 0:
+          cameraType = CameraType.VR_BALL;
+          break;
+        case 1:
+          cameraType = CameraType.VR_PLAYER_VIEW;
+          break;
+        case 2:
+          cameraType = CameraType.VR_FLY;
+          break;
+      }
+      this.dispatchEvent({type: VrManagerEvent.CAMERA_SELECT, cameraType});
+    });
+
+    this.playerControl.addEventListener('select', event => {
+      this.dispatchEvent({type: VrManagerEvent.PLAYER_SELECT, id: this.playerIds[event.option]});
+    });
   }
 
   async enterVr() {

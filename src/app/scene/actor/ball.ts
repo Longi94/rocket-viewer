@@ -38,6 +38,16 @@ export class BallActor extends RigidBodyActor {
         return;
     }
   }
+
+  hide() {
+    this.body.visible = false;
+    this.trail.mesh.visible = false;
+  }
+
+  show() {
+    this.body.visible = true;
+    this.trail.mesh.visible = true;
+  }
 }
 
 function blendColor(base: number, blend: number, alpha: number): number {

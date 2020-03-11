@@ -7,7 +7,7 @@ import { WORLD_SCALE } from '../constant';
 
 export class CameraManager {
 
-  private type = CameraType.PLAYER_VIEW;
+  type = CameraType.PLAYER_VIEW;
   private target: PlayerActor;
 
   private pointingVector = new Vector3();
@@ -22,37 +22,57 @@ export class CameraManager {
 
   onMove: () => void;
 
-  constructor(scene: Scene, private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
+  constructor(private readonly rootScene: Scene, private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
     this.orbitControls = new OrbitControls(this.camera, canvasDiv);
     this.orbitControls.enabled = false;
     this.orbitControls.addEventListener('change', () => {
       this.onMove();
     });
-    this.vrTarget.add(this.vrUser);
-    scene.add(this.vrTarget);
+    rootScene.add(this.vrTarget);
   }
 
-  setCamera(type: CameraType, target?: PlayerActor) {
-    this.type = type;
+  setCamera(rs: ReplayScene, type: CameraType, target?: PlayerActor) {
+    if (this.type !== type) {
+      this.type = type;
 
-    this.target?.nameplateVisible(true);
-    target?.nameplateVisible(false);
-    this.target = target;
+      this.target?.nameplateVisible(true);
+      target?.nameplateVisible(false);
+      this.target = target;
 
-    this.orbitControls.enabled = false;
-    this.vrUser.remove(this.camera);
-    switch (type) {
-      case CameraType.ORBITAL:
-        this.orbitControls.enabled = true;
-        break;
-      case CameraType.VR_PLAYER_VIEW:
-        this.vrUser.position.set(40, 35, 0);
-        this.vrUser.add(this.camera);
+      // reset stuff
+      rs.ballActor.show();
+      this.orbitControls.enabled = false;
+      this.vrUser.position.set(0, 0, 0);
+      this.vrTarget.position.set(0, 0, 0);
+      this.vrUser.remove(this.camera);
+      this.vrTarget.add(this.vrUser);
+      this.rootScene.add(this.vrTarget);
+
+      switch (type) {
+        case CameraType.ORBITAL:
+          this.orbitControls.enabled = true;
+          break;
+        case CameraType.VR_PLAYER_VIEW:
+          this.vrUser.position.set(40, 35, 0);
+          this.vrUser.add(this.camera);
+          this.target.car.add(this.vrTarget);
+          break;
+        case CameraType.VR_BALL:
+          this.vrUser.add(this.camera);
+          rs.ballActor.hide();
+          break;
+      }
+
+      this.onMove();
+    } else if (this.target !== target) {
+      this.target?.nameplateVisible(true);
+      target?.nameplateVisible(false);
+      this.target = target;
+
+      if (type == CameraType.VR_PLAYER_VIEW) {
         this.target.car.add(this.vrTarget);
-        break;
+      }
     }
-
-    this.onMove();
   }
 
   getCamera(): Camera {
@@ -85,12 +105,10 @@ export class CameraManager {
       case CameraType.ORBITAL:
         this.orbitControls.update();
         break;
-      case CameraType.VR_PLAYER_VIEW:
-        // this.tempVector.set(0, 0, 0);
-        // this.target.car.localToWorld(this.tempVector);
-        // this.tempVector.multiplyScalar(1 / WORLD_SCALE);
-        // this.vrTarget.position.copy(this.tempVector);
-        // this.vrTarget.quaternion.copy(this.target.car.quaternion);
+      case CameraType.VR_BALL:
+        this.vrTarget.position.set(0, 0, 0);
+        rs.ballActor.body.localToWorld(this.vrTarget.position);
+        rs.ballActor.hide();
         break;
     }
 

@@ -105,13 +105,21 @@ export class SceneManager {
     if (vrSupport === VRSupport.SUPPORTED) {
       this.vrManager = new VrManager(this.renderer, this.cameraManager.vrUser);
       this.vrManager.addEventListener(VrManagerEvent.PLAYBACK_TOGGLE, () => this.isPlaying ? this.pause() : this.play());
+      this.vrManager.addEventListener(VrManagerEvent.CAMERA_SELECT, event => {
+        if (event.cameraType == CameraType.VR_PLAYER_VIEW) {
+          this.changeCamera(event.cameraType, parseInt(Object.keys(this.rs.players)[0]));
+        } else {
+          this.changeCamera(event.cameraType);
+        }
+      });
+      this.vrManager.addEventListener(VrManagerEvent.PLAYER_SELECT, event => this.changeCamera(this.cameraManager.type, event.id));
       this.vrManager.onVrEnter = () => {
         if (this.onVrEnter) {
           this.onVrEnter();
         }
       };
       this.vrManager.onVrLeave = () => {
-        this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
+        this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
         if (this.onVrLeave) {
           this.onVrLeave();
         }
@@ -216,7 +224,7 @@ export class SceneManager {
       player.addToScene(this.rs.scene);
     }
 
-    this.cameraManager.setCamera(CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
+    this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW, Object.values(this.rs.players)[0]);
     this.animationManager = new AnimationManager(replay.frame_data, this.rs, boostPads, this.debug);
     this.update();
     this.cameraManager.update(this.currentAnimationTime, this.rs);
@@ -331,10 +339,10 @@ export class SceneManager {
   }
 
   changeCamera(type: CameraType, targetPlayer?: number) {
-    if (targetPlayer == undefined) {
-      this.cameraManager.setCamera(type);
+    if (targetPlayer == undefined && type !== CameraType.PLAYER_VIEW && type !== CameraType.VR_PLAYER_VIEW) {
+      this.cameraManager.setCamera(this.rs, type);
     } else {
-      this.cameraManager.setCamera(type, this.rs.players[targetPlayer]);
+      this.cameraManager.setCamera(this.rs, type, this.rs.players[targetPlayer]);
     }
   }
 
@@ -366,7 +374,7 @@ export class SceneManager {
 
   enterVr() {
     this.vrManager?.enterVr().then(() => {
-      this.cameraManager.setCamera(CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
+      this.cameraManager.setCamera(this.rs, CameraType.VR_PLAYER_VIEW, Object.values(this.rs.players)[0]);
     });
   }
 
