@@ -18,7 +18,7 @@ export class CameraManager {
   private orbitControls: OrbitControls;
 
   private vrTarget = new Object3D();
-  private vrUser = new Object3D();
+  vrUser = new Object3D();
 
   onMove: () => void;
 

@@ -32,7 +32,7 @@ import { loadDemoSprite } from './loader/demo';
 import { advanceFrame } from '../util/util';
 import { HudData } from '../model/hud-data';
 import { WORLD_SCALE } from './constant';
-import { VrManager } from './vr/vr-manager';
+import { VrManager, VrManagerEvent } from './vr/vr-manager';
 
 export class SceneManager {
 
@@ -100,7 +100,8 @@ export class SceneManager {
     this.particleSystemManager = new ParticleSystemManager(this.renderer, this.rs.scene);
 
     // Init VR
-    this.vrManager = new VrManager(this.renderer);
+    this.vrManager = new VrManager(this.renderer, this.cameraManager.vrUser);
+    this.vrManager.addEventListener(VrManagerEvent.PLAYBACK_TOGGLE, () => this.isPlaying ? this.pause() : this.play());
     this.vrManager.onVrEnter = () => {
       if (this.onVrEnter) {
         this.onVrEnter();
