@@ -1,3 +1,5 @@
+@import "../../../../theme";
+
 .hud-container {
   width: 100%;
   height: 100%;
@@ -20,15 +22,28 @@
     justify-content: center;
     align-items: center;
   }
+
+  @include tablet-down {
+    font-size: 40px;
+    height: 48px;
+  }
 }
 
 .clock {
   background-color: rgba(0, 0, 0, 0.5);
   width: 120px;
+
+  @include tablet-down {
+    width: 100px;
+  }
 }
 
 .goal {
   width: 60px;
+
+  @include tablet-down {
+    width: 48px;
+  }
 }
 
 .goal.orange {
