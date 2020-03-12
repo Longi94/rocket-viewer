@@ -49,6 +49,11 @@ export class ReplayScene {
     }
     this.players = {};
 
+    for (const pad of this.boostPads) {
+      pad.dispose();
+    }
+    this.boostPads = [];
+
     this.boostSprite.geometry.dispose();
     this.boostSprite.material.dispose();
     this.boostSprite = undefined;

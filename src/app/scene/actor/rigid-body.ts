@@ -1,5 +1,6 @@
 import { Object3D, Scene, Vector3 } from 'three';
 import { Actor } from './actor';
+import { disposeObject } from '../../util/three';
 
 export abstract class RigidBodyActor implements Actor {
   protected constructor(public readonly body: Object3D) {
@@ -25,5 +26,10 @@ export abstract class RigidBodyActor implements Actor {
 
   setQuaternionFromArray(q: number[], i: number) {
     this.body.quaternion.set(q[i], q[i + 1], q[i + 2], q[i + 3]);
+  }
+
+  dispose() {
+    disposeObject(this.body);
+    this.body.parent?.remove(this.body);
   }
 }
