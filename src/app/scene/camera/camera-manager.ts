@@ -117,7 +117,7 @@ export class CameraManager extends EventDispatcher {
         break;
       case CameraType.VR_FLY:
         if (this.flying) {
-          this.tempVector.set(0, 0, -10);
+          this.tempVector.set(0, 5, -10);
           this.tempVector.applyQuaternion(this.flyingController.quaternion);
           this.tempVector.add(this.vrTarget.position);
           this.vrTarget.position.lerp(this.tempVector, 1);

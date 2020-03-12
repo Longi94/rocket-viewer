@@ -83,7 +83,15 @@ export class VrManager extends EventDispatcher {
   async enterVr() {
     if (this.vrSession == undefined) {
       const sessionInit: XRSessionInit = {optionalFeatures: [XRReferenceSpaceType.LOCAL_FLOOR, XRReferenceSpaceType.BOUNDED_FLOOR]};
-      const session = await navigator.xr.requestSession(XRSessionMode.IMMERSIVE_VR, sessionInit);
+
+      let session: XRSession;
+      try {
+        session = await navigator.xr.requestSession(XRSessionMode.IMMERSIVE_VR, sessionInit);
+      } catch (e) {
+        console.log(e);
+        return;
+      }
+
       this.inVr = true;
       this.renderer.xr.setSession(session);
       this.vrSession = session;
