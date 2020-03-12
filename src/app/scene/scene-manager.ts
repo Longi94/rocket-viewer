@@ -382,6 +382,7 @@ export class SceneManager extends EventDispatcher {
     this.particleSystemManager.reset(this.rs.scene);
     this.vrManager?.reset();
 
+    this.animationManager = undefined;
     this.playbackInfo = new PlaybackInfo();
     this.setSpeed(1);
     this.playerFrames = {};

@@ -1,51 +1,49 @@
 import { FrameData } from '../../model/replay/frame-data';
 import { ReplayScene } from '../replay-scene';
-import { AnimationMixer } from 'three';
-import { createBallAnimationMixer } from './ball';
-import { createCarAnimationMixer } from './car';
-import { createBoostPadAnimations } from './boost-pad';
+import { BallMixer } from './ball-mixer';
+import { CarMixer } from './car-mixer';
+import { BoostPadMixers } from './boost-pad-mixer';
 import { BoostPad } from '../../model/boost-pad';
-import { createHudMixer } from './hud';
+import { HudMixer } from './hud-mixer';
 
 export class AnimationManager {
-  ballMixer: AnimationMixer;
-  playerMixers: AnimationMixer[] = [];
-  boostPadMixers: AnimationMixer[];
-  hudMixer: AnimationMixer;
+  ballMixer: BallMixer;
+  playerMixers: CarMixer[] = [];
+  boostPadMixers: BoostPadMixers;
+  hudMixer: HudMixer;
 
   constructor(frameData: FrameData, replayScene: ReplayScene, boostPads: BoostPad[], debug = false) {
     const maxTime = frameData.real_times[frameData.real_times.length - 1];
 
-    this.ballMixer = createBallAnimationMixer(frameData, replayScene, maxTime, debug);
-    this.boostPadMixers = createBoostPadAnimations(boostPads, frameData.boost_pads, replayScene, maxTime);
+    this.ballMixer = new BallMixer(frameData, replayScene, maxTime);
+    this.boostPadMixers = new BoostPadMixers(boostPads, frameData.boost_pads, replayScene, maxTime);
 
     for (const playerData of Object.values(frameData.players)) {
-      this.addMixers(createCarAnimationMixer(playerData, replayScene, maxTime, debug));
+      this.playerMixers.push(new CarMixer(playerData, replayScene, maxTime));
     }
 
-    this.hudMixer = createHudMixer(replayScene, maxTime);
-  }
-
-  private addMixers(mixers: AnimationMixer[]) {
-    for (const mixer of mixers) {
-      if (mixer != undefined) {
-        this.playerMixers.push(mixer);
-      }
-    }
+    this.hudMixer = new HudMixer(replayScene, maxTime);
   }
 
   update(time: number) {
-    this.ballMixer.setTime(time);
-    this.hudMixer.setTime(time);
+    this.ballMixer.update(time);
+    this.hudMixer.update(time);
     for (const mixer of this.playerMixers) {
-      mixer.setTime(time);
+      mixer.update(time);
     }
-    for (const mixer of this.boostPadMixers) {
-      mixer.setTime(time);
-    }
+    this.boostPadMixers.update(time);
   }
 
   reset() {
-
+    this.ballMixer.dispose();
+    this.ballMixer = undefined;
+    this.boostPadMixers.dispose();
+    this.boostPadMixers = undefined;
+    this.hudMixer.dispose();
+    this.hudMixer = undefined;
+    for (const mixer of this.playerMixers) {
+      mixer.dispose();
+    }
+    this.playerMixers = [];
   }
 }
