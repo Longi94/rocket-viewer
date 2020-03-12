@@ -1,0 +1,18 @@
+@import "../../../../theme";
+
+a, a:visited, a:hover, a:active {
+  color: map-get($app-accent, A200);
+}
+
+.title-container, .version-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column;
+}
+
+.title-container h1 {
+  font-family: Rajdhani, sans-serif;
+  font-size: 48px;
+  margin-bottom: 8px;
+}

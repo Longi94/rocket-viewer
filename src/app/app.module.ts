@@ -16,6 +16,8 @@ import { Ng5SliderModule } from 'ng5-slider';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HudComponent } from './home/components/hud/hud.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AboutComponent } from './home/components/about/about.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,8 @@ import { HudComponent } from './home/components/hud/hud.component';
     CanvasComponent,
     HomeComponent,
     PlaybackControlComponent,
-    HudComponent
+    HudComponent,
+    AboutComponent
   ],
   imports: [
     BrowserModule,
@@ -31,6 +34,7 @@ import { HudComponent } from './home/components/hud/hud.component';
     BrowserAnimationsModule,
     FormsModule,
     MatButtonModule,
+    MatDialogModule,
     MatIconModule,
     MatMenuModule,
     MatProgressBarModule,

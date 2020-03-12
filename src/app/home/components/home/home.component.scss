@@ -16,10 +16,14 @@
   flex-flow: column;
   font-size: 16px;
   z-index: 500;
-}
 
-.upload-div span {
-  margin-bottom: 8px;
+  span {
+    margin-bottom: 8px;
+  }
+
+  span.title {
+    margin-bottom: 0;
+  }
 }
 
 .error-div {
@@ -63,5 +67,31 @@
   svg {
     width: 128px;
     height: 128px;
+  }
+}
+
+.title {
+  font-family: Rajdhani, sans-serif;
+  font-size: 72px;
+  line-height: 64px;
+
+  @include tablet-down {
+    font-size: 56px;
+    line-height: 48px;
+  }
+}
+
+.link-container {
+  display: flex;
+  flex-flow: row;
+  margin-bottom: 32px;
+
+  * svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  @include tablet-down {
+    margin-bottom: 16px;
   }
 }
