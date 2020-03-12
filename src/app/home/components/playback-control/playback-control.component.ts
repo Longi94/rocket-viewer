@@ -5,6 +5,8 @@ import { PlayerPlaybackInfo } from '../../../model/playback-info';
 import { CameraType } from '../../../scene/camera/camera-type';
 import { VRSupport, VRUtils } from '../../../util/vr';
 import { ThreeService } from '../../../service/three.service';
+import { MatDialog } from '@angular/material/dialog';
+import { AboutComponent } from '../about/about.component';
 
 @Component({
   selector: 'app-playback-control',
@@ -30,7 +32,8 @@ export class PlaybackControlComponent implements OnInit {
   vrButtonText = 'VR not supported';
 
   constructor(private readonly playbackService: PlaybackService,
-              private readonly threeService: ThreeService) {
+              private readonly threeService: ThreeService,
+              private readonly dialog: MatDialog) {
     this.playbackService.onPlaybackInfo.subscribe(info => {
       this.players = info.players;
       this.sliderOptions = this.createSliderOption(info.minTime, info.maxTime);
@@ -51,6 +54,12 @@ export class PlaybackControlComponent implements OnInit {
     this.threeService.onVrLeave.subscribe(() => {
       this.vrButtonText = 'Enter VR';
       this.inVr = false;
+    });
+    this.playbackService.onCloseReplay.subscribe(() => {
+      this.sliderOptions = this.createSliderOption(0, 100);
+      this.selectedSpeed = 1;
+      this.isPlaying = false;
+      this.players = [];
     });
   }
 
@@ -127,5 +136,13 @@ export class PlaybackControlComponent implements OnInit {
     } else {
       this.playbackService.enterVr();
     }
+  }
+
+  closeReplay() {
+    this.playbackService.closeReplay();
+  }
+
+  openAbout() {
+    this.dialog.open(AboutComponent, {width: '400px'});
   }
 }

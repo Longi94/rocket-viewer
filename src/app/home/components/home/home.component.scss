@@ -92,6 +92,7 @@
   }
 
   @include tablet-down {
-    margin-bottom: 16px;
+    font-size: 56px;
+    line-height: 48px;
   }
 }

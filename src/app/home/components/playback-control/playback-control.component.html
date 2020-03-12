@@ -9,6 +9,9 @@
     <button class="no-mobile" mat-icon-button [matMenuTriggerFor]="cameraMenu" matTooltip="Camera">
       <mat-icon>videocam</mat-icon>
     </button>
+    <button class="no-mobile" mat-icon-button [matMenuTriggerFor]="moreMenu" matTooltip="More">
+      <mat-icon>more_vert</mat-icon>
+    </button>
     <ng5-slider
       class="time-slider"
       [options]="sliderOptions"
@@ -28,6 +31,17 @@
 <mat-menu #mobileMenu>
   <button mat-menu-item [matMenuTriggerFor]="playbackSpeedMenu"> Playback speed</button>
   <button mat-menu-item [matMenuTriggerFor]="cameraMenu"> Camera</button>
+  <button mat-menu-item (click)="closeReplay()">Close replay</button>
+  <a mat-menu-item href="https://discord.gg/RqXF9Uu" target="_blank">Discord</a>
+  <a mat-menu-item href="https://github.com/Longi94/rocket-viewer" target="_blank">GitHub</a>
+  <button mat-menu-item (click)="openAbout()">About</button>
+</mat-menu>
+
+<mat-menu #moreMenu>
+  <button mat-menu-item (click)="closeReplay()">Close replay</button>
+  <a mat-menu-item href="https://discord.gg/RqXF9Uu" target="_blank">Discord</a>
+  <a mat-menu-item href="https://github.com/Longi94/rocket-viewer" target="_blank">GitHub</a>
+  <button mat-menu-item (click)="openAbout()">About</button>
 </mat-menu>
 
 <mat-menu #playbackSpeedMenu="matMenu">

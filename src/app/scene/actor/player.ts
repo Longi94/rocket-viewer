@@ -9,6 +9,7 @@ import { BoostData } from '../../model/replay/boost-data';
 import { RenderOrder } from '../../three/render-order';
 import { SpriteSheetTexture } from '../../three/sprite-sheet-texture';
 import { WORLD_SCALE } from '../constant';
+import { disposeObject } from '../../util/three';
 
 export class PlayerActor extends RigidBodyActor {
 
@@ -96,5 +97,12 @@ export class PlayerActor extends RigidBodyActor {
     this.demoTexture = demoTexture.clone();
     this.demoSprite.material.map = this.demoTexture.texture;
     this.demoSprite.material.needsUpdate = true;
+  }
+
+  dispose() {
+    this.nameplate.dispose();
+    this.demoTexture.dispose();
+    this.boost.dispose();
+    disposeObject(this.jumpSprite);
   }
 }

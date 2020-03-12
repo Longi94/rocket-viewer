@@ -48,6 +48,10 @@ export class BallActor extends RigidBodyActor {
     this.body.visible = true;
     this.trail.mesh.visible = true;
   }
+
+  dispose() {
+    this.trail.dispose();
+  }
 }
 
 function blendColor(base: number, blend: number, alpha: number): number {

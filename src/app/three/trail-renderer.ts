@@ -493,4 +493,14 @@ export class Trail {
       this.active = true;
     }
   }
+
+  dispose() {
+    this.active = false;
+    this.targetObject = undefined;
+    this.mesh = undefined;
+    this.geometry.dispose();
+    this.geometry = undefined;
+    this.material.dispose();
+    this.material = undefined;
+  }
 }

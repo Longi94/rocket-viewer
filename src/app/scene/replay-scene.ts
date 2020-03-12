@@ -5,6 +5,7 @@ import { PlayerActor } from './actor/player';
 import { BoostPadActor } from './actor/boost-pad';
 import { SpriteSheetTexture } from '../three/sprite-sheet-texture';
 import { HudData } from '../model/hud-data';
+import { clearObject3D, disposeObject } from '../util/three';
 
 export class ModelStore {
   map: Object3D;
@@ -31,4 +32,29 @@ export class ReplayScene {
   demoTexture: SpriteSheetTexture;
 
   hudData: HudData = new HudData();
+
+  reset() {
+    clearObject3D(this.scene);
+    this.scene.dispose();
+    this.replay = undefined;
+
+    disposeObject(this.models.bigBoostPad);
+    disposeObject(this.models.smallBoostPad);
+
+    this.models = new ModelStore();
+    this.ballActor.dispose();
+    this.ballActor = undefined;
+    for (const player of Object.values(this.players)) {
+      player.dispose();
+    }
+    this.players = {};
+
+    this.boostSprite.geometry.dispose();
+    this.boostSprite.material.dispose();
+    this.boostSprite = undefined;
+
+    this.demoTexture.dispose();
+
+    this.hudData = new HudData();
+  }
 }

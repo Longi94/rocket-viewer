@@ -3,7 +3,7 @@ import { Scene, WebGLRenderer } from 'three';
 import * as THREE from 'three';
 
 export class ParticleSystemManager {
-  private readonly system = new System();
+  private system = new System();
 
   private currentTime: number;
 
@@ -21,5 +21,11 @@ export class ParticleSystemManager {
     const emitter = new Emitter();
     this.system.addEmitter(emitter);
     return emitter;
+  }
+
+  reset(scene: Scene) {
+    this.system.destroy();
+    this.system = new System();
+    this.system.addRenderer(new SpriteRenderer(scene, THREE));
   }
 }

@@ -158,4 +158,12 @@ export class VrManager extends EventDispatcher {
       this.dispatchEvent({type: VrManagerEvent.SQUEEZE_END});
     }
   }
+
+  reset() {
+    if (this.inVr) {
+      this.leaveVr();
+    }
+    this.playerIds = [];
+    this.playerControl.setOptions([]);
+  }
 }

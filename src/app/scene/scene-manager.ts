@@ -39,6 +39,7 @@ export enum SceneEvent {
   TICK = 'tick',
   VR_ENTER = 'vr-enter',
   VR_LEAVE = 'vr-leave',
+  RESET = 'reset'
 }
 
 export class SceneManager extends EventDispatcher {
@@ -125,7 +126,7 @@ export class SceneManager extends EventDispatcher {
 
   private addLights() {
     const ambient = new AmbientLight(0xFFFFFF, 0.6);
-    this.rs.scene.add(ambient);
+    this.rootScene.add(ambient);
   }
 
   private processBackground(backgroundTexture: Texture) {
@@ -366,5 +367,26 @@ export class SceneManager extends EventDispatcher {
 
   leaveVr() {
     this.vrManager?.leaveVr();
+  }
+
+  unloadReplay() {
+    this.pause();
+    this.rs.reset();
+
+    this.rootScene.remove(this.rs.scene);
+    this.rs.scene = new Scene();
+    this.rootScene.add(this.rs.scene);
+
+    this.animationManager.reset();
+    this.cameraManager.reset();
+    this.particleSystemManager.reset(this.rs.scene);
+    this.vrManager?.reset();
+
+    this.playbackInfo = new PlaybackInfo();
+    this.setSpeed(1);
+    this.playerFrames = {};
+    this.dispatchEvent({type: SceneEvent.RESET});
+
+    this.requestRender();
   }
 }

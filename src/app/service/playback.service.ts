@@ -36,6 +36,9 @@ export class PlaybackService {
   private leaveVrSubject = new Subject<void>();
   onLeaveVr = this.leaveVrSubject.asObservable();
 
+  private closeReplaySubject = new Subject<void>();
+  onCloseReplay = this.closeReplaySubject.asObservable();
+
   constructor() {
   }
 
@@ -76,5 +79,9 @@ export class PlaybackService {
 
   leaveVr() {
     this.leaveVrSubject.next();
+  }
+
+  closeReplay() {
+    this.closeReplaySubject.next();
   }
 }

@@ -77,4 +77,8 @@ export class BoostEmitter {
     this.active = this.activeFrames[this.currentFrame];
     this.currentTime = time;
   }
+
+  dispose() {
+    this.emitter.destroy();
+  }
 }

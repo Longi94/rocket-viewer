@@ -142,4 +142,10 @@ export class CameraManager extends EventDispatcher {
     this.flying = false;
     this.flyingController = undefined;
   }
+
+  reset() {
+    this.type = CameraType.PLAYER_VIEW;
+    this.target = undefined;
+    this.endVrFly();
+  }
 }

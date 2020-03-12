@@ -34,6 +34,10 @@ export class HomeComponent implements OnInit {
     });
     this.threeService.onVrEnter.subscribe(() => this.inVr = true);
     this.threeService.onVrLeave.subscribe(() => this.inVr = false);
+    this.threeService.onSceneReset.subscribe(() => {
+      this.replayLoaded = false;
+      this.replayReady = false;
+    });
   }
 
   ngOnInit(): void {

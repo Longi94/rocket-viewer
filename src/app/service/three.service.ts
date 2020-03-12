@@ -12,6 +12,9 @@ export class ThreeService {
   private vrLeaveSubject = new Subject<any>();
   onVrLeave = this.vrLeaveSubject.asObservable();
 
+  private sceneResetSubject = new Subject<any>();
+  onSceneReset = this.sceneResetSubject.asObservable();
+
   constructor() {
   }
 
@@ -21,5 +24,9 @@ export class ThreeService {
 
   vrLeft() {
     this.vrLeaveSubject.next();
+  }
+
+  sceneReset() {
+    this.sceneResetSubject.next();
   }
 }

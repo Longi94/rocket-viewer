@@ -44,4 +44,8 @@ export class AnimationManager {
       mixer.setTime(time);
     }
   }
+
+  reset() {
+
+  }
 }

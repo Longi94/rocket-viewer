@@ -35,4 +35,8 @@ export class SpriteSheetTexture {
   clone(): SpriteSheetTexture {
     return new SpriteSheetTexture(this.texture, this.columns, this.rows, this.length);
   }
+
+  dispose() {
+    this.texture.dispose();
+  }
 }

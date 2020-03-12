@@ -51,12 +51,14 @@ export class CanvasComponent implements OnInit {
     this.playbackService.onCameraChange.subscribe(e => this.sceneManager.changeCamera(e.type, e.targetPlayer));
     this.playbackService.onEnterVr.subscribe(() => this.sceneManager.enterVr());
     this.playbackService.onLeaveVr.subscribe(() => this.sceneManager.leaveVr());
+    this.playbackService.onCloseReplay.subscribe(() => this.sceneManager.unloadReplay());
 
     this.sceneManager.addEventListener(SceneEvent.TICK, event => {
       this.playbackService.updateTime({time: event.time, hudData: event.hudData});
     });
     this.sceneManager.addEventListener(SceneEvent.VR_ENTER, () => this.threeService.vrEntered());
     this.sceneManager.addEventListener(SceneEvent.VR_LEAVE, () => this.threeService.vrLeft());
+    this.sceneManager.addEventListener(SceneEvent.RESET, () => this.threeService.sceneReset());
 
     Cache.enabled = true;
   }

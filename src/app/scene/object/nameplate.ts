@@ -62,4 +62,10 @@ export class Nameplate {
     const scale = spritePos.distanceTo(camPos) * SCALE_TO_CAMERA;
     this.sprite.scale.setScalar(scale / WORLD_SCALE);
   }
+
+  dispose() {
+    this.sprite.material.dispose();
+    this.sprite.geometry.dispose();
+    this.sprite.parent?.remove(this.sprite);
+  }
 }

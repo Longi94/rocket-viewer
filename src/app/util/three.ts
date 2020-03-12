@@ -1,4 +1,4 @@
-import { Object3D, Texture } from 'three';
+import { Mesh, MeshStandardMaterial, Object3D, Scene, Texture } from 'three';
 import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 import { TextureEncoding } from 'three/src/constants';
 
@@ -28,4 +28,20 @@ export function setEncoding(o: Object3D, encoding: TextureEncoding) {
       material.needsUpdate = true;
     }
   });
+}
+
+export function clearObject3D(object) {
+  for (const child of object.children) {
+    if (object.isLight) {
+      continue;
+    }
+    disposeObject(child);
+    clearObject3D(child);
+    object.remove(child);
+  }
+}
+
+export function disposeObject(object) {
+  object.material?.dispose();
+  object.geometry?.dispose();
 }
