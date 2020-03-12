@@ -1,6 +1,6 @@
 import { EventDispatcher, Group, Object3D, WebGLRenderer } from 'three';
-import { XRReferenceSpaceType, XRSession, XRSessionInit, XRSessionMode } from '../../util/vr';
-import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
+import { HtcViveMapping, XRReferenceSpaceType, XRSession, XRSessionInit, XRSessionMode } from '../../util/vr';
+import { XRControllerModel, XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
 import { RingControl } from './ring-control';
 import { PlayerData } from '../../model/replay/player-data';
 import { CameraType } from '../camera/camera-type';
@@ -11,6 +11,8 @@ export enum VrManagerEvent {
   PLAYER_SELECT = 'player-select',
   VR_ENTER = 'vr-enter',
   VR_LEAVE = 'vr-leave',
+  SQUEEZE_START = 'squeeze-start',
+  SQUEEZE_END = 'squeeze-end',
 }
 
 export class VrManager extends EventDispatcher {
@@ -26,6 +28,9 @@ export class VrManager extends EventDispatcher {
   private playerControl = new RingControl([]);
 
   private playerIds: number[] = [];
+
+  private squeezing = false;
+  private squeezingController = -1;
 
   // noinspection UnterminatedStatementJS
   vrEndListener = () => {
@@ -100,6 +105,9 @@ export class VrManager extends EventDispatcher {
       return;
     }
 
+    this.updateController(0);
+    this.updateController(1);
+
     this.cameraControl.update();
     this.playerControl.update();
   }
@@ -119,5 +127,35 @@ export class VrManager extends EventDispatcher {
   setPlayers(players: PlayerData[]) {
     this.playerIds = players.map(p => p.id);
     this.playerControl.setOptions(players.map(p => p.name));
+  }
+
+  updateController(id: number) {
+    const xrModel = this.controllerGrips[id].children[0] as XRControllerModel;
+
+    const motionController = xrModel.motionController;
+
+    // TODO replace with squeeze events when that's fixed
+    if (motionController == undefined) {
+      if (this.squeezing && this.squeezingController === id) {
+        this.squeezing = false;
+        this.squeezingController = -1;
+        this.dispatchEvent({type: VrManagerEvent.SQUEEZE_END});
+      }
+      return;
+    }
+
+    const xrInputSource = motionController.xrInputSource;
+    const gamepad: Gamepad = xrInputSource.gamepad;
+    const button = gamepad.buttons[HtcViveMapping.squeeze];
+
+    if (button.pressed && !this.squeezing && this.squeezingController === -1) {
+      this.squeezing = true;
+      this.squeezingController = id;
+      this.dispatchEvent({type: VrManagerEvent.SQUEEZE_START, controller: this.controllers[id]});
+    } else if (!button.pressed && this.squeezing && this.squeezingController === id) {
+      this.squeezing = false;
+      this.squeezingController = -1;
+      this.dispatchEvent({type: VrManagerEvent.SQUEEZE_END});
+    }
   }
 }

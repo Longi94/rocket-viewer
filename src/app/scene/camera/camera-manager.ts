@@ -1,4 +1,4 @@
-import { Camera, EventDispatcher, Object3D, PerspectiveCamera, Scene, Vector3 } from 'three';
+import { Camera, EventDispatcher, Group, Object3D, PerspectiveCamera, Scene, Vector3 } from 'three';
 import { CameraType } from './camera-type';
 import { ReplayScene } from '../replay-scene';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -19,6 +19,9 @@ export class CameraManager extends EventDispatcher {
 
   private vrTarget = new Object3D();
   vrUser = new Object3D();
+
+  private flying = false;
+  private flyingController: Group;
 
   constructor(private readonly rootScene: Scene, private camera: PerspectiveCamera, canvasDiv: HTMLCanvasElement) {
     super();
@@ -112,6 +115,14 @@ export class CameraManager extends EventDispatcher {
         rs.ballActor.body.localToWorld(this.vrTarget.position);
         rs.ballActor.hide();
         break;
+      case CameraType.VR_FLY:
+        if (this.flying) {
+          this.tempVector.set(0, 0, -10);
+          this.tempVector.applyQuaternion(this.flyingController.quaternion);
+          this.tempVector.add(this.vrTarget.position);
+          this.vrTarget.position.lerp(this.tempVector, 1);
+        }
+        break;
     }
 
     this.lastTime = time;
@@ -120,5 +131,15 @@ export class CameraManager extends EventDispatcher {
   resize(width: number, height: number) {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+  }
+
+  startVrFly(controller: Group) {
+    this.flying = true;
+    this.flyingController = controller;
+  }
+
+  endVrFly() {
+    this.flying = false;
+    this.flyingController = undefined;
   }
 }

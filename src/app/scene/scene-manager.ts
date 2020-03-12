@@ -110,6 +110,8 @@ export class SceneManager extends EventDispatcher {
         this.cameraManager.setCamera(this.rs, CameraType.PLAYER_VIEW);
         this.dispatchEvent({type: SceneEvent.VR_LEAVE});
       });
+      this.vrManager.addEventListener(VrManagerEvent.SQUEEZE_START, event => this.cameraManager.startVrFly(event.controller));
+      this.vrManager.addEventListener(VrManagerEvent.SQUEEZE_END, () => this.cameraManager.endVrFly());
     }
 
     this.addLights();
@@ -359,7 +361,7 @@ export class SceneManager extends EventDispatcher {
   }
 
   enterVr() {
-    this.vrManager?.enterVr().then(() => this.cameraManager.setCamera(this.rs, CameraType.VR_PLAYER_VIEW));
+    this.vrManager?.enterVr().then(() => this.cameraManager.setCamera(this.rs, CameraType.VR_FLY));
   }
 
   leaveVr() {
