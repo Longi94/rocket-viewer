@@ -35,7 +35,9 @@ export class CameraManager extends EventDispatcher {
   setTarget(target: PlayerActor) {
     if (this.target !== target) {
       this.target?.nameplateVisible(true);
-      target?.nameplateVisible(false);
+      if (this.type === CameraType.PLAYER_VIEW || this.type === CameraType.VR_PLAYER_VIEW) {
+        target?.nameplateVisible(false);
+      }
       this.target = target;
 
       if (this.type == CameraType.VR_PLAYER_VIEW) {
@@ -56,8 +58,12 @@ export class CameraManager extends EventDispatcher {
       this.vrTarget.position.set(0, 0, 0);
       this.vrUser.remove(this.camera);
       this.rootScene.add(this.vrTarget);
+      this.target.nameplateVisible(true);
 
       switch (type) {
+        case CameraType.PLAYER_VIEW:
+          this.target.nameplateVisible(false);
+          break;
         case CameraType.ORBITAL:
           this.orbitControls.enabled = true;
           break;
@@ -65,6 +71,7 @@ export class CameraManager extends EventDispatcher {
           this.vrUser.position.set(40, 35, 0);
           this.vrUser.add(this.camera);
           this.target.car.add(this.vrTarget);
+          this.target.nameplateVisible(false);
           break;
         case CameraType.VR_BALL:
           this.vrUser.add(this.camera);
