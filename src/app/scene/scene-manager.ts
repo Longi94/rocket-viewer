@@ -13,7 +13,7 @@ import {
   WebGLRenderer,
   WebGLRenderTarget
 } from 'three';
-import { GlobalWebGLContext, PromiseLoader } from 'rl-loadout-lib';
+import { PromiseLoader } from 'rl-loadout-lib';
 import { loadMap } from './loader/map';
 import { ReplayScene } from './replay-scene';
 import { loadBall } from './loader/ball';
@@ -182,8 +182,6 @@ export class SceneManager extends EventDispatcher {
     await mapPromise;
     await ballPromise;
     await Promise.all(playerPromises);
-
-    GlobalWebGLContext.dispose();
 
     // add the map
     this.rs.scene.add(this.rs.models.map);
