@@ -175,7 +175,7 @@ jobs:
           command: scp -rP $SSH_PORT dist/rocket-viewer/* "$SSH_USER@$SSH_HOST:/home/$SSH_USER/rocket-viewer-prod/"
       - run:
           name: Copy artifacts to deploy folder
-          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo $SSH_PASS | sudo -S cp -r ~/rocket-viewer-dev/* $FRONTEND_DIR/"
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo $SSH_PASS | sudo -S cp -r ~/rocket-viewer-prod/* $FRONTEND_DIR/"
       - run:
           name: Remove dir in home
           command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "rm -rf ~/rocket-viewer-prod/"
