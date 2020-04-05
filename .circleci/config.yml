@@ -86,7 +86,7 @@ jobs:
             - ./node_modules
       - run:
           name: Copy wasm
-          command: cp boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/
+          command: mkdir -p src/app/boxcars && cp boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/
       - run:
           name: angular-build
           command: ng build
@@ -146,7 +146,7 @@ jobs:
             - ./node_modules
       - run:
           name: Copy wasm
-          command: cp boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/
+          command: mkdir -p src/app/boxcars && cp boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/
       - run:
           name: angular-build
           command: ng build --prod
