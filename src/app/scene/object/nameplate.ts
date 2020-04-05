@@ -43,7 +43,9 @@ export class Nameplate {
     ctx.fillText(name.toUpperCase(), WIDTH / 2, HEIGHT / 2 - Math.floor(NAMEPLATE_HEIGHT * 2 / 10), WIDTH - NAMEPLATE_HEIGHT);
 
     const imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
-    const texture = new DataTexture(imageData.data, WIDTH, HEIGHT);
+
+    // needs to be an UInt8Array, see https://github.com/Longi94/rocket-viewer/issues/10
+    const texture = new DataTexture(new Uint8Array(imageData.data), WIDTH, HEIGHT);
     texture.flipY = true;
     texture.magFilter = LinearFilter;
     const spriteMaterial = new SpriteMaterial({map: texture});
