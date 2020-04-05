@@ -187,6 +187,8 @@ workflows:
       - lint
       - build-wasm:
           filters:
+            tags:
+              only: /.*/
             branches:
               only:
                 - master
@@ -194,8 +196,6 @@ workflows:
           requires:
             - build-wasm
           filters:
-            tags:
-              only: /.*/
             branches:
               only:
                 - master
