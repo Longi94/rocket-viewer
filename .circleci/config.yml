@@ -67,7 +67,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: boxcars-wasm/pkg
+          at: boxcars-wasm
       - run:
           name: Setup custom environment variables
           command: |
@@ -127,7 +127,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: boxcars-wasm/pkg
+          at: boxcars-wasm
       - run:
           name: Setup custom environment variables
           command: |
