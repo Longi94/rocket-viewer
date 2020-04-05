@@ -194,6 +194,8 @@ workflows:
           requires:
             - build-wasm
           filters:
+            tags:
+              only: /.*/
             branches:
               only:
                 - master
