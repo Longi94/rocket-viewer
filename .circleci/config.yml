@@ -1,0 +1,164 @@
+version: 2.1
+
+jobs:
+  lint:
+    working_directory: ~/rocket-viewer
+    docker:
+      - image: circleci/node:10.16-browsers
+    steps:
+      - checkout
+      - run:
+          name: Setup custom environment variables
+          command: |
+            echo 'export NG_CLI_ANALYTICS=ci' >> $BASH_ENV
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install angular cli
+          command: sudo npm install -g @angular/cli@9.0.1 > /dev/null
+      - run:
+          name: install-dependencies
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: angular-lint
+          command: ng lint
+  build-dev:
+    working_directory: ~/rocket-viewer
+    docker:
+      - image: circleci/node:10.16-browsers
+    steps:
+      - checkout
+      - run:
+          name: Setup custom environment variables
+          command: |
+            echo 'export NG_CLI_ANALYTICS=ci' >> $BASH_ENV
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install angular cli
+          command: sudo npm install -g @angular/cli@9.0.1 > /dev/null
+      - run:
+          name: install-dependencies
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: angular-build
+          command: ng build
+      - store_artifacts:
+          path: dist/rocket-viewer
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - rocket-viewer
+  deploy-dev:
+    working_directory: ~/rocket-viewer
+    machine:
+      enabled: true
+    steps:
+      - attach_workspace:
+          at: dist
+      - run:
+          name: Remove old files
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo $SSH_PASS | sudo -S rm -rf $FRONTEND_DIR_DEV/*"
+      - run:
+          name: Create dir for files in home
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "mkdir -p ~/rocket-viewer-dev"
+      - run:
+          name: Copy artifacts to host
+          command: scp -rP $SSH_PORT dist/rocket-viewer/* "$SSH_USER@$SSH_HOST:/home/$SSH_USER/rocket-viewer-dev/"
+      - run:
+          name: Copy artifacts to deploy folder
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo $SSH_PASS | sudo -S cp -r ~/rocket-viewer-dev/* $FRONTEND_DIR_DEV/"
+      - run:
+          name: Remove dir in home
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "rm -rf ~/rocket-viewer-dev/"
+  build-prod:
+    working_directory: ~/rocket-viewer
+    docker:
+      - image: circleci/node:10.16-browsers
+    steps:
+      - checkout
+      - run:
+          name: Setup custom environment variables
+          command: |
+            echo 'export NG_CLI_ANALYTICS=ci' >> $BASH_ENV
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install angular cli
+          command: sudo npm install -g @angular/cli@9.0.1 > /dev/null
+      - run:
+          name: install-dependencies
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: angular-build
+          command: ng build --prod
+      - store_artifacts:
+          path: dist/rocket-viewer
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - rocket-viewer
+  deploy-prod:
+    working_directory: ~/rocket-viewer
+    machine:
+      enabled: true
+    steps:
+      - attach_workspace:
+          at: dist
+      - run:
+          name: Remove old files
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo $SSH_PASS | sudo -S rm -rf $FRONTEND_DIR/*"
+      - run:
+          name: Create dir for files in home
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "mkdir -p ~/rocket-viewer-prod"
+      - run:
+          name: Copy artifacts to host
+          command: scp -rP $SSH_PORT dist/rocket-viewer/* "$SSH_USER@$SSH_HOST:/home/$SSH_USER/rocket-viewer-prod/"
+      - run:
+          name: Copy artifacts to deploy folder
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo $SSH_PASS | sudo -S cp -r ~/rocket-viewer-dev/* $FRONTEND_DIR/"
+      - run:
+          name: Remove dir in home
+          command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "rm -rf ~/rocket-viewer-prod/"
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - lint
+      - build-dev:
+          filters:
+            branches:
+              only:
+                - master
+      - deploy-dev:
+          requires:
+            - build-dev
+          filters:
+            branches:
+              only:
+                - master
+      - build-prod:
+          filters:  # required since `deploy` has tag filters AND requires `build`
+            tags:
+              only: /.*/
+      - deploy-prod:
+          requires:
+            - lint
+            - build-prod
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
