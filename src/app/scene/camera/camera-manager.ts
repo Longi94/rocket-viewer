@@ -40,7 +40,7 @@ export class CameraManager extends EventDispatcher {
       }
       this.target = target;
 
-      if (this.type == CameraType.VR_PLAYER_VIEW) {
+      if (this.type === CameraType.VR_PLAYER_VIEW) {
         this.target.car.add(this.vrTarget);
       }
       this.dispatchEvent({type: 'move'});

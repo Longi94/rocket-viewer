@@ -33,19 +33,19 @@ export class VrManager extends EventDispatcher {
   private squeezingController = -1;
 
   // noinspection UnterminatedStatementJS
-  vrEndListener = () => {
+  vrEndListener() {
     this.inVr = false;
     this.vrSession.removeEventListener('end', this.vrEndListener);
     this.vrSession = undefined;
     this.vrUser.remove(...this.controllers);
     this.vrUser.remove(...this.controllerGrips);
     this.dispatchEvent({type: VrManagerEvent.VR_LEAVE});
-  };
+  }
 
   // noinspection UnterminatedStatementJS
-  selectStart = () => {
+  selectStart() {
     this.dispatchEvent({type: VrManagerEvent.PLAYBACK_TOGGLE});
-  };
+  }
 
   constructor(private readonly renderer: WebGLRenderer, private readonly vrUser: Object3D) {
     super();
