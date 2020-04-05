@@ -1,6 +1,5 @@
 import { ReplayScene } from '../replay-scene';
 import { modelLoader } from './loader-config';
-import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 import { Mesh, MeshStandardMaterial } from 'three';
 import { RenderOrder } from '../../three/render-order';
 

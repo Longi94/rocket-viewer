@@ -2,7 +2,6 @@ import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PromiseLoader } from 'rl-loadout-lib';
 import { LinearEncoding, Texture } from 'three';
 import { applyEnvMap, setEncoding } from '../../util/three';
-import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 
 export class ModelLoader {
 

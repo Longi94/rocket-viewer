@@ -1,4 +1,4 @@
-import { Mesh, MeshStandardMaterial, Object3D, Scene, Texture } from 'three';
+import { Object3D, Texture } from 'three';
 import { traverseMaterials } from 'rl-loadout-lib/dist/3d/object';
 import { TextureEncoding } from 'three/src/constants';
 

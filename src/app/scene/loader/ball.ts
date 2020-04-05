@@ -1,5 +1,4 @@
 import { ReplayScene } from '../replay-scene';
-import { applyEnvMap } from '../../util/three';
 import { modelLoader } from './loader-config';
 import { BallActor } from '../actor/ball';
 import { BallType } from '../../model/replay/ball-data';

@@ -2,7 +2,6 @@ import {
   AnimationClip,
   AnimationMixer,
   BooleanKeyframeTrack,
-  Object3D,
   QuaternionKeyframeTrack,
   VectorKeyframeTrack
 } from 'three';
