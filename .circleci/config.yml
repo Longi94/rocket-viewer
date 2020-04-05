@@ -40,17 +40,18 @@ jobs:
           working_directory: boxcars-wasm
       - restore_cache:
           keys:
-            - cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+            - cargo-cache-{{ arch }}-{{ checksum "boxcars-wasm/Cargo.lock" }}
       - run:
           name: Build wasm
           command: cargo build
+          working_directory: boxcars-wasm
       - save_cache:
           paths:
             - /usr/local/cargo/registry
             - target/release/.fingerprint
             - target/release/build
             - target/release/deps
-          key: cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+          key: cargo-cache-{{ arch }}-{{ checksum "boxcars-wasm/Cargo.lock" }}
       - persist_to_workspace:
           root: boxcars-wasm
           paths:
