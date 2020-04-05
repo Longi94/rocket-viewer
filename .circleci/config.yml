@@ -1,6 +1,7 @@
 version: 2.1
 
 jobs:
+
   lint:
     working_directory: ~/rocket-viewer
     docker:
@@ -26,12 +27,43 @@ jobs:
       - run:
           name: angular-lint
           command: ng lint
+
+  build-wasm:
+    working_directory: ~/rocket-viewer
+    docker:
+      - image: circleci/rust:1.41.0
+    steps:
+      - checkout
+      - run:
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+          working_directory: boxcars-wasm
+      - restore_cache:
+          keys:
+            - cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Build wasm
+          command: cargo build
+      - save_cache:
+          paths:
+            - /usr/local/cargo/registry
+            - target/release/.fingerprint
+            - target/release/build
+            - target/release/deps
+          key: cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - persist_to_workspace:
+          root: boxcars-wasm
+          paths:
+            - pkg
+
   build-dev:
     working_directory: ~/rocket-viewer
     docker:
       - image: circleci/node:10.16-browsers
     steps:
       - checkout
+      - attach_workspace:
+          at: boxcars-wasm/pkg
       - run:
           name: Setup custom environment variables
           command: |
@@ -49,6 +81,9 @@ jobs:
           paths:
             - ./node_modules
       - run:
+          name: Copy wasm
+          command: cp boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/
+      - run:
           name: angular-build
           command: ng build
       - store_artifacts:
@@ -57,6 +92,7 @@ jobs:
           root: dist
           paths:
             - rocket-viewer
+
   deploy-dev:
     working_directory: ~/rocket-viewer
     machine:
@@ -79,12 +115,15 @@ jobs:
       - run:
           name: Remove dir in home
           command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "rm -rf ~/rocket-viewer-dev/"
+
   build-prod:
     working_directory: ~/rocket-viewer
     docker:
       - image: circleci/node:10.16-browsers
     steps:
       - checkout
+      - attach_workspace:
+          at: boxcars-wasm/pkg
       - run:
           name: Setup custom environment variables
           command: |
@@ -102,6 +141,9 @@ jobs:
           paths:
             - ./node_modules
       - run:
+          name: Copy wasm
+          command: cp boxcars-wasm/pkg/*.{js,ts,wasm} src/app/boxcars/
+      - run:
           name: angular-build
           command: ng build --prod
       - store_artifacts:
@@ -110,6 +152,7 @@ jobs:
           root: dist
           paths:
             - rocket-viewer
+
   deploy-prod:
     working_directory: ~/rocket-viewer
     machine:
@@ -132,12 +175,20 @@ jobs:
       - run:
           name: Remove dir in home
           command: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "rm -rf ~/rocket-viewer-prod/"
+
 workflows:
   version: 2
   build-and-deploy:
     jobs:
       - lint
+      - build-wasm:
+          filters:
+            branches:
+              only:
+                - master
       - build-dev:
+          requires:
+            - build-wasm
           filters:
             branches:
               only:
@@ -150,6 +201,8 @@ workflows:
               only:
                 - master
       - build-prod:
+          requires:
+            - build-wasm
           filters:  # required since `deploy` has tag filters AND requires `build`
             tags:
               only: /.*/
