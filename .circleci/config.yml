@@ -42,8 +42,11 @@ jobs:
           keys:
             - cargo-cache-{{ arch }}-{{ checksum "boxcars-wasm/Cargo.lock" }}
       - run:
+          name: Install wasm-pack
+          command: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - run:
           name: Build wasm
-          command: cargo build
+          command: wasm-pack build
           working_directory: boxcars-wasm
       - save_cache:
           paths:
